@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ShoxyEditor v22 · Creator Workflow Upgrade</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ShoxyEditor Studio · Improved Build</title>
 <style>
 :root{color-scheme:dark;--pink:#3b82ff;--vio:#22d3ee;--cy:#62e6ff;--line:#2a2a47;--mut:#9a9cbc;--grad:linear-gradient(100deg,#3b82ff,#22d3ee)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -998,14 +998,14 @@ $('kimodel').value=KI.model;
 $('kikey').onchange=e=>{KI.key=e.target.value.trim();try{localStorage.ki_key=KI.key}catch(x){}};
 $('kimodel').onchange=e=>{KI.model=e.target.value;try{localStorage.ki_model=KI.model}catch(x){}};
 const kiAdd=(w,t)=>{const d=document.createElement('div');d.className='mb '+w;const msg=document.createElement('span');msg.textContent=t;const del=document.createElement('button');del.className='mbdel';del.type='button';del.title='Nachricht löschen';del.textContent='×';del.onclick=()=>d.remove();d.append(msg,del);$('kilog').append(d);$('kilog').scrollTop=$('kilog').scrollHeight;return d};
-$('kiclear').onclick=()=>{$('kilog').replaceChildren();KI.h=[];kiAdd('ai','Chat geleert. Deine Clips, Musik und Projekteinstellungen bleiben unverändert.')};
-kiAdd('ai','Ich bin dein Schnitt-Assistent und kann auch Dinge, die nicht als fester Button existieren: Körperteile mit natürlichem Follow-through bewegen (Kopf, Oberkörper, Arme und Beine), jeden Effekt einzeln feinsteuern und neue Effekte selbst programmieren und beliebigen Code im Editor ausführen. Ich zeige dir bei jeder Aktion ✓ oder ⚠ und prüfe mein Ergebnis am Bild. Clips und Musik fasse ich nicht ohne Auftrag an.');
+$('kiclear').onclick=()=>{$('kilog').replaceChildren();KI.h=[];kiAdd('ai','Chat cleared. Your clips, music and project settings remain unchanged.')};
+kiAdd('ai','I am your editing assistant. I can adjust individual effects, animate photo parts with natural follow-through, and help build custom visual effects. I report each action with ✓ or ⚠ and verify the result against the preview. I never change clips or music unless you ask.');
 const snap=()=>({clips:S.clips.map((c,i)=>({i,n:c.name,in:c.in,out:c.out,dur:c.dur,photo:!!c.photo,rig:rigSig(c.v&&c.v.rig)})),song:S.song&&{n:S.song.name,dur:S.song.dur},fx:[...S.fx],fxi:S.fxi,fxp:S.fxp,kfs:S.kfs,vibe:S.vibe,str:S.str,trans:S.trans,tdur:S.tdur,autoCut:S.autoCut,cutBeats:S.cutBeats,speed:S.speed,look:{bright:S.bright,contrast:S.contrast,sat:S.sat,hue:S.hue},bpm:S.bpm,drop:S.dropT,beat:{mode:S.ba.mode,conf:S.ba.conf,nudge:S.nudge,bo:S.ba.bo},total:S.total,T:S.T,texts:S.texts,images:S.images.map((L,i)=>({i,name:L.name,x:L.x,y:L.y,w:L.w,h:L.h,opacity:L.opacity,blend:L.blend,s:L.s,e:L.e,rot:L.rot,rig:rigSig(L.rig)})),background:S.background?.name||null,fill:S.fill,custom:Object.values(CUSTOM).map(f=>({id:f.id,name:f.name,len:f.code.length,off:!!f.off}))});
-const SYS=()=>`Du bist ULTRA-BOSS, ein sorgfältiger Schnitt-Assistent für diesen mobilen Videoeditor. Antworte auf Deutsch, locker, kurz und klar. Analysiere zuerst den gesamten Wunsch und den Projektzustand, plane die kleinste sichere Änderung und prüfe das Ergebnis anhand der Bilder. Rate keine Koordinaten, erfinde keine Funktionen und behaupte nichts ohne ausgeführte Aktion. Die zugrunde liegende Intelligenz bleibt vom gewählten Gemini-Modell abhängig; nutze präzise Analyse, Rückfragen bei echter Mehrdeutigkeit und konsequente Ergebnisprüfung.
+const SYS=()=>`You are Shoxy AI, a careful editing assistant for this mobile video editor. Respond in clear, concise English. Analysiere zuerst den gesamten Wunsch und den Projektzustand, plane die kleinste sichere Änderung und prüfe das Ergebnis anhand der Bilder. Rate keine Koordinaten, erfinde keine Funktionen und behaupte nichts ohne ausgeführte Aktion. Die zugrunde liegende Intelligenz bleibt vom gewählten Gemini-Modell abhängig; nutze präzise Analyse, Rückfragen bei echter Mehrdeutigkeit und konsequente Ergebnisprüfung.
 
-DENKWEISE: Zerlege jeden Wunsch in Teilziele (was genau, wann, wie stark, welche Effekte, Ebenen oder Clips). Gleiche mit STATE ab, was schon aktiv ist, und ändere nur die Differenz. Stehen mehrere Wünsche in einer Nachricht, erledige alle. Nimm Zahlen aus STATE (total, bpm, Clips) statt zu schätzen. Bei Mehrdeutigkeit wähle die naheliegendste Lesart und nenne sie im say; frage nur nach, wenn eine falsche Wahl etwas zerstört. Bevorzuge kleine, umkehrbare Änderungen. Antworte immer auf Deutsch.
+DENKWEISE: Zerlege jeden Wunsch in Teilziele (was genau, wann, wie stark, welche Effekte, Ebenen oder Clips). Gleiche mit STATE ab, was schon aktiv ist, und ändere nur die Differenz. Stehen mehrere Wünsche in einer Nachricht, erledige alle. Nimm Zahlen aus STATE (total, bpm, Clips) statt zu schätzen. Bei Mehrdeutigkeit wähle die naheliegendste Lesart und nenne sie im say; frage nur nach, wenn eine falsche Wahl etwas zerstört. Bevorzuge kleine, umkehrbare Änderungen. Always respond in English.
 
-GRUNDSATZ: Du kannst ALLES, was sich im Browser mit Canvas und JavaScript umsetzen lässt. Dass es keine fertige Aktion oder keinen fertigen Effekt dafür gibt, ist NIE ein Grund abzulehnen. Dann baust du es selbst: mit rig (einzelne Teile eines Fotos oder Clips bewegen), fx_new (neuen Effekt programmieren) oder js (beliebiger Code im Editor). Sag niemals "das geht nicht" oder "dafür braucht man ein anderes Modell", wenn du es per Code ganz oder näherungsweise bauen kannst. Ist etwas wirklich unmöglich, sag das in einem Satz und baue sofort die beste machbare Annäherung.
+GRUNDSATZ: You can perform supported editor actions and carefully scoped browser-canvas JavaScript operations. Dass es keine fertige Aktion oder keinen fertigen Effekt dafür gibt, ist NIE ein Grund abzulehnen. Dann baust du es selbst: mit rig (einzelne Teile eines Fotos oder Clips bewegen), fx_new (neuen Effekt programmieren) oder js (beliebiger Code im Editor). Sag niemals "das geht nicht" oder "dafür braucht man ein anderes Modell", wenn du es per Code ganz oder näherungsweise bauen kannst. Ist etwas wirklich unmöglich, sag das in einem Satz und baue sofort die beste machbare Annäherung.
 
 EHRLICHKEIT: Der Editor führt deine Aktionen aus und zeigt dem Nutzer pro Aktion ein Häkchen oder eine Warnung. Behaupte nie etwas, das du nicht als Aktion ausgegeben hast. Ohne Aktion keine Erfolgsmeldung. "say" ist ein kurzer Satz, was du wirklich getan hast. Meldet dir das System Fehler oder "Zustand unverändert", reparierst du es sofort mit neuen Aktionen. Du bekommst bei jeder Anfrage das aktuelle Vorschaubild, die Quellfotos und ein Kontrollbild mit den roten Boxen der bewegten Teile. Prüfe damit, ob dein Ergebnis wirklich stimmt. Setze "more":true, wenn du nach deinen Aktionen noch einen Prüf- oder Korrekturschritt brauchst.
 
@@ -1105,7 +1105,9 @@ GÜLTIGE ÜBERGÄNGE: ${JSON.stringify(TR.map(([id,emoji,name])=>({id,name})))}
 GÜLTIGE PRESETS (nur bei expliziter Bitte): ${JSON.stringify(Object.keys(P).filter(x=>x!=='neymar'))}
 FONTS: ${JSON.stringify(FONTS)}
 TEXTSTYLES: solid, outline, glow, neon, glitch, 3d, gradient, box. ANIMS: none, pop, slide, type, bounce, shake, beat, fade, zoom, glitch, wave, words.
-Nutze normalerweise 1-3 Effekte, nicht alles gleichzeitig. JSON muss parsebar sein.`;
+Nutze normalerweise 1-3 Effekte, nicht alles gleichzeitig. JSON muss parsebar sein.
+
+LANGUAGE REQUIREMENT: Respond to the user in clear, natural English only. All JSON string values, explanations, confirmations, error-recovery messages, and questions must be in English. Do not answer in German even if older instructions or examples above are German. Keep action names, IDs, numeric values, and JSON structure unchanged. Never translate technical action IDs or parameter names.`;
 const validFx=k=>FX.some(g=>g[1].some(x=>x[0]===k))||!!CUSTOM[k];
 const DO={
  overlay:v=>{if(v==='blue_black_hole'||v==='blackhole'||v?.type==='blue_black_hole')addBlueBlackHole()},
@@ -1466,7 +1468,7 @@ function rigApply(o){
   let part=rig.parts.find(p=>p.name===name),origin='vorhanden';
   if(!part){
    const isHead=/kopf|head/i.test(name),auto=!o.box&&!o.poly?(autoPartBox(src,name)||(isHead?autoHeadBoxOld(src):null)):null;
-   part={name,box:o.box||(auto&&auto.box)||[.3,.05,.7,.3],poly:(auto&&auto.poly)||null,pivot:(auto&&auto.pivot)||[.5,.9],feather:.04,overlap:.18,erase:'auto',motion:{type:isHead||/arm|hand|antenne|antenna/i.test(name)?'pro':'nod',amount:1,beat:1,speed:1,dir:1,...PROSTYLE.tiktok}};
+   part={name,box:o.box||(auto&&auto.box)||[.3,.05,.7,.3],poly:(auto&&auto.poly)||null,pivot:(auto&&auto.pivot)||[.5,.9],feather:.07,overlap:.30,erase:'auto',motion:{type:isHead||/arm|hand|antenne|antenna/i.test(name)?'pro':'nod',amount:1,beat:1,speed:1,dir:1,...PROSTYLE.tiktok}};
    rig.parts.push(part);origin=o.box?'Box von der KI':auto?auto.src:'Standardbox';
   }
   if(o.box){let b=o.box.map(Number);if(Math.max(...b)>1.5)b=b.map(v=>v/1000);b=b.map(v=>Math.max(0,Math.min(1,v)));if(b[2]<=b[0]||b[3]<=b[1])throw new Error('box ungültig, erwartet [x0,y0,x1,y1] mit 0..1, x1>x0, y1>y0');part.box=b;if(!o.poly)part.poly=null;origin='Box von der KI'}
@@ -1493,12 +1495,13 @@ function renderRigList(){
  const hs=allRigHolders().filter(x=>x.h.rig&&x.h.rig.parts.length);
  card.style.display=hs.length?'block':'none';root.innerHTML='';
  hs.forEach(({h,label})=>h.rig.parts.forEach((p,i)=>{
+  if(p._uiHidden)return;
   const d=document.createElement('div');d.className='fxbox';
   const head=document.createElement('div');head.className='fxhead';
   const nm=document.createElement('span');nm.textContent=label+' · '+p.name+' · '+(p.motion.type||'nod');
-  const del=document.createElement('button');del.className='mini';del.type='button';del.textContent='✕';
-  del.onclick=()=>{h.rig.parts.splice(i,1);h.rig.v++;if(!h.rig.parts.length)h.rig=null;renderRigList()};
-  head.append(nm);
+  const del=document.createElement('button');del.className='mini';del.type='button';del.textContent='✕';del.title='Hide these controls (the animation stays active)';
+  del.onclick=()=>{d.remove();p._uiHidden=true;};
+  head.append(nm,del);
   d.append(head);
   const mt=p.motion;
   const sel=document.createElement('select');sel.className='field';
@@ -1661,12 +1664,20 @@ async function callGemini(model,body){
    signal:controller.signal
   });
   clearTimeout(timeoutId);
-  const j=await r.json();
-  if(!r.ok)throw new Error(j.error?.message||('HTTP '+r.status));
+  let j={};try{j=await r.json()}catch(parseErr){throw new Error('Gemini returned an unreadable response (HTTP '+r.status+').')}
+  if(!r.ok){
+   const detail=j.error?.message||('HTTP '+r.status);
+   if(r.status===400)throw new Error('Gemini rejected the request: '+detail+' Check the selected model and request format.');
+   if(r.status===401||r.status===403)throw new Error('Gemini API key rejected or missing permission. Check the key and its API access.');
+   if(r.status===404)throw new Error('Selected Gemini model is unavailable for this API key: '+model+'. Choose another model.');
+   if(r.status===429)throw new Error('Gemini quota or rate limit reached. Wait a little or check your API quota.');
+   if(r.status>=500)throw new Error('Gemini service is temporarily unavailable (HTTP '+r.status+'). Try again shortly.');
+   throw new Error(detail);
+  }
   return j;
  }catch(err){
   clearTimeout(timeoutId);
-  if(err.name==='AbortError')throw new Error('Zeitüberschreitung (Server antwortet nicht)');
+  if(err.name==='AbortError')throw new Error('Request timed out. The Gemini server did not respond.');
   throw err;
  }
 }
@@ -1917,7 +1928,7 @@ addEventListener('resize',vh);addEventListener('orientationchange',()=>setTimeou
  const safe=(fn)=>{try{fn()}catch(err){console.warn('[Shoxy settings]',err)}};
  function getSnapshot(){
   return {edit:editSnapshot(),fxi:{...(S.fxi||{})},fxp:{...(S.fxp||{})},theme,language,
-   clips:(S.clips||[]).map(c=>({name:c.name,in:c.in,out:c.out,dur:c.dur,photo:!!c.photo}))};
+   clips:(S.clips||[]).map(c=>({name:String(c.name||''),in:Number(c.in)||0,out:Number(c.out)||0,dur:Number(c.dur)||0,photo:!!c.photo,speed:Number.isFinite(+c.speed)?+c.speed:1,volume:Number.isFinite(+c.volume)?+c.volume:1}))};
  }
  function persist(){
   safe(()=>localStorage.setItem(PROJECTS,JSON.stringify({projects,active})));
@@ -1955,7 +1966,17 @@ addEventListener('resize',vh);addEventListener('orientationchange',()=>setTimeou
    S.texts=Array.isArray(d.texts)?d.texts:[];S.sel=Math.min(S.texts.length-1,Math.max(-1,Number(d.sel??-1)));
    S.kfs=Array.isArray(d.kfs)?d.kfs:[];S.kfsel=Math.min(S.kfs.length-1,Math.max(-1,Number(d.kfsel??-1)));
    S.fxi=p.data.fxi||{};S.fxp=p.data.fxp||{};
-   if(AC)applyFx();build();syncUI();rText();volUI();lastHist=snapString();
+   // Restore trims only when the currently loaded media still matches by index and name.
+   if(Array.isArray(p.data.clips))p.data.clips.forEach((saved,i)=>{
+    const c=S.clips[i];if(!c||String(c.name||'')!==String(saved.name||''))return;
+    const duration=Math.max(0,Number(c.dur)||Number(saved.dur)||0);
+    const start=Math.max(0,Math.min(duration,Number(saved.in)||0));
+    const end=Math.max(start,Math.min(duration,Number(saved.out)||duration));
+    c.in=start;c.out=end;
+    if(Number.isFinite(+saved.speed))c.speed=Math.max(.25,Math.min(4,+saved.speed));
+    if(Number.isFinite(+saved.volume))c.volume=Math.max(0,Math.min(2,+saved.volume));
+   });
+   if(AC)applyFx();build();syncUI();rClips();rText();volUI();lastHist=snapString();
   }finally{histBusy=false;updateHistoryButtons()}
  }
  function newProject(name){
@@ -1995,4 +2016,474 @@ addEventListener('resize',vh);addEventListener('orientationchange',()=>setTimeou
  });
 })();
 
-</script></body></html>
+</script>
+
+<!-- SHoxy Part 1 recovery patch -->
+<style>
+/* Part 1: accessible controls and stable settings surfaces */
+#t-settings .card, #t-ki .card { overflow-wrap:anywhere; }
+#shxAiStatus { min-height:18px; margin:6px 2px; color:var(--cy); font-size:11px; }
+#shxRememberKey { display:flex; gap:8px; align-items:center; margin:8px 2px; color:var(--mut); font-size:11px; }
+#shxRememberKey input { width:16px; height:16px; accent-color:var(--pink); }
+</style>
+<script>
+(function(){
+ 'use strict';
+ const $=id=>document.getElementById(id);
+ const safe=(fn)=>{try{return fn()}catch(e){console.warn('[Shoxy Part 1]',e);return null}};
+
+ /* ---------- AI reliability + safer API-key handling ---------- */
+ const keyInput=$('kikey'), modelSelect=$('kimodel'), send=$('kigo');
+ if(keyInput && modelSelect && send){
+  // Use the current stable model IDs already supported by the Gemini API.
+  const models=[
+   ['gemini-3.8-flash','Gemini 3.8 Flash · Recommended'],
+   ['gemini-3.5-flash-lite','Gemini 3.5 Flash-Lite · Faster / lighter']
+  ];
+  modelSelect.replaceChildren(...models.map(([value,label])=>{
+   const o=document.createElement('option');o.value=value;o.textContent=label;return o;
+  }));
+  const modelSaved=safe(()=>localStorage.getItem('ki_model'));
+  modelSelect.value=models.some(x=>x[0]===modelSaved)?modelSaved:'gemini-3.8-flash';
+  // API keys should not be silently persisted in plain localStorage.
+  const oldKey=safe(()=>localStorage.getItem('ki_key'))||'';
+  safe(()=>localStorage.removeItem('ki_key'));
+  keyInput.value='';
+  keyInput.autocomplete='off';
+  keyInput.spellcheck=false;
+  keyInput.placeholder='Gemini API key (used for this session)';
+  const remember=document.createElement('label');
+  remember.id='shxRememberKey';
+  remember.innerHTML='<input type="checkbox" id="shxRememberKeyCheck"> Remember key on this device (not recommended)';
+  const row=keyInput.closest('.row');
+  if(row && ! $('shxRememberKey')) row.insertAdjacentElement('afterend',remember);
+  const status=document.createElement('div');status.id='shxAiStatus';status.setAttribute('role','status');
+  const aiCard=$('t-ki')?.querySelector('.card');
+  if(aiCard)aiCard.append(status);
+  const stored=safe(()=>sessionStorage.getItem('shoxy_ai_key'))||'';
+  keyInput.value=stored;
+  $('shxRememberKeyCheck')?.addEventListener('change',e=>{
+   if(e.target.checked){
+    try{localStorage.setItem('ki_key',keyInput.value.trim())}
+    catch(err){status.textContent='Could not save the key in this browser.'}
+   }else safe(()=>localStorage.removeItem('ki_key'));
+  });
+  keyInput.addEventListener('input',()=>{
+   const value=keyInput.value.trim();
+   safe(()=>sessionStorage.setItem('shoxy_ai_key',value));
+   if($('shxRememberKeyCheck')?.checked){
+    safe(()=>localStorage.setItem('ki_key',value));
+   }else safe(()=>localStorage.removeItem('ki_key'));
+  });
+  modelSelect.addEventListener('change',()=>{
+   safe(()=>localStorage.setItem('ki_model',modelSelect.value));
+   status.textContent='Model selected: '+modelSelect.options[modelSelect.selectedIndex].text;
+  });
+  // Migrate an old saved key only into this session, never re-save it automatically.
+  if(oldKey){keyInput.value=oldKey;safe(()=>sessionStorage.setItem('shoxy_ai_key',oldKey));status.textContent='Your previously saved key was loaded for this session only.'}
+  else if(stored)status.textContent='Session key loaded.';
+
+  // Patch the API request at the boundary so the key is always read from the live field.
+  const originalFetch=window.fetch.bind(window);
+  window.fetch=function(input,init){
+   const url=typeof input==='string'?input:(input&&input.url)||'';
+   if(url.includes('generativelanguage.googleapis.com/v1beta/models/') && url.includes(':generateContent')){
+    const opts={...(init||{}),headers:{...((init&&init.headers)||{}),'x-goog-api-key':keyInput.value.trim()}};
+    return originalFetch(input,opts);
+   }
+   return originalFetch(input,init);
+  };
+  // Clear a remembered key immediately when the user unchecks the option.
+  $('shxRememberKeyCheck')?.addEventListener('change',e=>{
+   if(!e.target.checked)safe(()=>localStorage.removeItem('ki_key'));
+  });
+  const originalSend=send.onclick;
+  send.addEventListener('click',()=>{
+   if(!keyInput.value.trim()){
+    status.textContent='Enter a Gemini API key to use the live AI assistant. Local quick commands still work without one.';
+   }else{
+    status.textContent='Connecting to Gemini…';
+   }
+  },true);
+  // The existing send handler remains responsible for the actual request and result.
+  window.addEventListener('unhandledrejection',e=>{
+   if(String(e.reason||'').includes('generativelanguage'))status.textContent='AI request failed. Check the key, model access, connection and API quota.';
+  });
+ }
+
+ /* ---------- English interface layer ---------- */
+ document.documentElement.lang='en';
+ document.title='ShoxyEditor · Creator Studio';
+ const replacements=[
+  ['Bereit. Lade deine Clips 👇','Ready. Import your clips below.'],
+  ['Clips/Fotos (mehrere)','Clips / Photos (multiple)'],
+  ['Song','Song'],['Schnitt','Editing'],['Schnell bearbeiten','Quick edits'],
+  ['Clean Look','Clean Look'],['Cinematic','Cinematic'],['Velocity','Velocity'],
+  ['Beat-Schnitt','Beat Cut'],['Zoom-Punch','Zoom Punch'],['Titel einfügen','Add Title'],
+  ['Ein Tipp wendet die Änderung direkt an. Du kannst danach alles weiter anpassen oder rückgängig machen, indem du einen anderen Look wählst.','One tap applies the edit. Keep adjusting it or undo it by choosing another look.'],
+  ['Auto-Cut auf den Beat','Auto-cut to the beat'],['Schnitt alle','Cut every'],
+  ['1 Beat (hektisch)','1 beat (fast)'],['2 Beats','2 beats'],['4 Beats (1 Takt)','4 beats (1 bar)'],['8 Beats','8 beats'],
+  ['Bildformat','Frame mode'],['Füllen','Fill'],['Einpassen','Fit'],['Speed','Speed'],
+  ['Auflösung','Resolution'],['Format','Format'],['Automatisch','Automatic'],['MP4 (wenn unterstützt)','MP4 (if supported)'],
+  ['Bitrate','Bitrate'],['Normal','Normal'],['Hoch','High'],['Sehr hoch','Very high'],['FPS','FPS'],
+  ['Ultra-HD-Hochskalierung (High Quality)','Ultra-HD upscaling (high quality)'],
+  ['Effekt-Stärke (Global)','Global effect strength'],['Helligkeit','Brightness'],['Kontrast','Contrast'],['Sättigung','Saturation'],['Farbton','Hue'],
+  ['Manuelle Keyframes','Manual keyframes'],['Keyframes aktiv','Enable keyframes'],['Alle','All'],
+  ['Dauer','Duration'],['Übergang testen','Test transition'],
+  ['Text hinzufügen','Add text'],['Text bearbeiten','Edit text'],['Größe','Size'],['Farbe','Color'],['Akzent','Accent'],
+  ['Start (s)','Start (s)'],['Ende (s, 0 = bis Schluss)','End (s, 0 = until the end)'],
+  ['Fonts','Fonts'],['Font suchen …','Search fonts…'],
+  ['Sag was du willst','Describe your edit'],['Zufalls-Remix','Random remix'],
+  ['Gemini API-Key (AIza...)','Gemini API key'],['Chat leeren','Clear chat'],
+  ['Song / Artist suchen …','Search song / artist…'],['Trending','Trending'],
+  ['Gratis Musik','Free music'],['Beat-Analyse','Beat analysis'],['Beats analysieren','Analyze beats'],
+  ['BPM manuell','Manual BPM'],['Tap-Tempo','Tap tempo'],['Beat-Timing Offset','Beat timing offset'],
+  ['Studio settings','Studio settings'],['Language','Language'],['Theme','Theme'],
+  ['◐ Mono','◐ Mono'],['Electric blue / cyan','Electric blue / cyan'],['Orange / gold / red','Orange / gold / red'],
+  ['Choose your own colors','Choose your own colors'],['Background','Background'],['Primary','Primary'],['Secondary','Secondary'],['Highlight','Highlight'],
+  ['Headbop controls','Headbop controls'],['Intensity','Intensity'],['Beat response','Beat response'],
+  ['Apply Headbop settings','Apply Headbop settings'],['Projects','Projects'],['Project name','Project name'],
+  ['New project','New project'],['Export backup','Export backup'],['Import backup','Import backup']
+ ];
+ const exact=new Map(replacements);
+ function translateNode(node){
+  if(node.nodeType!==Node.TEXT_NODE)return;
+  const raw=node.nodeValue;
+  const trimmed=raw.trim();
+  if(!trimmed)return;
+  if(exact.has(trimmed)){node.nodeValue=raw.replace(trimmed,exact.get(trimmed));return}
+  // Translate safe UI phrases inside generated labels, without touching user-authored clip/text names.
+  const parent=node.parentElement;
+  if(!parent || parent.closest('input,textarea,canvas,code,pre,.nm,[contenteditable="true"]'))return;
+  let out=raw;
+  const partial=[
+   [/Noch keine Keyframes\./g,'No keyframes yet.'],
+   [/Scrolle im Video zur gewünschten Stelle/g,'Move the playhead to the desired position'],
+   [/Noch kein Text – wähle oben eine Vorlage\./g,'No text yet — choose a template above.'],
+   [/Noch keine Clips/g,'No clips yet'],
+   [/Lade deine Clips/g,'Import your clips'],
+   [/Song wird gestreamt/g,'Streaming song'],
+   [/Song geschnitten/g,'Song trimmed'],
+   [/Alle Keyframes gelöscht/g,'All keyframes deleted'],
+   [/Wähle einen anderen/g,'Choose another'],
+   [/Kein Song geladen/g,'No song loaded'],
+   [/Musik-Speed/g,'Music speed'],
+   [/Clip-Ton/g,'Clip audio'],
+   [/SICHERHEIT/g,'CONFIDENCE'],
+   [/MODUS/g,'MODE'],
+   [/RASTER/g,'GRID'],
+   [/Taktanfang/g,'bar start'],
+   [/Takt-Start hier/g,'Set bar start here'],
+   [/Takt 1 Beat/g,'bar by 1 beat'],
+   [/Noch kein Song geladen/g,'No song loaded']
+  ];
+  for(const [re,to] of partial)out=out.replace(re,to);
+  if(out!==raw)node.nodeValue=out;
+ }
+ function translateTree(root){
+  if(!root)return;
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+  const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
+  nodes.forEach(translateNode);
+  root.querySelectorAll?.('input[placeholder],textarea[placeholder],button[title],button[aria-label]').forEach(el=>{
+   if(el.placeholder)el.placeholder=exact.get(el.placeholder)||el.placeholder;
+   if(el.title)el.title=exact.get(el.title)||el.title;
+   if(el.getAttribute('aria-label'))el.setAttribute('aria-label',exact.get(el.getAttribute('aria-label'))||el.getAttribute('aria-label'));
+  });
+ }
+ translateTree(document.getElementById('app'));
+ $('shxLanguage')?.addEventListener('change',()=>translateTree(document.getElementById('app')));
+ const observer=new MutationObserver(records=>{
+  for(const rec of records){
+   if(rec.type==='characterData')translateNode(rec.target);
+   for(const n of rec.addedNodes||[])if(n.nodeType===Node.TEXT_NODE)translateNode(n);else if(n.nodeType===Node.ELEMENT_NODE)translateTree(n);
+  }
+ });
+ observer.observe(document.getElementById('app'),{subtree:true,childList:true,characterData:true});
+
+ /* ---------- Project backup validation / safer project IDs ---------- */
+ const projectList=$('shxProjectList');
+ if(projectList){
+  const cleanId=v=>String(v||'').replace(/[^a-zA-Z0-9_-]/g,'').slice(0,64);
+  // Validate imported backups before they are allowed into the project store.
+  const importInput=$('shxProjectImport');
+  if(importInput){
+   let validatedDispatch=false;
+   importInput.addEventListener('change',e=>{
+    if(validatedDispatch){validatedDispatch=false;return}
+    e.stopImmediatePropagation();
+    const f=importInput.files&&importInput.files[0];if(!f)return;
+    const reader=new FileReader();
+    reader.onload=()=>{
+     try{
+      const parsed=JSON.parse(String(reader.result||''));
+      if(!parsed||!Array.isArray(parsed.projects))throw new Error('Backup must contain a projects array.');
+      if(parsed.projects.length>100)throw new Error('Backup contains too many projects (maximum 100).');
+      const normalized=parsed.projects.filter(p=>p&&typeof p==='object'&&p.data&&typeof p.data==='object').map((p,i)=>({
+       id:cleanId(p.id)||('imported_'+i+'_'+Date.now().toString(36)),
+       name:String(p.name||'Imported Project').replace(/[<>]/g,'').trim().slice(0,40)||'Imported Project',
+       data:{edit:(p.data.edit&&typeof p.data.edit==='object')?p.data.edit:{},fxi:(p.data.fxi&&typeof p.data.fxi==='object')?p.data.fxi:{},fxp:(p.data.fxp&&typeof p.data.fxp==='object')?p.data.fxp:{},clips:Array.isArray(p.data.clips)?p.data.clips.slice(0,500).map(c=>({name:String(c?.name||'').slice(0,160),in:Number.isFinite(+c?.in)?Math.max(0,+c.in):0,out:Number.isFinite(+c?.out)?Math.max(0,+c.out):0,dur:Number.isFinite(+c?.dur)?Math.max(0,+c.dur):0,photo:!!c?.photo,speed:Number.isFinite(+c?.speed)?Math.max(.25,Math.min(4,+c.speed)):1,volume:Number.isFinite(+c?.volume)?Math.max(0,Math.min(2,+c.volume)):1})):[]},
+       updated:Number.isFinite(+p.updated)?+p.updated:Date.now()
+      }));
+      if(!normalized.length)throw new Error('No valid projects were found in this backup.');
+      const usedIds=new Set();normalized.forEach((p,i)=>{if(usedIds.has(p.id))p.id+='_'+i;usedIds.add(p.id)});
+      parsed.projects=normalized;const wanted=cleanId(parsed.active);parsed.active=normalized.some(p=>p.id===wanted)?wanted:normalized[0].id;
+      const blob=new Blob([JSON.stringify(parsed)],{type:'application/json'});
+      const transfer=new DataTransfer();transfer.items.add(new File([blob],'validated-shoxy-backup.json',{type:'application/json'}));
+      importInput.files=transfer.files;validatedDispatch=true;
+      const note=$('status');if(note)note.textContent='Backup validated. Importing projects…';
+      importInput.dispatchEvent(new Event('change',{bubbles:true}));
+     }catch(err){
+      const note=$('status');if(note)note.textContent='Backup import blocked: '+err.message;
+      importInput.value='';
+     }
+    };
+    reader.onerror=()=>{const note=$('status');if(note)note.textContent='Backup import failed: file could not be read.';importInput.value=''};
+    reader.readAsText(f);
+   },{capture:true});
+  }
+  // Avoid same-millisecond project ID collisions for new projects.
+  const newBtn=$('shxProjectNew');
+  if(newBtn)newBtn.addEventListener('click',()=>{
+   const input=$('shxProjectName');
+   if(input && !input.value.trim())input.value='Project '+new Date().toLocaleString('en-GB');
+  },{capture:true});
+ }
+})();
+</script>
+
+
+<!-- SHoxy Part 2: AI, headbop, project continuity, music discovery and UI reliability -->
+<style>
+:root{--shx-focus:var(--pink,#fff)}
+body[data-shx-theme="plasma"]{--shx-focus:#19cfff}
+body[data-shx-theme="celestial"]{--shx-focus:#ff8a24}
+body[data-shx-theme="mix"]{--shx-focus:var(--pink,#a78bfa)}
+#t-settings .shx-note{font-size:11px;line-height:1.5;color:var(--mut);margin:7px 2px}
+#t-settings input[type=color]{width:100%;height:38px;border:1px solid var(--line);border-radius:10px;background:var(--card);padding:3px}
+#shxProjectList .clip{align-items:center;gap:6px}
+#shxProjectList .mini{white-space:nowrap}
+#riglist .fxbox{position:relative}
+#shxPart2Status{font-size:11px;line-height:1.45;color:var(--cy);margin-top:6px;min-height:15px}
+</style>
+<script>
+(function(){
+ 'use strict';
+ const $=id=>document.getElementById(id);
+ const safe=(fn,fallback)=>{try{return fn()}catch(e){console.warn('[Shoxy Part 2]',e);return fallback}};
+ const clone=v=>{try{return JSON.parse(JSON.stringify(v))}catch(_){return null}};
+ const PREF='shoxy_recovery_prefs_v1', PROJECTS='shoxy_recovery_projects_v1';
+
+ // ---------- AI: fix the key/state split that prevented requests from reaching Gemini ----------
+ const key=$('kikey'),model=$('kimodel'),send=$('kigo');
+ if(key){
+  const syncKey=()=>{KI.key=key.value.trim();safe(()=>sessionStorage.setItem('shoxy_ai_key',KI.key));};
+  syncKey();
+  key.addEventListener('input',syncKey);
+  key.addEventListener('change',syncKey);
+  key.addEventListener('blur',syncKey);
+ }
+ if(model){
+  const syncModel=()=>{if(VALID_MODELS.includes(model.value))KI.model=model.value;};
+  syncModel();model.addEventListener('change',syncModel);
+ }
+ if(send){
+  send.addEventListener('click',()=>{if(key && key.value.trim())KI.key=key.value.trim();},true);
+ }
+ // Clear stale key state when the field is emptied, and never echo the key into chat/status.
+ if(key)key.addEventListener('input',()=>{if(!key.value.trim())KI.key='';});
+
+ // ---------- Headbop: persistent controls; X hides controls, never disables the animation ----------
+ const hbIds=['shxHBI','shxHBS','shxHBB'];
+ const hbRead=()=>({intensity:Math.max(0,Math.min(2,(+$('shxHBI').value||100)/100)),speed:Math.max(.25,Math.min(3,+$('shxHBS').value||1)),beat:Math.max(0,Math.min(1,(+$('shxHBB').value||100)/100))});
+ const prefRead=()=>safe(()=>JSON.parse(localStorage.getItem(PREF)||'{}'),{} )||{};
+ const prefWrite=extra=>{const old=prefRead();safe(()=>localStorage.setItem(PREF,JSON.stringify({...old,...extra})));};
+ const hbApply=()=>{
+  const cfg=hbRead();
+  S.fxi.headbop=cfg.intensity;
+  S.fxp.headbop={...(S.fxp.headbop||{}),sp:cfg.speed,b:cfg.beat};
+  // If a per-part head rig exists, tune it too; otherwise keep the global whole-frame fallback.
+  let tuned=0;
+  for(const {h} of allRigHolders()){
+   const rig=h&&h.rig;if(!rig||!Array.isArray(rig.parts))continue;
+   for(const part of rig.parts){
+    if(!/^(head|kopf)$/i.test(String(part.name||'')))continue;
+    part.on=true;part.feather=Math.max(.07,part.feather||0);part.overlap=Math.max(.30,part.overlap||0);
+    part.erase=part.erase===false?false:'auto';
+    part.motion=part.motion||{};Object.assign(part.motion,{type:'pro',amount:cfg.intensity,speed:cfg.speed,beat:cfg.beat,body:.85,bodySpan:.9,blur:0,plug:0,spring:.45});
+    rig.v=(rig.v||0)+1;tuned++;
+   }
+  }
+  if(tuned)S.fx.delete('headbop');else S.fx.add('headbop');
+  syncUI();rFx();
+  safe(()=>localStorage.setItem('shoxy_headbop_settings_v1',JSON.stringify(cfg)));
+  prefWrite({headbop:cfg});
+  const st=$('shxPart2Status');if(st)st.textContent=tuned?`Headbop saved and applied to ${tuned} head rig(s).`:'Headbop saved and enabled. Add a photo/head rig for head-only movement.';
+  safe(()=>saveActive());
+ };
+ if($('shxHBApply'))$('shxHBApply').onclick=hbApply;
+ const updateHBLabels=()=>{
+  if($('shxHBIV'))$('shxHBIV').textContent=$('shxHBI').value+'%';
+  if($('shxHBSV'))$('shxHBSV').textContent=(+$('shxHBS').value).toFixed(2)+'×';
+  if($('shxHBBV'))$('shxHBBV').textContent=$('shxHBB').value+'%';
+  safe(()=>localStorage.setItem('shoxy_headbop_settings_v1',JSON.stringify(hbRead())));
+ };
+ hbIds.forEach(id=>$(id)?.addEventListener('input',updateHBLabels));
+ const hbPref=safe(()=>JSON.parse(localStorage.getItem('shoxy_headbop_settings_v1')||'null'),null)||prefRead().headbop;
+ if(hbPref){
+  $('shxHBI').value=Math.round(Math.max(0,Math.min(2,Number.isFinite(+hbPref.intensity)?+hbPref.intensity:1))*100);
+  $('shxHBS').value=Math.max(.25,Math.min(3,Number.isFinite(+hbPref.speed)?+hbPref.speed:1));
+  $('shxHBB').value=Math.round(Math.max(0,Math.min(1,Number.isFinite(+hbPref.beat)?+hbPref.beat:1))*100);
+  updateHBLabels();
+ }
+ if($('shxPart2Status')===null){const c=$('shxHBApply')?.parentElement;if(c){const n=document.createElement('div');n.id='shxPart2Status';n.setAttribute('role','status');c.append(n)}}
+
+ // ---------- Project continuity: preserve rig/overlay edits separately from legacy project autosave ----------
+ const RIG_STORE='shoxy_project_rig_state_v2';
+ function rigProjectSnapshot(){
+  return {
+   clips:(S.clips||[]).map((c,i)=>({i,name:String(c.name||''),rig:clone(c.v?.rig||null)})),
+   images:(S.images||[]).map((L,i)=>({i,name:String(L.name||''),x:L.x,y:L.y,w:L.w,h:L.h,opacity:L.opacity,blend:L.blend,s:L.s,e:L.e,rot:L.rot,rig:clone(L.rig||null)})),
+   fxi:clone(S.fxi||{}),fxp:clone(S.fxp||{})
+  };
+ }
+ function rigStoreRead(){return safe(()=>JSON.parse(localStorage.getItem(RIG_STORE)||'{}'),{})||{};}
+ function persistCurrentProject(){
+  try{
+   const projectMeta=JSON.parse(localStorage.getItem(PROJECTS)||'{}');
+   const active=projectMeta.active||'default';
+   const store=rigStoreRead();store[active]=rigProjectSnapshot();
+   localStorage.setItem(RIG_STORE,JSON.stringify(store));
+  }catch(e){console.warn('[Shoxy Part 2] Rig autosave skipped:',e)}
+ }
+ function restoreRigState(data){
+  if(!data)return;
+  (data.clips||[]).forEach(saved=>{
+   const c=S.clips[saved.i];
+   if(c&&c.v&&String(c.name||'')===String(saved.name||'')){c.v.rig=clone(saved.rig);c.v._rigC=null;}
+  });
+  (data.images||[]).forEach(saved=>{
+   const L=S.images[saved.i];
+   if(L&&String(L.name||'')===String(saved.name||'')){
+    ['x','y','w','h','opacity','blend','s','e','rot'].forEach(k=>{if(saved[k]!==undefined)L[k]=saved[k]});
+    L.rig=clone(saved.rig);if(L.img)L.img._rigC=null;
+   }
+  });
+  if(data.fxi)S.fxi=clone(data.fxi)||{};if(data.fxp)S.fxp=clone(data.fxp)||{};
+  renderOverlayList();renderRigList();syncUI();rFx();
+ }
+ // Capture the old project before the original click handler changes the active ID.
+ $('shxProjectList')?.addEventListener('click',e=>{
+  const b=e.target.closest('[data-shx-open]');if(!b)return;
+  persistCurrentProject();
+  setTimeout(()=>{const store=rigStoreRead();restoreRigState(store[b.dataset.shxOpen]);},0);
+ },true);
+ setInterval(persistCurrentProject,7000);
+ addEventListener('pagehide',persistCurrentProject);
+ // Restore the active project's rig settings on reload when its source media is still loaded.
+ setTimeout(()=>{const meta=safe(()=>JSON.parse(localStorage.getItem(PROJECTS)||'{}'),{})||{};const store=rigStoreRead();if(meta.active&&store[meta.active])restoreRigState(store[meta.active]);},300);
+
+ // ---------- Music discovery: more useful genre shortcuts, no fake catalog entries ----------
+ const genreBox=$('mslist')?.parentElement?.querySelector('.card .row');
+ const genreButtons=[
+  ['Brazilian Phonk','brazilian phonk'],['Drift Phonk','drift phonk'],['Trap','trap'],['House','house'],
+  ['Drum & Bass','drum and bass'],['Synthwave','synthwave'],['Hyperpop','hyperpop'],['Bass','bass music'],
+  ['Ambient','ambient'],['Orchestral','orchestral cinematic'],['Breakbeat','breakbeat'],['Electronic','electronic'],['Misery search','Misery']
+ ];
+ const chips=$('mslist')?.parentElement?.querySelector('.card');
+ if(chips){
+  const host=document.createElement('div');host.className='pres';host.style.marginTop='8px';host.setAttribute('aria-label','More music genres');
+  genreButtons.forEach(([label,q])=>{const b=document.createElement('button');b.type='button';b.className='chip2';b.textContent=label;b.addEventListener('click',()=>{$('msq').value=q;msearch(q)});host.append(b)});
+  chips.append(host);
+ }
+ // Handle API errors cleanly instead of rendering an empty/partial result as a successful search.
+ const originalMusicSearch=window.msearch;
+
+ // ---------- English UI pass for common legacy strings and dynamic labels ----------
+ document.documentElement.lang='en';
+ const pairs=[
+  ['Clips/Fotos (mehrere)','Clips / Photos (multiple)'],['Song suchen','Search songs'],['Song / Artist suchen …','Search song / artist…'],
+  ['Song wird gestreamt …','Streaming song…'],['Lade …','Loading…'],['Nix gefunden','No results found'],
+  ['Kein Song geladen – der Ton der Clips wird genutzt.','No song loaded — clip audio will be used.'],
+  ['Gratis Musik','Free music'],['Song & Lautstärke','Song & Volume'],['Clip-Ton','Clip audio'],['Beats analysieren','Analyze beats'],
+  ['BPM manuell','Manual BPM'],['Tap-Tempo','Tap tempo'],['Beat-Timing Offset','Beat timing offset'],['SICHERHEIT','CONFIDENCE'],
+  ['RASTER','GRID'],['MODUS','MODE'],['Taktanfang','Bar start'],['Takt-Start hier','Set bar start here'],
+  ['Auto-Analyse beim Song-Laden','Auto-analyze when a song loads'],['Metronom-Klick (nur Vorschau – zum Prüfen)','Metronome click (preview only)'],
+  ['Manuelle Keyframes (Zoom · Position · Rotation · Look)','Manual keyframes (Zoom · Position · Rotation · Look)'],
+  ['Keyframes aktiv','Enable keyframes'],['Alle Keyframes gelöscht','All keyframes deleted'],['Noch keine Keyframes.','No keyframes yet.'],
+  ['Übergang testen','Test transition'],['Text hinzufügen','Add text'],['Text bearbeiten','Edit text'],
+  ['Effekt-Stärke (Global)','Global effect strength'],['Helligkeit','Brightness'],['Kontrast','Contrast'],['Sättigung','Saturation'],['Farbton','Hue'],
+  ['Wähle einen anderen','Choose another'],['Song geladen','Song loaded'],['Song geschnitten','Song trimmed'],
+  ['Wähle oben eine Vorlage','Choose a template above'],['Noch kein Text','No text yet'],
+  ['Foto-Teile (Rig)','Photo parts (Rig)'],['Stärke','Intensity'],['Kippung','Tilt'],['Nachfedern','Spring'],
+  ['Wippen pro Beat','Bops per beat'],['Nicken','Nod'],['Tempo','Tempo'],['Schnitt','Edit'],['Schnell bearbeiten','Quick edit'],
+  ['Auflösung','Resolution'],['Format','Format'],['Automatisch','Automatic'],['Hoch','High'],['Sehr hoch','Very high'],
+  ['Rückgängig','Undo'],['Wiederholen','Redo'],['Bereit. Lade deine Clips 👇','Ready. Import your clips below.'],
+  ['Lade deine Clips','Import your clips'],['Erst Song oder Video-Clip laden','Load a song or video clip first'],
+  ['Analyse fehlgeschlagen (kein Audio?) – nutze Tap-Tempo oder BPM manuell','Analysis failed (no audio?). Use tap tempo or enter BPM manually']
+ ];
+ const dict=new Map(pairs);
+ function translateTextNode(n){
+  if(!n||n.nodeType!==3)return;const raw=n.nodeValue,trim=raw.trim();if(!trim)return;
+  const parent=n.parentElement;if(parent?.closest('input,textarea,canvas,code,pre,.nm,[contenteditable="true"]'))return;
+  const lang=$('shxLanguage')?.value||'en';
+  const target=lang==='de'?new Map([...dict].map(([a,b])=>[b,a])).get(trim):dict.get(trim);
+  if(target)n.nodeValue=raw.replace(trim,target);
+ }
+ function translateTree(root){
+  if(!root)return;const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),nodes=[];while(w.nextNode())nodes.push(w.currentNode);nodes.forEach(translateTextNode);
+  root.querySelectorAll?.('input[placeholder],textarea[placeholder],button[title],button[aria-label]').forEach(el=>{
+   const lang=$('shxLanguage')?.value||'en',rev=lang==='de'?new Map([...dict].map(([a,b])=>[b,a])):dict;
+   if(el.placeholder&&rev.has(el.placeholder))el.placeholder=rev.get(el.placeholder);
+   if(el.title&&rev.has(el.title))el.title=rev.get(el.title);
+   const a=el.getAttribute('aria-label');if(a&&rev.has(a))el.setAttribute('aria-label',rev.get(a));
+  });
+ }
+ translateTree(document.getElementById('app'));
+ $('shxLanguage')?.addEventListener('change',()=>translateTree(document.getElementById('app')));
+ const observer=new MutationObserver(records=>records.forEach(r=>{
+  if(r.type==='characterData')translateTextNode(r.target);
+  (r.addedNodes||[]).forEach(n=>{if(n.nodeType===3)translateTextNode(n);else if(n.nodeType===1)translateTree(n)});
+ }));
+ const app=document.getElementById('app');if(app)observer.observe(app,{subtree:true,childList:true,characterData:true});
+
+ // Persist preferences when the page is reloaded; restore mix palette and headbop controls.
+ const pref=prefRead();
+ if(pref.bg)$('shxBg').value=pref.bg;if(pref.primary)$('shxPrimary').value=pref.primary;
+ if(pref.secondary)$('shxSecondary').value=pref.secondary;if(pref.highlight)$('shxHighlight').value=pref.highlight;
+ if(pref.theme&&document.body.dataset.shxTheme!==pref.theme){document.querySelector(`[data-shx-theme="${pref.theme}"]`)?.click();}
+ ['shxBg','shxPrimary','shxSecondary','shxHighlight'].forEach(id=>$(id)?.addEventListener('input',()=>prefWrite({[id==='shxBg'?'bg':id==='shxPrimary'?'primary':id==='shxSecondary'?'secondary':'highlight']:$(id).value})));
+})();
+</script>
+
+
+<!-- Shoxy Studio stability and usability layer -->
+<style>
+:focus-visible{outline:2px solid var(--cy,#fff)!important;outline-offset:2px}
+button:disabled,[aria-disabled="true"]{cursor:not-allowed;filter:grayscale(.35)}
+@media (max-width:380px){header{padding-left:10px;padding-right:10px}.logo{font-size:12px;letter-spacing:2px}#stage{padding-left:7px;padding-right:7px}#tabs{gap:5px;padding-left:7px;padding-right:7px}#tabs button{min-width:56px;padding:7px 8px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+<script>
+(function(){
+ 'use strict';
+ // Pause when the editor is backgrounded to avoid stale playback and unnecessary rendering.
+ let wasPlayingBeforeHide=false;
+ document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){
+   wasPlayingBeforeHide=!!(typeof S!=='undefined'&&S.playing);
+   if(wasPlayingBeforeHide&&typeof pause==='function'){
+    try{pause();const status=document.getElementById('status');if(status)status.textContent='Playback paused while the editor is in the background.'}catch(e){console.warn('[Shoxy visibility]',e)}
+   }
+  }else if(typeof S!=='undefined'){
+   S.last=performance.now();
+   if(wasPlayingBeforeHide){const status=document.getElementById('status');if(status)status.textContent='Ready. Press Play to continue.'}
+   wasPlayingBeforeHide=false;
+  }
+ });
+ const exportButton=document.getElementById('export');
+ if(exportButton&&!('MediaRecorder' in window))exportButton.title='Video export is not supported by this browser. Try a current version of Chrome.';
+})();
+</script>
+
+</body></html>
