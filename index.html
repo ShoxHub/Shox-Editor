@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ShoxyEditor v22 · Creator Workflow Upgrade</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ShoxyEditor · Studio</title>
 <style>
 :root{color-scheme:dark;--pink:#3b82ff;--vio:#22d3ee;--cy:#62e6ff;--line:#2a2a47;--mut:#9a9cbc;--grad:linear-gradient(100deg,#3b82ff,#22d3ee)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -141,9 +141,11 @@ a{color:#fff;text-decoration:underline}
 .tplgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
 .qgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
 .tplgrid .btn,.qgrid .btn{padding:10px 4px;font-size:12.5px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+body[data-shx-theme="plasma"],body[data-shx-theme="celestial"],body[data-shx-theme="mix"]{background-color:#05070d}
+body[data-shx-theme="plasma"] .btn,body[data-shx-theme="plasma"] .mini,body[data-shx-theme="plasma"] .chip,body[data-shx-theme="plasma"] .pre,body[data-shx-theme="plasma"] #tabs button,body[data-shx-theme="celestial"] .btn,body[data-shx-theme="celestial"] .mini,body[data-shx-theme="celestial"] .chip,body[data-shx-theme="celestial"] .pre,body[data-shx-theme="celestial"] #tabs button,body[data-shx-theme="mix"] .btn,body[data-shx-theme="mix"] .mini,body[data-shx-theme="mix"] .chip,body[data-shx-theme="mix"] .pre,body[data-shx-theme="mix"] #tabs button{filter:none}
 </style></head><body>
 <div id="app">
-<header><div class="logo">Shoxy<b>Editor</b></div><div style="display:flex;align-items:center;gap:5px"><button class="mini" id="undoBtn" title="Rückgängig (Strg+Z)" aria-label="Rückgängig">↶</button><button class="mini" id="redoBtn" title="Wiederholen (Strg+Y)" aria-label="Wiederholen">↷</button><button class="btn hot" id="exp">⬇ Export</button></div></header>
+<header><div class="logo">Shoxy<b>Editor</b></div><div style="display:flex;align-items:center;gap:5px"><button class="mini" id="undoBtn" title="Rückgängig (Strg+Z)" aria-label="Rückgängig">↶</button><button class="mini" id="redoBtn" title="Wiederholen (Strg+Y)" aria-label="Wiederholen">↷</button><button class="mini" id="projectBtn" title="Switch projects">▣ Projects</button><button class="btn hot" id="exp">⬇ Export</button></div></header>
 <main>
 <section id="stage"><div id="wrap"><div id="pv"><canvas id="cv" width="720" height="1280"></canvas><div id="empty"><div>🎬 TIPPEN &amp; CLIPS LADEN<small>① Clips rein · ② selbst bearbeiten<br>③ Vorschau · ④ Export</small></div></div></div></div>
 <div id="transport"><button class="btn hot" id="play" style="padding:8px 14px">▶</button><input type="range" id="scrub" min="0" max="1000" value="0"><span id="time">0:00 / 0:00</span></div><div id="status">Bereit. Lade deine Clips 👇</div></section>
@@ -249,10 +251,10 @@ a{color:#fff;text-decoration:underline}
 <div class="tab" id="t-ki">
  <div class="card">
   <div class="row">
-   <input id="kikey" class="field" type="password" placeholder="Gemini API-Key (AIza...)">
+   <input id="kikey" class="field" type="password" placeholder="Gemini API key (AIza…)">
    <select id="kimodel" style="max-width:175px">
-    <option value="gemini-3.8-flash">Gemini 3.8 Flash</option>
-    <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite</option>
+    <option value="gemini-3.8-flash">Gemini 3.8 Flash · Best quality</option>
+    <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite · Fast</option>
    </select>
   </div>
  </div>
@@ -263,7 +265,7 @@ a{color:#fff;text-decoration:underline}
   <div class="small">Die KI sieht Vorschau und Quellfotos, kann Teile eines Fotos einzeln bewegen, neue Effekte programmieren und Code im Editor ausführen. Jede Aktion wird mit ✓ oder ⚠ angezeigt, ohne echte Änderung korrigiert sie sich selbst. KI-Code läuft nur in deinem Browser. Dein API-Key bleibt lokal in diesem Browser.</div>
 </div>
 
-<div class="tab" id="t-music"><div class="card"><div class="row"><input id="msq" class="field" placeholder="Song / Artist suchen …"><button class="btn hot" id="msgo" style="flex:0 0 auto">🔍</button></div><div style="margin-top:7px"><button class="chip2" data-a="trend">🔥 Trending</button><button class="chip2" data-a="gen" data-v="phonk">Phonk</button><button class="chip2" data-a="gen" data-v="edm">EDM</button><button class="chip2" data-a="gen" data-v="lofi">Lo-Fi</button><button class="chip2" data-a="gen" data-v="hip hop">Hip-Hop</button><button class="chip2" data-a="gen" data-v="cinematic">Cinematic</button></div></div><div id="mslist"></div><div class="grp">Mix</div> <div class="card"><h3>Song &amp; Lautstärke</h3><div class="small" id="songinfo">Kein Song geladen – der Ton der Clips wird genutzt.</div><label class="l">Clip-Ton <b></b></label><input id="clipVol" type="range" min="0" max="1" step=".05" value="1"><label class="l">Song <b></b></label><input id="songVol" type="range" min="0" max="1" step=".05" value="1"></div>
+<div class="tab" id="t-music"><div class="card"><div class="row"><input id="msq" class="field" placeholder="Song / Artist suchen …"><button class="btn hot" id="msgo" style="flex:0 0 auto">🔍</button></div><div style="margin-top:7px"><button class="chip2" data-a="trend">🔥 Trending</button><button class="chip2" data-a="gen" data-v="phonk">Phonk</button><button class="chip2" data-a="gen" data-v="drift phonk">Drift Phonk</button><button class="chip2" data-a="gen" data-v="brazilian funk">Brazilian Funk</button><button class="chip2" data-a="gen" data-v="hardwave">Hardwave</button><button class="chip2" data-a="gen" data-v="dark trap">Dark Trap</button><button class="chip2" data-a="gen" data-v="edm">EDM</button><button class="chip2" data-a="gen" data-v="lofi">Lo-Fi</button><button class="chip2" data-a="gen" data-v="hip hop">Hip-Hop</button><button class="chip2" data-a="gen" data-v="cinematic">Cinematic</button></div></div><div id="mslist"></div><div class="grp">Mix</div> <div class="card"><h3>Song &amp; Lautstärke</h3><div class="small" id="songinfo">Kein Song geladen – der Ton der Clips wird genutzt.</div><label class="l">Clip-Ton <b></b></label><input id="clipVol" type="range" min="0" max="1" step=".05" value="1"><label class="l">Song <b></b></label><input id="songVol" type="range" min="0" max="1" step=".05" value="1"></div>
  <div class="card"><h3>Beat-Analyse</h3><button class="btn hot" id="analyse" style="width:100%;margin-bottom:10px">🥁 Beats analysieren</button><label class="sw" style="margin-bottom:8px"><input type="checkbox" id="autoan" checked><i></i>Auto-Analyse beim Song-Laden</label><div class="stat"><div><b id="bpm">—</b><small>BPM</small></div><div><b id="drop">—</b><small>DROP</small></div><div><b id="nbeats">0</b><small>BEATS</small></div></div><div class="stat s2"><div><b id="bconf">—</b><small>SICHERHEIT</small></div><div><b id="bmode" style="font-size:13px;padding:4px 0">RASTER</b><small>MODUS</small></div><div><b id="bdot" style="display:block;margin:3px auto;width:20px;height:20px;border-radius:50%;background:#777;opacity:.18;font-size:0">.</b><small>PULS</small></div></div><div id="timeline"></div><label class="l">BPM manuell <b></b></label><input id="bpmIn" type="number" min="30" max="400" step=".01" value="128">
 <div class="row" style="margin-top:8px"><button class="btn" id="tap" type="button">👆 Tap-Tempo</button><button class="btn" id="bhalf" type="button">÷2</button><button class="btn" id="bdbl" type="button">×2</button></div>
 <div class="row" style="margin-top:8px"><button class="btn" id="bgrid" type="button">📍 Beat 1 = Playhead</button><button class="btn" id="bone" type="button">📍 Takt-Start hier</button></div>
@@ -285,6 +287,36 @@ a{color:#fff;text-decoration:underline}
 <label class="l">Dumpf (Muffled) <b></b></label><input type="range" data-af="lp" min="0" max="100" value="0">
 <label class="l">Telefon / dünn <b></b></label><input type="range" data-af="hp" min="0" max="100" value="0">
 <label class="sw" style="margin-top:8px"><input type="checkbox" data-af="p8"><i></i>8D-Audio (wandert links↔rechts)</label></div><p class="small">Bibliothek: Audius – wird nur gestreamt, nichts wird heruntergeladen. Spotify und YouTube Music lassen sich technisch und rechtlich nicht in einen Editor einbauen.</p></div>
+</div>
+<div class="tab" id="t-settings">
+ <div class="card"><h3>Studio settings</h3>
+  <label class="l">Language</label><select id="uiLanguage"><option value="en">English</option><option value="de">Deutsch</option></select>
+  <label class="l">Theme</label><div class="pres" id="themeChoices">
+   <button class="pre on" data-theme="mono" style="--c:#fff"><b>◐ Mono</b><small>Black & white</small></button>
+   <button class="pre" data-theme="plasma" style="--c:#38bdf8"><b>⚡ Plasma</b><small>Electric blue / cyan</small></button>
+   <button class="pre" data-theme="celestial" style="--c:#ff7a18"><b>☀ Celestial</b><small>Orange / gold / red</small></button>
+   <button class="pre" data-theme="mix" style="--c:#a78bfa"><b>✦ Mix</b><small>Build your own palette</small></button>
+  </div>
+  <div id="mixControls" style="display:none">
+   <label class="l">Base background</label><input type="color" id="mixBg" value="#050505">
+   <label class="l">Primary accent</label><input type="color" id="mixPrimary" value="#38bdf8">
+   <label class="l">Secondary accent</label><input type="color" id="mixSecondary" value="#ffffff">
+   <label class="l">Highlight</label><input type="color" id="mixHighlight" value="#ff8a24">
+   <label class="sw"><input type="checkbox" id="mixMono"><i></i>Keep interface mostly monochrome</label>
+  </div>
+  <label class="l">Preview quality</label><select id="previewQuality"><option value="balanced">Balanced</option><option value="high">High quality</option><option value="performance">Performance</option></select>
+  <p class="small">Theme and interface preferences are saved automatically in this browser.</p>
+ </div>
+ <div class="card"><h3>Headbop controls</h3><p class="small">Closing the Headbop controls only hides this panel. It does not remove or disable the effect. Use the Headbop chip in Effects to turn the effect off.</p>
+  <label class="l">Intensity <b id="hbIntensityValue">100%</b></label><input id="hbIntensity" type="range" min="0" max="200" value="100">
+  <label class="l">Speed <b id="hbSpeedValue">1.00×</b></label><input id="hbSpeed" type="range" min=".25" max="3" step=".05" value="1">
+  <label class="l">Beat response <b id="hbBeatValue">100%</b></label><input id="hbBeat" type="range" min="0" max="100" value="100">
+  <label class="l">Motion style</label><select id="hbStyle"><option value="smooth">Smooth</option><option value="tiktok">TikTok bounce</option><option value="slam">Slam</option><option value="double">Double bounce</option></select>
+  <button class="btn" id="hbApply" style="width:100%;margin-top:8px">Apply Headbop settings</button>
+ </div>
+ <div class="card"><h3>Project library</h3><div class="row"><input class="field" id="projectName" maxlength="48" placeholder="Project name"><button class="btn hot" id="newProject">＋ New project</button></div><div id="projectList"></div><p class="small">Project settings, effect parameters, text and keyframes are saved locally. Imported media itself is not embedded in this lightweight backup, so re-import video/audio files after a browser reset or on another device.</p></div>
+ <div class="card"><h3>Storage & privacy</h3><button class="btn" id="exportProject" style="width:100%">Export project backup (.json)</button><label class="btn" style="display:block;margin-top:7px;text-align:center">Import project backup<input id="importProject" type="file" accept="application/json,.json" hidden></label><button class="btn" id="clearLocal" style="width:100%;margin-top:7px">Clear saved projects</button></div>
+</div>
 </div></section></main></div>
 <script>
 const $=id=>document.getElementById(id),W=720,H=1280,esc=s=>s.replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
@@ -830,7 +862,7 @@ $('videos').onchange=e=>{addClips(e.target.files);e.target.value=''};
 function songReady(name,file,url){const sp=S.songSpeed||1;S.song={name,dur:songEl.duration/sp,file,url};if(AC)connSong();vols();$('songinfo').textContent='🎵 '+name+' ('+fm(songEl.duration)+')';build();volUI();st('Song geladen – Musik bleibt unverändert, bis du sie selbst änderst');if($('autoan')&&$('autoan').checked)analyse()}
 $('audiofile').onchange=e=>{const f=e.target.files[0];if(!f)return;songEl.removeAttribute('crossorigin');const old=S.song&&S.song.blobUrl;const u=URL.createObjectURL(f);songEl.onloadedmetadata=()=>{songEl.onloadedmetadata=null;songReady(f.name,f,null);S.song.blobUrl=u;old&&URL.revokeObjectURL(old)};songEl.src=u;e.target.value=''};
 /* ---------- UI ---------- */
-const TABS=[['music','🎧','Musik'],['ki','🤖','KI'],['clips','🎬','Clips'],['vibe','🔥','Vibe'],['fx','🎛','Effekte'],['kf','⏱','Keyframes'],['trans','🔀','Übergänge'],['text','🔤','Text']];
+const TABS=[['music','🎧','Music'],['ki','🤖','AI'],['clips','🎬','Clips'],['vibe','🔥','Vibe'],['fx','🎛','Effects'],['kf','⏱','Keyframes'],['trans','🔀','Transitions'],['text','🔤','Text'],['settings','⚙️','Settings']];
 $('tabs').innerHTML=TABS.map(t=>`<button type=button data-a=tab data-v=${t[0]} aria-label="${t[2]}">${t[1]} ${t[2]}</button>`).join('');
 function setTab(v){S.tab=v;document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id==='t-'+v));$('body').scrollTop=0;$('body').scrollTop=0;const panel=$('body');if(panel)panel.scrollTop=0;const content=$('body').parentElement?.querySelector('#body');if(content)content.scrollTop=0}
 function rClips(){$('cliplist').innerHTML=S.clips.map((c,i)=>`<div class=clip><b>${i+1}</b><div class=cn><div class=nm>${esc(c.name)}</div><div class=tin>Start <input type=number step=.1 min=0 max=${(c.photo?60:c.dur).toFixed(1)} value=${c.in.toFixed(1)} data-trim=${i} data-k=in> Ende <input type=number step=.1 min=0 max=${(c.photo?60:c.dur).toFixed(1)} value=${c.out.toFixed(1)} data-trim=${i} data-k=out> / ${c.photo?'Foto':c.dur.toFixed(1)+'s'}</div></div><button class=mini data-a=split data-v=${i} title="Am Playhead teilen">✂</button><button class=mini data-a=dup data-v=${i} title="Duplizieren">⧉</button><button class=mini data-a=mv data-v="${i},-1">◀</button><button class=mini data-a=mv data-v="${i},1">▶</button><button class=mini data-a=rm data-v=${i}>✕</button></div>`).join('')||'<div class=small style="margin:8px 2px">Noch keine Clips – wähle „➕ Clips/Fotos“. Du kannst mehrere Dateien auf einmal und später weitere hinzufügen.</div>'}
@@ -856,6 +888,7 @@ const ACT={tab:setTab,preset:applyPreset,
  },
  fx:v=>{has(v)?S.fx.delete(v):S.fx.add(v);S.vibe='custom';rFx();rPresets()},
  fxoff:v=>{S.fx.delete(v);S.vibe='custom';rFx();rPresets()},
+  fxhide:v=>{S.fxHidden=S.fxHidden||new Set();S.fxHidden.has(v)?S.fxHidden.delete(v):S.fxHidden.add(v);rFx();st('Headbop controls hidden/shown. The effect stays active.') },
  kfsel:v=>{S.kfsel=+v;const K=S.kfs[S.kfsel];if(K){S.T=K.t;S.seg=-1}rKf()},
  tr:v=>{S.trans=v;rTrans()},fill:v=>{S.fill=v;rFill()},
  trtest:()=>{if(S.segs.length<2)return st('Dafür brauchst du 2+ Clips oder Auto-Cut');S.T=Math.max(0,S.segs[1].start-.7);S.seg=-1;play()},
@@ -957,11 +990,11 @@ $('kikey').onchange=e=>{KI.key=e.target.value.trim();try{localStorage.ki_key=KI.
 $('kimodel').onchange=e=>{KI.model=e.target.value;try{localStorage.ki_model=KI.model}catch(x){}};
 const kiAdd=(w,t)=>{const d=document.createElement('div');d.className='mb '+w;const msg=document.createElement('span');msg.textContent=t;const del=document.createElement('button');del.className='mbdel';del.type='button';del.title='Nachricht löschen';del.textContent='×';del.onclick=()=>d.remove();d.append(msg,del);$('kilog').append(d);$('kilog').scrollTop=$('kilog').scrollHeight;return d};
 $('kiclear').onclick=()=>{$('kilog').replaceChildren();KI.h=[];kiAdd('ai','Chat geleert. Deine Clips, Musik und Projekteinstellungen bleiben unverändert.')};
-kiAdd('ai','Ich bin dein Schnitt-Assistent und kann auch Dinge, die nicht als fester Button existieren: Körperteile mit natürlichem Follow-through bewegen (Kopf, Oberkörper, Arme und Beine), jeden Effekt einzeln feinsteuern und neue Effekte selbst programmieren und beliebigen Code im Editor ausführen. Ich zeige dir bei jeder Aktion ✓ oder ⚠ und prüfe mein Ergebnis am Bild. Clips und Musik fasse ich nicht ohne Auftrag an.');
+kiAdd('ai','I’m your editing assistant. I can adjust effects, keyframes, text, transitions and supported character-part rigs. Every edit is reported with ✓ or ⚠. I will not change your clips or music unless you ask. Add your Gemini API key to enable cloud AI; local editing controls still work without it.');
 const snap=()=>({clips:S.clips.map((c,i)=>({i,n:c.name,in:c.in,out:c.out,dur:c.dur,photo:!!c.photo,rig:rigSig(c.v&&c.v.rig)})),song:S.song&&{n:S.song.name,dur:S.song.dur},fx:[...S.fx],fxi:S.fxi,fxp:S.fxp,kfs:S.kfs,vibe:S.vibe,str:S.str,trans:S.trans,tdur:S.tdur,autoCut:S.autoCut,cutBeats:S.cutBeats,speed:S.speed,look:{bright:S.bright,contrast:S.contrast,sat:S.sat,hue:S.hue},bpm:S.bpm,drop:S.dropT,beat:{mode:S.ba.mode,conf:S.ba.conf,nudge:S.nudge,bo:S.ba.bo},total:S.total,T:S.T,texts:S.texts,images:S.images.map((L,i)=>({i,name:L.name,x:L.x,y:L.y,w:L.w,h:L.h,opacity:L.opacity,blend:L.blend,s:L.s,e:L.e,rot:L.rot,rig:rigSig(L.rig)})),background:S.background?.name||null,fill:S.fill,custom:Object.values(CUSTOM).map(f=>({id:f.id,name:f.name,len:f.code.length,off:!!f.off}))});
-const SYS=()=>`Du bist ULTRA-BOSS, ein sorgfältiger Schnitt-Assistent für diesen mobilen Videoeditor. Antworte auf Deutsch, locker, kurz und klar. Analysiere zuerst den gesamten Wunsch und den Projektzustand, plane die kleinste sichere Änderung und prüfe das Ergebnis anhand der Bilder. Rate keine Koordinaten, erfinde keine Funktionen und behaupte nichts ohne ausgeführte Aktion. Die zugrunde liegende Intelligenz bleibt vom gewählten Gemini-Modell abhängig; nutze präzise Analyse, Rückfragen bei echter Mehrdeutigkeit und konsequente Ergebnisprüfung.
+const SYS=()=>`Du bist ULTRA-BOSS, ein sorgfältiger Schnitt-Assistent für diesen mobilen Videoeditor. Respond in English, clearly and concisely. Analysiere zuerst den gesamten Wunsch und den Projektzustand, plane die kleinste sichere Änderung und prüfe das Ergebnis anhand der Bilder. Rate keine Koordinaten, erfinde keine Funktionen und behaupte nichts ohne ausgeführte Aktion. Die zugrunde liegende Intelligenz bleibt vom gewählten Gemini-Modell abhängig; nutze präzise Analyse, Rückfragen bei echter Mehrdeutigkeit und konsequente Ergebnisprüfung.
 
-DENKWEISE: Zerlege jeden Wunsch in Teilziele (was genau, wann, wie stark, welche Effekte, Ebenen oder Clips). Gleiche mit STATE ab, was schon aktiv ist, und ändere nur die Differenz. Stehen mehrere Wünsche in einer Nachricht, erledige alle. Nimm Zahlen aus STATE (total, bpm, Clips) statt zu schätzen. Bei Mehrdeutigkeit wähle die naheliegendste Lesart und nenne sie im say; frage nur nach, wenn eine falsche Wahl etwas zerstört. Bevorzuge kleine, umkehrbare Änderungen. Antworte immer auf Deutsch.
+DENKWEISE: Zerlege jeden Wunsch in Teilziele (was genau, wann, wie stark, welche Effekte, Ebenen oder Clips). Gleiche mit STATE ab, was schon aktiv ist, und ändere nur die Differenz. Stehen mehrere Wünsche in einer Nachricht, erledige alle. Nimm Zahlen aus STATE (total, bpm, Clips) statt zu schätzen. Bei Mehrdeutigkeit wähle die naheliegendste Lesart und nenne sie im say; frage nur nach, wenn eine falsche Wahl etwas zerstört. Bevorzuge kleine, umkehrbare Änderungen. Always respond in English.
 
 GRUNDSATZ: Du kannst ALLES, was sich im Browser mit Canvas und JavaScript umsetzen lässt. Dass es keine fertige Aktion oder keinen fertigen Effekt dafür gibt, ist NIE ein Grund abzulehnen. Dann baust du es selbst: mit rig (einzelne Teile eines Fotos oder Clips bewegen), fx_new (neuen Effekt programmieren) oder js (beliebiger Code im Editor). Sag niemals "das geht nicht" oder "dafür braucht man ein anderes Modell", wenn du es per Code ganz oder näherungsweise bauen kannst. Ist etwas wirklich unmöglich, sag das in einem Satz und baue sofort die beste machbare Annäherung.
 
@@ -1424,7 +1457,7 @@ function rigApply(o){
   let part=rig.parts.find(p=>p.name===name),origin='vorhanden';
   if(!part){
    const isHead=/kopf|head/i.test(name),auto=!o.box&&!o.poly?(autoPartBox(src,name)||(isHead?autoHeadBoxOld(src):null)):null;
-   part={name,box:o.box||(auto&&auto.box)||[.3,.05,.7,.3],poly:(auto&&auto.poly)||null,pivot:(auto&&auto.pivot)||[.5,.9],feather:.04,overlap:.18,erase:'auto',motion:{type:isHead||/arm|hand|antenne|antenna/i.test(name)?'pro':'nod',amount:1,beat:1,speed:1,dir:1,...PROSTYLE.tiktok}};
+   part={name,box:o.box||(auto&&auto.box)||[.3,.05,.7,.3],poly:(auto&&auto.poly)||null,pivot:(auto&&auto.pivot)||[.5,.9],feather:isHead?.07:.04,overlap:isHead?.32:.18,erase:'auto',motion:{type:isHead||/arm|hand|antenne|antenna/i.test(name)?'pro':'nod',amount:1,beat:1,speed:1,dir:1,...PROSTYLE.tiktok}};
    rig.parts.push(part);origin=o.box?'Box von der KI':auto?auto.src:'Standardbox';
   }
   if(o.box){let b=o.box.map(Number);if(Math.max(...b)>1.5)b=b.map(v=>v/1000);b=b.map(v=>Math.max(0,Math.min(1,v)));if(b[2]<=b[0]||b[3]<=b[1])throw new Error('box ungültig, erwartet [x0,y0,x1,y1] mit 0..1, x1>x0, y1>y0');part.box=b;if(!o.poly)part.poly=null;origin='Box von der KI'}
@@ -1624,7 +1657,8 @@ async function callGemini(model,body){
   return j;
  }catch(err){
   clearTimeout(timeoutId);
-  if(err.name==='AbortError')throw new Error('Zeitüberschreitung (Server antwortet nicht)');
+  if(err.name==='AbortError')throw new Error('Request timed out. Check your connection and try again.');
+  if(err instanceof TypeError || /failed to fetch|networkerror|load failed/i.test(err.message||''))throw new Error('Could not reach the Gemini API. Check your internet connection, browser privacy/ad-block settings, and whether this page is allowed to call generativelanguage.googleapis.com. Your API key was not sent if the request was blocked before connecting.');
   throw err;
  }
 }
@@ -1646,7 +1680,7 @@ async function callAny(body){
 }
 function parseAI(txt){
  const t=txt.trim().replace(/^```(?:json)?\s*/i,'').replace(/```\s*$/,'').trim();
- try{return JSON.parse(t)}catch(e){const a=t.indexOf('{'),b=t.lastIndexOf('}');if(a>=0&&b>a)return JSON.parse(t.slice(a,b+1));throw new Error('KI-Antwort war kein gültiges JSON')}
+ try{return JSON.parse(t)}catch(e){const a=t.indexOf('{'),b=t.lastIndexOf('}');if(a>=0&&b>a)return JSON.parse(t.slice(a,b+1));throw new Error('The AI returned invalid JSON')}
 }
 async function kiSend(){
  const q=$('kiin').value.trim();if(!q)return;$('kiin').value='';kiAdd('me',q);try{pushHistory()}catch(e){}
@@ -1686,7 +1720,7 @@ async function kiSend(){
  if(/\b(head ?bop|head ?bang|kopf ?nicken|kopfnicken)\b/i.test(q)){
   let hs=[];try{hs=rigTargets('photos')}catch(e){}
   if(hs.length){
-   try{await prepVideo({target:'photos'});const msg=rigApply({target:'photos',part:'head',motion:'pro',body:.9,bodySpan:.92,blur:0,plug:0,overlap:.26,feather:.06});S.fx.delete('headbop');rFx();kiAdd('ai','Headbop gesetzt: Kopf bewegt sich, Oberkörper/Arme folgen weich und die Beine bekommen den Follow-through. Keine Ghost-/Shadow-Overlay-Kopien.\n'+msg);localNote='\n[LOKAL BEREITS ANGEWENDET: '+msg+'. Prüfe mit Quellfoto und Kontrollbild, ob die rote Box den ganzen Kopf trifft. Wenn nicht, korrigiere per rig mit exakter box oder poly. Wenn ja, antworte nur kurz mit do:[] und noop:true.]'}catch(e){kiAdd('ai','⚠ '+e.message)}
+   try{await prepVideo({target:'photos'});const msg=rigApply({target:'photos',part:'head',motion:'pro',body:.9,bodySpan:.92,blur:0,plug:0,overlap:.34,feather:.08});S.fx.delete('headbop');rFx();kiAdd('ai','Headbop gesetzt: Kopf bewegt sich, Oberkörper/Arme folgen weich und die Beine bekommen den Follow-through. Keine Ghost-/Shadow-Overlay-Kopien.\n'+msg);localNote='\n[LOKAL BEREITS ANGEWENDET: '+msg+'. Prüfe mit Quellfoto und Kontrollbild, ob die rote Box den ganzen Kopf trifft. Wenn nicht, korrigiere per rig mit exakter box oder poly. Wenn ja, antworte nur kurz mit do:[] und noop:true.]'}catch(e){kiAdd('ai','⚠ '+e.message)}
   }else{
    S.fx.add('headbop');syncUI();rFx();
    kiAdd('ai','Kein Foto im Projekt gefunden. Ich habe deshalb nur den Ganzbild-Headbop eingeschaltet, dabei bouncet der komplette Clip. Für Kopf-only erst ein Foto als Clip oder Overlay importieren.');
@@ -1732,7 +1766,7 @@ async function kiSend(){
    await new Promise(r=>setTimeout(r,350));
    imgParts=kiImages(true);
   }
- }catch(e){kiAdd('ai','❌ '+e.message+(/API key|API_KEY|PERMISSION|403|400/i.test(e.message)?'\n💡 Prüf deinen Gemini-Key oben im KI-Tab.':''))}
+ }catch(e){kiAdd('ai','Request failed: '+e.message+(/API key|API_KEY|PERMISSION|403|400|unauthorized|invalid argument/i.test(e.message)?'\nCheck that your Gemini API key is valid, has Gemini API access, and that the selected model is enabled for your project.':'\nTry again after checking your connection.'))}
  $('kigo').disabled=false;
 }
 $('kigo').onclick=kiSend;$('kiin').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!$('kigo').disabled)kiSend()}};
@@ -1758,8 +1792,9 @@ function rFx(){
   const cfg=S.fxp[k]||{b:1,s:0,e:0};
   const br=Math.round((cfg.b??1)*100);
   return `<div class="fxbox">
-   <div class="fxhead"><span>${nmx[k]||k}</span><button class="mini" data-a="fxoff" data-v="${k}" style="min-height:28px;padding:3px 8px">✕ Aus</button></div>
-   <label class="l" style="margin:4px 0 2px">Intensität <b>${v}%</b></label>
+   <div class="fxhead"><span>${nmx[k]||k}</span><button class="mini" data-a="${k==='headbop'?'fxhide':'fxoff'}" data-v="${k}" style="min-height:28px;padding:3px 8px">${k==='headbop'?'× Hide controls':'Turn off'}</button></div>
+   <div style="${k==='headbop'&&S.fxHidden?.has(k)?'display:none':''}">
+   <label class="l" style="margin:4px 0 2px">Intensity <b>${v}%</b></label>
    <input type="range" min="0" max="200" value="${v}" data-fxi="${k}">
    <label class="l" style="margin:6px 0 2px">Geschwindigkeit <b>${(cfg.sp??1).toFixed(2)}×</b></label>
    <input type="range" min="0.25" max="8" step="0.05" value="${cfg.sp??1}" data-fxsp="${k}">
@@ -1768,9 +1803,9 @@ function rFx(){
    <div class="row" style="margin-top:6px">
     <div><label class="l" style="margin:0 0 2px">Start (s)</label><input type="number" step=".1" min="0" value="${cfg.s||0}" data-fxs="${k}"></div>
     <div><label class="l" style="margin:0 0 2px">Ende (0 = bis Schluss)</label><input type="number" step=".1" min="0" value="${cfg.e||0}" data-fxe="${k}"></div>
-   </div>
+   </div></div>
   </div>`;
- }).join('')||'<div class="small">Noch kein Effekt aktiv – tippe oben einen Effekt an, um ihn manuell einzustellen.</div>');
+ }).join('')||'<div class="small">No active effects yet — tap an effect above to enable and fine-tune it.</div>');
 }
 document.addEventListener('input',e=>{
  const d=e.target.dataset;
@@ -1865,4 +1900,67 @@ $('strimGo').onclick=async()=>{try{st('✂ '+await trimSong($('strimS').value||0
 /* ---------- Viewport-Fix (Handy) ---------- */
 function vh(){document.documentElement.style.setProperty('--vh',(window.visualViewport?.height||innerHeight)+'px');fit()}
 addEventListener('resize',vh);addEventListener('orientationchange',()=>setTimeout(vh,200));window.visualViewport&&visualViewport.addEventListener('resize',vh);addEventListener('pagehide',()=>{try{pause();exportStream?.getTracks().forEach(t=>t.stop());S.clips.forEach(c=>{if(c.url)URL.revokeObjectURL(c.url)});S.images.forEach(x=>{if(x.url)URL.revokeObjectURL(x.url)});if(S.song?.blobUrl)URL.revokeObjectURL(S.song.blobUrl)}catch(e){}});vh();setTimeout(vh,400);
+
+
+/* UI localisation pass: English is the default. Never translate user-authored text or filenames. */
+const SHX_EN={
+ 'Musik':'Music','Effekte':'Effects','Übergänge':'Transitions','Schnitt':'Editing','Schnell bearbeiten':'Quick edits','Bildformat':'Aspect ratio','Füllen':'Fill','Einpassen':'Fit','Auflösung':'Resolution','Format':'Format','Automatisch':'Automatic','Bitrate':'Bitrate','Normal':'Normal','Hoch':'High','Sehr hoch':'Very high','FPS':'FPS','Auto-Cut auf den Beat':'Auto-cut to the beat','Schnitt alle':'Cut every','Beat (hektisch)':'Beat (fast)','Beats':'Beats','1 Takt':'1 bar','Speed':'Speed','Export':'Export','Clips/Fotos (mehrere)':'Clips / Photos (multiple)','Song':'Song','Titel einfügen':'Add title','Clean Look':'Clean look','Cinematic':'Cinematic','Velocity':'Velocity','Beat-Schnitt':'Beat cut','Zoom-Punch':'Zoom punch','Effekt-Stärke (Global)':'Global effect strength','Helligkeit':'Brightness','Kontrast':'Contrast','Sättigung':'Saturation','Farbton':'Hue','Dauer':'Duration','Übergang testen':'Test transition','Text hinzufügen':'Add text','Text bearbeiten':'Edit text','Farbe':'Color','Größe':'Size','Start (s)':'Start (s)','Ende (s, 0 = bis Schluss)':'End (s, 0 = until end)','Text löschen':'Delete text','Fonts':'Fonts','Font suchen …':'Search fonts…','Song / Artist suchen …':'Search songs / artists…','Trending':'Trending','Gratis Musik':'Free music','Song & Lautstärke':'Song & volume','Kein Song geladen – der Ton der Clips wird genutzt.':'No song loaded — clip audio will be used.','Clip-Ton':'Clip audio','Beat-Analyse':'Beat analysis','Beats analysieren':'Analyze beats','Auto-Analyse beim Song-Laden':'Analyze automatically when a song loads','SICHERHEIT':'CONFIDENCE','MODUS':'MODE','BPM manuell':'Manual BPM','Tap-Tempo':'Tap tempo','Beat-Timing Offset':'Beat timing offset','Metronom-Klick (nur Vorschau – zum Prüfen)':'Metronome click (preview only)','Audio-Effekte':'Audio effects','Musik':'Music','Beide':'Both','Bass':'Bass','Höhen':'Treble','Hall':'Reverb','Echo':'Echo','Dumpf (Muffled)':'Muffled','Telefon / dünn':'Telephone / thin','Tempo':'Tempo','Musik-Speed':'Music speed','Clip-Ton / Video-Speed':'Clip audio / video speed','Tonhöhe folgt Speed (Slowed / Nightcore)':'Pitch follows speed (slowed / nightcore)','Keyframes aktiv':'Keyframes enabled','Alle':'All','Diesen Keyframe löschen':'Delete this keyframe','Text hinzufügen':'Add text','Noch kein Text – wähle oben eine Vorlage.':'No text yet — choose a template above.','Noch keine Clips – wähle „➕ Clips/Fotos“. Du kannst mehrere Dateien auf einmal und später weitere hinzufügen.':'No clips yet — choose “＋ Clips / Photos”. You can add multiple files now or add more later.','Noch kein Effekt aktiv – tippe oben einen Effekt an, um ihn manuell einzustellen.':'No effect active yet — tap an effect above to fine-tune it.','Aktive Effekte · Manuelles Feintuning':'Active effects · Manual tuning','Intensität':'Intensity','Geschwindigkeit':'Speed','Beat-Kopplung (0% = Dauerhaft, 100% = Nur auf Beat)':'Beat sync (0% = continuous, 100% = on beat only)','Dauerhaft':'Continuous','Nur auf Beat':'On beat only','Übergang':'Transition','Zufalls-Remix':'Random remix','KI':'AI','Vibe':'Vibe','Keyframes':'Keyframes','Bereit. Lade deine Clips 👇':'Ready. Add your clips below.','Clip(s)/Foto(s) hinzugefügt ·':'clip(s)/photo(s) added ·','insgesamt':'total','Alle Keyframes gelöscht':'All keyframes cleared','Song wird gestreamt …':'Streaming song…','Song geladen – Musik bleibt unverändert, bis du sie selbst änderst':'Song loaded — audio stays unchanged until you edit it','Song konnte nicht geladen werden':'Could not load song','Nachricht löschen':'Delete message','Chat geleert. Deine Clips, Musik und Projekteinstellungen bleiben unverändert.':'Chat cleared. Your clips, music and project settings are unchanged.','Song geschnitten':'Song trimmed','Datei(en) nicht lesbar (Format/Codec?)':'file(s) could not be read (format / codec?)','Foto':'Photo','Kein Song geladen':'No song loaded','Übergang testen':'Test transition','Rückgängig':'Undo','Wiederholen':'Redo','Zufall':'Random','Schnell bearbeiten':'Quick edits','Übergänge':'Transitions','Effekte':'Effects','Musik':'Music','Körperteile':'Body parts','Vorschau':'Preview','Quelle':'Source','Datei':'File','Dateien':'Files','Hintergrund':'Background','Lautstärke':'Volume','Aufnahme':'Recording','Wiederherstellen':'Restore','Rückgängig':'Undo','Wiederholen':'Redo','Einzel-Effekt-Steuerung':'Individual effect controls','Bildebenen':'Image layers','Text-Ebenen':'Text layers','Hochskalierung':'Upscaling','Bild-Overlays':'Image overlays','Effekt':'Effect','Stärke':'Strength','Bearbeiten':'Edit','Löschen':'Delete','Abspielen':'Play','Pausieren':'Pause','Suchen':'Search','Schnittpunkt':'Cut point','Sekunden':'seconds','Sekunde':'second','Hinzufügen':'Add','Entfernen':'Remove','Speichern':'Save','Geladen':'Loaded','Fehlgeschlagen':'Failed','Kein':'No','Noch':'No','Aktiv':'Active','Aus':'Off','Ein':'On','Fertig':'Done','Manuell':'Manual','Automatisch':'Automatic'
+};
+const SHX_DE=Object.fromEntries(Object.entries(SHX_EN).map(([de,en])=>[en,de]));
+function shxTranslateNode(n){if(!n.nodeValue||!n.nodeValue.trim())return;const p=n.parentElement;if(!p||p.closest('.mb,.nm,.field,.clip .nm,[contenteditable=true]'))return;const dict=shxLocale==='de'?SHX_DE:SHX_EN;let t=n.nodeValue.trim();if(dict[t]){n.nodeValue=n.nodeValue.replace(t,dict[t]);return}for(const [a,b] of Object.entries(dict)){if(a.length>7&&t.includes(a))t=t.replaceAll(a,b)}if(t!==n.nodeValue.trim())n.nodeValue=t}
+function shxTranslateTree(root=document.body){const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;while((n=w.nextNode()))shxTranslateNode(n);root.querySelectorAll?.('[placeholder],[title],[aria-label]').forEach(e=>{for(const a of ['placeholder','title','aria-label'])if(e.hasAttribute(a)&&SHX_EN[e.getAttribute(a)])e.setAttribute(a,SHX_EN[e.getAttribute(a)])})}
+const shxObserver=new MutationObserver(ms=>{for(const m of ms){if(m.type==='characterData')shxTranslateNode(m.target);for(const n of m.addedNodes)if(n.nodeType===1)shxTranslateTree(n);}});
+shxObserver.observe(document.body,{subtree:true,childList:true,characterData:true});
+
+/* ================= SHoxy STUDIO UPGRADE ================= */
+const SHX_PROJECTS_KEY='shoxy_studio_projects_v1', SHX_PREFS_KEY='shoxy_studio_prefs_v1';
+let shxProjects=[], shxActiveProject='default', shxTheme='mono', shxLocale='en';
+function shxLoadStore(){try{const x=JSON.parse(localStorage.getItem(SHX_PROJECTS_KEY)||'{}');shxProjects=Array.isArray(x.projects)?x.projects:[];shxActiveProject=x.active||'default';const p=JSON.parse(localStorage.getItem(SHX_PREFS_KEY)||'{}');shxTheme=p.theme||'mono';shxLocale=p.locale||'en';}catch(e){shxProjects=[]}}
+function shxSaveStore(){try{localStorage.setItem(SHX_PROJECTS_KEY,JSON.stringify({projects:shxProjects,active:shxActiveProject}))}catch(e){st('Storage is full. Export a project backup or remove older projects.')}}
+function shxSnapshot(){return {...editSnapshot(),fxi:S.fxi||{},fxp:S.fxp||{},fx:[...S.fx],vibe:S.vibe,str:S.str,bright:S.bright,contrast:S.contrast,sat:S.sat,hue:S.hue,trans:S.trans,tdur:S.tdur,speed:S.speed,clips:(S.clips||[]).map(c=>({name:c.name,in:c.in,out:c.out,dur:c.dur,photo:!!c.photo})),projectVersion:1}}
+function shxApply(d){if(!d)return;histBusy=true;try{
+ S.vibe=d.vibe||'custom';S.fx=new Set(d.fx||[]);['str','trans','tdur','autoCut','cutBeats','fill','bright','contrast','sat','hue','speed','clipVol','songVol','kfon','kfease'].forEach(k=>{if(d[k]!==undefined)S[k]=d[k]});
+ S.fxi=d.fxi||{};S.fxp=d.fxp||{};S.texts=Array.isArray(d.texts)?d.texts:[];S.sel=Math.min(S.texts.length-1,Math.max(-1,Number(d.sel??-1)));S.kfs=Array.isArray(d.kfs)?d.kfs:[];S.kfsel=Math.min(S.kfs.length-1,Math.max(-1,Number(d.kfsel??-1)));
+ if(AC)applyFx();build();syncUI();rText();volUI();$('autocut').checked=!!S.autoCut;lastHist=snapString();
+ }finally{histBusy=false;updateHistoryButtons()}}
+function shxSaveActive(){if(shxActiveProject==='default'&&!shxProjects.some(p=>p.id==='default'))shxProjects.unshift({id:'default',name:'My First Project',data:shxSnapshot(),updated:Date.now()});const p=shxProjects.find(x=>x.id===shxActiveProject);if(p){p.data=shxSnapshot();p.updated=Date.now()}shxSaveStore()}
+function shxRenderProjects(){const root=$('projectList');if(!root)return;root.innerHTML=shxProjects.map(p=>`<div class="clip"><b>▣</b><div class="cn"><div class="nm">${esc(p.name)}</div><div class="tin">${p.id===shxActiveProject?'Current project · ':''}${new Date(p.updated||Date.now()).toLocaleString()}</div></div><button class="mini" data-shx="open" data-id="${p.id}">Open</button><button class="mini" data-shx="rename" data-id="${p.id}">✎</button><button class="mini" data-shx="duplicate" data-id="${p.id}">⧉</button><button class="mini" data-shx="delete" data-id="${p.id}">×</button></div>`).join('')||'<p class="small">No saved projects yet. Create your first project above.</p>'}
+function shxClearSessionMedia(){try{pause()}catch(e){};S.clips.forEach(c=>{try{c.v?.pause?.();c.source?.disconnect();c.g?.disconnect()}catch(e){}if(c.url)try{URL.revokeObjectURL(c.url)}catch(e){}});S.images.forEach(x=>{if(x.url)try{URL.revokeObjectURL(x.url)}catch(e){}});S.clips=[];S.segs=[];S.images=[];S.song=null;S.background=null;try{songEl.pause();songEl.removeAttribute('src');songEl.load()}catch(e){}build();rClips();renderOverlayList();$('songinfo').textContent='No song loaded — clip audio will be used.'}
+function shxNewProject(name){shxSaveActive();shxClearSessionMedia();const id='p_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,6);shxProjects.push({id,name:(name||'Untitled Project').trim().slice(0,48)||'Untitled Project',data:{v:1,fx:[],texts:[],kfs:[]},updated:Date.now()});shxActiveProject=id;shxApply(shxProjects.at(-1).data);shxSaveStore();shxRenderProjects();st('New project created and saved locally.')}
+function shxSwitch(id){const p=shxProjects.find(x=>x.id===id);if(!p)return;shxSaveActive();shxClearSessionMedia();shxActiveProject=id;shxApply(p.data);shxSaveStore();shxRenderProjects();setTab('clips');st('Opened '+p.name+'. Re-import media if it is not already loaded.')}
+function shxThemeApply(theme){shxTheme=theme;document.body.dataset.shxTheme=theme;const root=document.documentElement;const themes={mono:{bg:'#000000',panel:'#090909',a:'#ffffff',b:'#bdbdbd',glow:'#ffffff'},plasma:{bg:'#030a18',panel:'#07152b',a:'#19bfff',b:'#55f4ff',glow:'#20cfff'},celestial:{bg:'#160600',panel:'#220b04',a:'#ff7a18',b:'#ffd447',glow:'#ff4b1f'}};
+ let t=themes[theme]||themes.mono;if(theme==='mix')t={bg:$('mixBg')?.value||'#050505',panel:$('mixBg')?.value||'#050505',a:$('mixPrimary')?.value||'#38bdf8',b:$('mixSecondary')?.value||'#ffffff',glow:$('mixHighlight')?.value||'#ff8a24'};
+ root.style.setProperty('--pink',t.a);root.style.setProperty('--vio',t.b);root.style.setProperty('--cy',t.b);root.style.setProperty('--line',theme==='mono'?'#292929':'#263b59');root.style.setProperty('--mut','#9a9a9a');root.style.setProperty('--grad',`linear-gradient(100deg,${t.a},${t.b})`);
+ document.body.style.background=`radial-gradient(ellipse 70% 45% at 10% -10%,${t.a}30,transparent),radial-gradient(ellipse 55% 40% at 100% 100%,${t.glow}24,transparent),${t.bg}`;
+ $('app').style.background=t.bg;$('panel').style.background=`linear-gradient(180deg,${t.panel}f2,${t.bg})`;
+ document.querySelectorAll('[data-theme]').forEach(b=>b.classList.toggle('on',b.dataset.theme===theme));$('mixControls').style.display=theme==='mix'?'block':'none';
+ try{localStorage.setItem(SHX_PREFS_KEY,JSON.stringify({theme,locale:shxLocale,mix:{bg:$('mixBg')?.value,primary:$('mixPrimary')?.value,secondary:$('mixSecondary')?.value,highlight:$('mixHighlight')?.value,mono:$('mixMono')?.checked}}))}catch(e){}
+}
+function shxLocaleApply(lang){shxLocale=lang;document.documentElement.lang=lang;try{const p=JSON.parse(localStorage.getItem(SHX_PREFS_KEY)||'{}');p.locale=lang;localStorage.setItem(SHX_PREFS_KEY,JSON.stringify(p))}catch(e){}
+ // The editor's original editing labels are retained in English; language selection controls the app chrome and helper text.
+ shxTranslateTree();st(lang==='de'?'Sprache auf Deutsch gestellt.':'Language set to English.');
+}
+function shxExport(){shxSaveActive();const blob=new Blob([JSON.stringify({app:'ShoxyEditor',version:1,active:shxActiveProject,projects:shxProjects},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='shoxy-project-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}
+function shxImport(file){const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d.projects))throw Error('Invalid Shoxy project backup');shxProjects=d.projects;shxActiveProject=d.active||shxProjects[0]?.id||'default';shxSaveStore();const p=shxProjects.find(x=>x.id===shxActiveProject)||shxProjects[0];if(p){shxActiveProject=p.id;shxApply(p.data)}shxRenderProjects();st('Project backup imported. Re-import media files if needed.')}catch(e){st('Could not import backup: '+e.message)}};r.readAsText(file)}
+shxLoadStore();
+if(!shxProjects.length)shxProjects=[{id:'default',name:'My First Project',data:shxSnapshot(),updated:Date.now()}];
+if(!shxProjects.some(p=>p.id===shxActiveProject))shxActiveProject=shxProjects[0].id;
+$('uiLanguage').value=shxLocale;
+try{const prefs=JSON.parse(localStorage.getItem(SHX_PREFS_KEY)||'{}');if(prefs.mix){$('mixBg').value=prefs.mix.bg||'#050505';$('mixPrimary').value=prefs.mix.primary||'#38bdf8';$('mixSecondary').value=prefs.mix.secondary||'#ffffff';$('mixHighlight').value=prefs.mix.highlight||'#ff8a24';$('mixMono').checked=!!prefs.mix.mono}}catch(e){}
+shxThemeApply(shxTheme);shxLocaleApply(shxLocale);shxRenderProjects();rFx();
+document.querySelectorAll('[data-theme]').forEach(b=>b.addEventListener('click',()=>shxThemeApply(b.dataset.theme)));
+['mixBg','mixPrimary','mixSecondary','mixHighlight','mixMono'].forEach(id=>$(id).addEventListener('input',()=>shxThemeApply('mix')));
+$('uiLanguage').onchange=e=>shxLocaleApply(e.target.value);
+$('projectBtn').onclick=()=>{shxRenderProjects();setTab('settings')};
+$('newProject').onclick=()=>shxNewProject($('projectName').value);
+$('exportProject').onclick=shxExport;$('importProject').onchange=e=>{if(e.target.files[0])shxImport(e.target.files[0]);e.target.value=''};
+$('clearLocal').onclick=()=>{if(confirm('Delete all locally saved Shoxy projects? This cannot be undone.')){shxProjects=[];shxActiveProject='default';shxNewProject('My First Project');shxRenderProjects();st('Saved projects cleared.')}};
+$('projectList').addEventListener('click',e=>{const b=e.target.closest('[data-shx]');if(!b)return;const p=shxProjects.find(x=>x.id===b.dataset.id);if(!p)return;const act=b.dataset.shx;if(act==='open')shxSwitch(p.id);if(act==='rename'){const n=prompt('New project name',p.name);if(n?.trim()){p.name=n.trim().slice(0,48);shxSaveStore();shxRenderProjects()}}if(act==='duplicate'){shxSaveActive();shxClearSessionMedia();const cp=JSON.parse(JSON.stringify(p));cp.id='p_'+Date.now().toString(36);cp.name=p.name+' Copy';cp.updated=Date.now();shxProjects.push(cp);shxActiveProject=cp.id;shxApply(cp.data);shxSaveStore();shxRenderProjects()}if(act==='delete'){if(shxProjects.length===1){st('Keep at least one project in your library.');return}if(confirm('Delete '+p.name+'?')){shxProjects=shxProjects.filter(x=>x.id!==p.id);if(shxActiveProject===p.id){shxActiveProject=shxProjects[0].id;shxApply(shxProjects[0].data)}shxSaveStore();shxRenderProjects()}}});
+$('hbIntensity').oninput=e=>{$('hbIntensityValue').textContent=e.target.value+'%'};$('hbSpeed').oninput=e=>{$('hbSpeedValue').textContent=(+e.target.value).toFixed(2)+'×'};$('hbBeat').oninput=e=>{$('hbBeatValue').textContent=e.target.value+'%'};
+$('hbApply').onclick=()=>{const amount=+$('hbIntensity').value/100,speed=+$('hbSpeed').value,beatSync=+$('hbBeat').value/100,style=$('hbStyle').value;S.fx.add('headbop');S.fxi.headbop=amount;S.fxp.headbop={...(S.fxp.headbop||{}),sp:speed,b:beatSync,style};allRigHolders().forEach(({h})=>{h.rig?.parts?.forEach(part=>{if(/head|kopf/i.test(part.name)||part.motion?.type==='pro'){part.overlap=Math.max(part.overlap||0,.32);part.feather=Math.max(part.feather||0,.07);part.motion.amount=amount;part.motion.speed=speed;part.motion.beat=beatSync;if(PROSTYLE[style])Object.assign(part.motion,PROSTYLE[style],{type:'pro'})}})});renderRigList();syncUI();rFx();shxSaveActive();st('Headbop settings applied to available head rigs and the global effect. Controls can be hidden without removing the animation.')};
+$('kikey').insertAdjacentHTML('afterend','<button class="btn" id="kiTest" type="button" style="flex:0 0 auto">Test</button>');
+$('kiTest').onclick=async()=>{KI.key=$('kikey').value.trim();if(!KI.key){st('Add your Gemini API key first.');return}const b=$('kiTest');b.disabled=true;try{const j=await callGemini(KI.model,{contents:[{role:'user',parts:[{text:'Reply with exactly: Shoxy AI connection OK'}]}],generationConfig:{maxOutputTokens:30}});const t=j.candidates?.[0]?.content?.parts?.map(x=>x.text||'').join('')||'Connected';kiAdd('ai','✓ Gemini connection successful: '+t);st('Gemini connection successful.')}catch(e){kiAdd('ai','Connection test failed: '+e.message);st('Gemini connection failed. See the AI chat for details.')}finally{b.disabled=false}};
+const shxSaveTimer=setInterval(()=>{try{shxSaveActive()}catch(e){}},2500);addEventListener('pagehide',()=>{try{shxSaveActive();clearInterval(shxSaveTimer)}catch(e){}});
+/* A close button on Headbop only hides its controls; it never disables the animation. */
+
 </script></body></html>
