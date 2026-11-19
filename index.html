@@ -833,7 +833,7 @@ $('audiofile').onchange=e=>{const f=e.target.files[0];if(!f)return;songEl.remove
 const TABS=[['music','🎧','Musik'],['ki','🤖','KI'],['clips','🎬','Clips'],['vibe','🔥','Vibe'],['fx','🎛','Effekte'],['kf','⏱','Keyframes'],['trans','🔀','Übergänge'],['text','🔤','Text']];
 $('tabs').innerHTML=TABS.map(t=>`<button type=button data-a=tab data-v=${t[0]} aria-label="${t[2]}">${t[1]} ${t[2]}</button>`).join('');
 function setTab(v){S.tab=v;document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id==='t-'+v));$('body').scrollTop=0;$('body').scrollTop=0;const panel=$('body');if(panel)panel.scrollTop=0;const content=$('body').parentElement?.querySelector('#body');if(content)content.scrollTop=0}
-function rClips(){$('cliplist').innerHTML=S.clips.map((c,i)=>`<div class=clip><b>${i+1}</b><div class=cn><div class=nm>${esc(c.name)}</div><div class=tin>Start <input type=number step=.1 min=0 max=${(c.photo?60:c.dur).toFixed(1)} value=${c.in.toFixed(1)} data-trim=${i} data-k=in> Ende <input type=number step=.1 min=0 max=${(c.photo?60:c.dur).toFixed(1)} value=${c.out.toFixed(1)} data-trim=${i} data-k=out> / ${c.photo?'Foto':c.dur.toFixed(1)+'s'}</div></div><button class=mini data-a=mv data-v="${i},-1">◀</button><button class=mini data-a=mv data-v="${i},1">▶</button><button class=mini data-a=rm data-v=${i}>✕</button></div>`).join('')||'<div class=small style="margin:8px 2px">Noch keine Clips – wähle „➕ Clips/Fotos“. Du kannst mehrere Dateien auf einmal und später weitere hinzufügen.</div>'}
+function rClips(){$('cliplist').innerHTML=S.clips.map((c,i)=>`<div class=clip><b>${i+1}</b><div class=cn><div class=nm>${esc(c.name)}</div><div class=tin>Start <input type=number step=.1 min=0 max=${(c.photo?60:c.dur).toFixed(1)} value=${c.in.toFixed(1)} data-trim=${i} data-k=in> Ende <input type=number step=.1 min=0 max=${(c.photo?60:c.dur).toFixed(1)} value=${c.out.toFixed(1)} data-trim=${i} data-k=out> / ${c.photo?'Foto':c.dur.toFixed(1)+'s'}</div></div><button class=mini data-a=split data-v=${i} title="Am Playhead teilen">✂</button><button class=mini data-a=dup data-v=${i} title="Duplizieren">⧉</button><button class=mini data-a=mv data-v="${i},-1">◀</button><button class=mini data-a=mv data-v="${i},1">▶</button><button class=mini data-a=rm data-v=${i}>✕</button></div>`).join('')||'<div class=small style="margin:8px 2px">Noch keine Clips – wähle „➕ Clips/Fotos“. Du kannst mehrere Dateien auf einmal und später weitere hinzufügen.</div>'}
 function rFill(){$('fillseg').innerHTML=[['fill','Füllen'],['fit','Einpassen']].map(([k,l])=>`<button data-a=fill data-v=${k} class="${S.fill===k?'on':''}">${l}</button>`).join('')}
 function rPresets(){$('presets').innerHTML=Object.entries(P).map(([k,p])=>`<button class="pre${S.vibe===k?' on':''}" style="--c:${p.c}" data-a=preset data-v=${k}><b>${p.i} ${p.n}</b><small>${p.d}</small></button>`).join('')}
 function rFx0(){$('fxlist').innerHTML=FX.map(([g,l])=>`<div class=grp>${g}</div><div class=chips>${l.map(([k,i,n])=>`<button class="chip${has(k)?' on':''}" data-a=fx data-v=${k}><i>${i}</i>${n}</button>`).join('')}</div>`).join('')}
@@ -860,7 +860,7 @@ const ACT={tab:setTab,preset:applyPreset,
  tr:v=>{S.trans=v;rTrans()},fill:v=>{S.fill=v;rFill()},
  trtest:()=>{if(S.segs.length<2)return st('Dafür brauchst du 2+ Clips oder Auto-Cut');S.T=Math.max(0,S.segs[1].start-.7);S.seg=-1;play()},
  mv:v=>{const[i,d]=v.split(',').map(Number),j=i+d;if(j<0||j>=S.clips.length)return;[S.clips[i],S.clips[j]]=[S.clips[j],S.clips[i]];build();rClips()},
-rm:v=>{if(S.exporting)return st('Erst Export stoppen');const c=S.clips.splice(+v,1)[0];if(!c)return;if(c.v?.pause)c.v.pause();try{c.source?.disconnect();c.g?.disconnect()}catch(e){}if(c.url)URL.revokeObjectURL(c.url);build();rClips()},
+rm:v=>{if(S.exporting)return st('Erst Export stoppen');const c=S.clips.splice(+v,1)[0];if(!c)return;if(c.v?.pause)c.v.pause();try{c.source?.disconnect();c.g?.disconnect()}catch(e){}if(c.url&&!S.clips.some(o=>o.url===c.url))URL.revokeObjectURL(c.url);build();rClips()},
  tpl:v=>addText({...TPL[v]}),sel:v=>{S.sel=+v;rText()},
  font:v=>{S.font=v;loadFont(v);const L=S.texts[S.sel];if(L)L.font=v;rFonts()}};
 /* v21: Edit-History + lokales Autosave für Look/Text/Keyframes */
@@ -1030,6 +1030,25 @@ AKTIONEN:
 - cut(v=Beats pro Schnitt 1/2/4/8), speed(v=.5-2), bpm(v=60-200)
 - text(v={t,font,size,style,anim,x,y(0-1),color,c2,s,e}), edit(v={i,p:{...}}), del(v=index), lyrics(v=[{t,s,e}])
 - nudge(v=ms -250..250), analyse, play, pause, export, seek(v=sek), kf(v={t,z,x,y,r,a,b,c,s,p}), kf_clear, song(v=Suchtext)
+- clip_trim(v={i,in,out}): Start/Ende von Clip i (0-basiert) in Sekunden des ORIGINALS setzen. Nur in oder nur out ist erlaubt.
+- clip_split(v={i,t,timeline}): teilt Clip i in zwei Clips. t = Sekunde im Original, bei timeline:true ist t die Projektzeit (Playhead = STATE.T). Für mehrere Schnitte in einer Antwort von hinten nach vorn teilen, weil sich die Indizes danach verschieben.
+- clip_dup(v=i), clip_del(v=i), clip_move(v={i,to})
+- cutout(v={i,tol}): schneidet den Charakter eines Clips oder Fotos frei (einfarbiger Hintergrund wird transparent) und legt ihn als Bildebene deckungsgleich über den Clip. i weglassen = aktueller Clip. tol 10..120, Standard 40, bei mehrfarbigem Hintergrund höher. Das Ergebnis ist ein Standbild der aktuellen Stelle. Danach kannst du auf der Ebene Effekte bauen (siehe PROFI-WISSEN).
+- overlay_set(v={i,p:{x,y,w,h,opacity,blend,s,e,rot}}): Bildebene i ändern. x,y,w,h sind Anteile 0..1, s/e Sekunden (e 0 = bis Ende), rot in Grad, blend z.B. screen, lighter, multiply, overlay, source-over. overlay_del(v=i).
+- song_trim(v={s,e}): schneidet den Song wirklich auf den Bereich s..e (Sekunden im Original-Song). Danach werden die Beats neu analysiert.
+- vol(v={clip,song}): Lautstärke 0..1.5. Clip-Ton stumm = {clip:0}.
+- afx(v={target:"song"|"clip"|"both",bass,tre,rv,dl,lp,hp,p8}): Audioeffekte. bass/tre in dB, rv=Hall 0..100, dl=Echo 0..100, lp=Tiefpass 0..100, hp=Hochpass 0..100, p8=1 für 8D.
+
+PROFI-WISSEN (du bist ein Editor auf CapCut-, After-Effects- und Alight-Motion-Niveau; dass es in der App keinen Knopf dafür gibt, heißt nicht, dass du es nicht kannst):
+SCHNEIDEN: Clips teilen, kürzen, duplizieren, löschen, umsortieren (clip_*). Auf den Beat schneiden: Beat-Länge = 60 / STATE.bpm Sekunden. Für schnelle Edits cut(v=1 oder 2), für ruhige 4 oder 8. Charaktere freistellen mit cutout. Songs kürzen mit song_trim, zum Beispiel ab dem Drop (STATE.drop) beginnen. Ton pro Clip mit vol und afx steuern.
+CHARAKTER-EFFEKTE: 1) cutout liefert eine Ebene nur mit der Figur. 2) Über ED.S.images[index].img (Bild) per js ein neues Canvas mit ED.canvas() bauen, darauf mit shadowBlur und shadowColor einen Glow oder eine Outline zeichnen (Figur mehrfach mit versetztem Offset zeichnen ergibt eine Outline), Farben per globalCompositeOperation source-atop einfärben, und das Ergebnis mit ED.overlayFromCanvas wieder als Ebene einfügen. 3) Mit overlay_set bewegen, vergrößern, drehen, Zeitfenster s/e setzen. 4) Mit rig bewegen einzelne Teile (Kopf, Arme) im Beat. Eine Ebene hinter der Figur: erst Hintergrund-Overlay hinzufügen, dann Figur-Ebene danach (spätere Ebenen liegen oben).
+OVERLAYS per js zeichnen (Canvas 720x1280, transparent lassen, Blend screen oder lighter für Licht): Lichtlecks (große radiale Verläufe orange/pink), Lens Flares (Kreise und Streifen), Funken und Partikel, Staub, Regen, Schnee, Konfetti, Speedlines, Blitze, Scanlines, Film-Grain, Letterbox-Balken, Rahmen, Fadenkreuz und HUD, Countdown-Zahlen, Herzen und Sticker aus Emojis (fillText), Formen, Glitch-Balken, Sprechblasen, Pfeile. Für bewegte Overlays lieber fx_new (läuft jeden Frame, hat c.t, c.hit, c.n) statt einer Bildebene.
+EFFEKTE AUF DEN GANZEN CLIP: erst die fertigen Effekt-IDs aus der Liste nutzen. Fehlt etwas (Chromakey, Spiegeln, Split-Screen, Zoom-Punch, Freeze, Pixelate, Mosaik, Wellen, Tunnel, Kaleidoskop, Blitz-Flash, Chromatic Aberration, VHS, Kamera-Wackeln, Film-Burn, Bloom, Tilt-Shift), baust du es mit fx_new. In c.copy() hast du das aktuelle Bild und kannst mit c.X.drawImage Ausschnitte verschoben, gespiegelt, skaliert oder getönt neu zeichnen.
+ÜBERGÄNGE: eingebaute mit trans und tdur. Eigene Übergänge (Flash, Glitch-Cut, Zoom-Through, Whip-Pan, Spin, Shake-Cut, Luma-Wipe) als fx_new mit fx_window nur um die Schnittpunkte (Zeiten aus STATE.clips und STATE.total) bauen.
+KAMERA UND BEWEGUNG: kf setzt Keyframes für Zoom z, Position x y, Rotation r, Deckkraft a. Zoom-Punch auf Beat: Effekt oder kf. Zeitlupe und Tempo über speed (gilt für alles).
+TEXT: text, edit, del, lyrics. Styles solid, outline, glow, neon, glitch, 3d, gradient, box und die Anims aus der Liste. Untertitel und Lyrics Wort für Wort mit anim words.
+BEI GROSSEN WÜNSCHEN (\"mach es richtig krass\", \"wie ein Pro-Edit\"): Plane mehrere Aktionen in einer Antwort und setze more:true. Typisch: Preset nur wenn gewünscht, 2 bis 3 passende Effekte, Beat-Sync, Zoom-Punch auf dem Drop, ein eigenes Overlay, ein Übergang, ein Textakzent. Prüfe nach jeder Runde das Vorschaubild und verbessere, bis es wirklich gut aussieht. Fehler der Aktionen (⚠) behebst du sofort selbst.
+GRENZEN EHRLICH: Echte KI-Videogeneration, echtes Bewegungstracking und Hintergrundentfernung bei komplexen Hintergründen kann der Browser nicht exakt. Baue stattdessen die beste Annäherung (zum Beispiel cutout mit höherem tol, rig-Boxen oder ein Overlay) und sag in einem Satz, was angenähert ist.
 
 BEISPIELE:
 Nutzer: "Headbop mit meinem Foto" -> {"say":"Nur der Kopf nickt jetzt im Beat, Körper bleibt still.","do":[{"a":"rig","v":{"target":"photos","part":"head","box":[0.1,0.02,0.5,0.25],"pivot":[0.5,0.9],"motion":"nod","amount":1.2}}],"more":true}
@@ -1272,7 +1291,7 @@ function proCurve(u){
 }
 /* v10: Referenz-Messung (TikTok-Edit Titan TV Man, 30fps): Brustkern bopt mit ~75% der Kopf-Amplitude → body .7 */
 const PROSTYLE={
- tiktok:{amount:1,speed:1,sway:1,tilt:1,squash:.5,depth:1,body:.9,bodySpan:.88,blur:0,spring:.2,accent:1,plug:0},
+ tiktok:{amount:1,speed:1,sway:1,tilt:1,squash:.5,depth:1,body:.9,bodySpan:.88,blur:0,spring:.45,accent:1,plug:0},
  smooth:{amount:.7,speed:1,sway:.6,tilt:.7,squash:.2,depth:.6,body:.7,bodySpan:.82,blur:0,spring:.5,accent:.4,plug:0},
  slam:{amount:1.5,speed:1,sway:.4,tilt:1.4,squash:1,depth:1.4,body:1,bodySpan:.9,blur:0,spring:0,accent:1.5,plug:0},
  double:{amount:.7,speed:2,sway:1.2,tilt:.8,squash:.4,depth:.8,body:.75,bodySpan:.86,blur:0,spring:.1,accent:.6,plug:0}
@@ -1286,14 +1305,18 @@ function rigMotion(p,tt,bt){
   case'pro':{
    const k=sp||1,pos=(bt.n+cyc)*k,u=((pos%1)+1)%1;
    let d=proCurve(u);
-   const spr=m.spring??.2;if(spr>0&&u>.8)d-=spr*.07*Math.sin(Math.PI*Math.min(1,(u-.8)/.2));
    const acc=(bt.n%4===0)?1+.35*(m.accent??1):1,A=a*acc;
+   /* v22: echtes Nachfedern: gedämpfte Schwingung nach dem Aufprall, bei 200% deutlich sichtbar, sofort wirksam */
+   const spr=m.spring??.45,w=u>.25?(u-.25)/.75:0,ex=Math.exp(-3.6*w),osc=spr>0&&u>.25?ex*Math.sin(2*Math.PI*2.3*w):0;
+   d+=spr*.11*osc;
+   /* kleine Vorspannung kurz vor dem nächsten Schlag (Anticipation) */
+   if(u>.9)d-=.05*Math.sin(Math.PI*(u-.9)/.1);
    const sv=-Math.sin(Math.PI*(pos-.12))*(m.sway??1)*dir;
    const kick=u<.25?Math.sin(Math.PI*u/.25):0;
    const z=1+.03*(m.depth??1)*(2*d-1),sq=m.squash??.5;
    r.dy=.26*A*d;
    r.dx=.10*A*sv;
-   r.rot=(m.tilt??1)*Math.min(1.6,A)*(5*sv+2.2*kick*(sv<0?-1:1));
+   r.rot=(m.tilt??1)*Math.min(1.6,A)*(5*sv+2.2*kick*(sv<0?-1:1))+spr*2.2*(sv<0?-1:1)*(u>.25?ex*Math.sin(2*Math.PI*2.3*w+.9):0);
    r.sy=z*(1-.05*sq*kick);r.sx=z*(1+.03*sq*kick);
    break}
   case'nod':r.rot=6*a*tilt*pulse;r.dy=.09*a*pulse;r.sy=1-.03*a*pulse;r.sx=1+.015*a*pulse;break;
@@ -1433,7 +1456,7 @@ function renderRigList(){
   const nm=document.createElement('span');nm.textContent=label+' · '+p.name+' · '+(p.motion.type||'nod');
   const del=document.createElement('button');del.className='mini';del.type='button';del.textContent='✕';
   del.onclick=()=>{h.rig.parts.splice(i,1);h.rig.v++;if(!h.rig.parts.length)h.rig=null;renderRigList()};
-  head.append(nm,del);
+  head.append(nm);
   d.append(head);
   const mt=p.motion;
   const sel=document.createElement('select');sel.className='field';
@@ -1456,7 +1479,7 @@ function renderRigList(){
   };
   sl('Stärke','amount',1,300);
   if(mt.type==='pro'){
-   sl('Sway (seitlich)','sway',1);sl('Kippung','tilt',1);sl('Squash / Depth','squash',.5);sl('Körper wippt mit','body',.45);sl('Motion Blur','blur',.6);sl('Spring (Nachfedern)','spring',.2);sl('Beat-1-Akzent','accent',1);
+   sl('Sway (seitlich)','sway',1);sl('Kippung','tilt',1);sl('Squash / Depth','squash',.5);sl('Körper wippt mit','body',.45);sl('Motion Blur','blur',.6);sl('Spring (Nachfedern)','spring',.45,300);sl('Beat-1-Akzent','accent',1);
   }
   root.append(d);
  }));
@@ -1782,9 +1805,63 @@ $('sspd').oninput=e=>setSongSpeed(+e.target.value);$('speed2').oninput=e=>setCli
 afxUI();
 /* ---------- v10: KI-Tab Schnellbuttons ---------- */
 function kiImg(c,cap){const d=document.createElement('div');d.className='mb ai';const s=document.createElement('span');s.textContent=cap;const im=new Image();im.src=c.toDataURL('image/jpeg',.8);im.style.cssText='display:block;width:100%;border-radius:8px;margin-top:6px';const del=document.createElement('button');del.className='mbdel';del.type='button';del.textContent='×';del.onclick=()=>d.remove();d.append(s,im,del);$('kilog').append(d);$('kilog').scrollTop=$('kilog').scrollHeight}
-ED.addButton('🧠 Auto-Headbop',async()=>{await prepVideo({target:'photos'});const m=rigApply({target:'photos',part:'head',motion:'pro',body:.9,bodySpan:.92,blur:0,plug:0,overlap:.26,feather:.06});S.fx.delete('headbop');rFx();kiAdd('ai','Auto-Headbop: Kopf + Oberkörper/Arme + weicher Bein-Follow-through, ohne Ghost-/Shadow-Overlay.\n'+m)});
-ED.addButton('🔎 Teile erkennen',async()=>{await prepVideo({target:'photos'});const r=detReport();if(!r.imgs.length)return kiAdd('ai','Nichts zu erkennen: erst einen Clip oder ein Foto laden.');kiAdd('ai',r.text);r.imgs.forEach(i=>kiImg(i.c,'Erkennung '+i.label+' · rot = Kopf, grün = Kopf-Polygon, gelb = Glow, cyan = Zonen'))});
-ED.addButton('🧹 Rigs weg',async()=>{allRigHolders().forEach(x=>{x.h.rig=null;x.src&&(x.src._rigC=null)});renderRigList();kiAdd('ai','Alle Körperteil-Rigs entfernt.')});
+/* ---------- v22: Schnitt-Werkzeuge für Nutzer und KI ---------- */
+const clipAt=i=>{const c=S.clips[i];if(!c)throw new Error('Clip '+i+' existiert nicht (gültig 0..'+(S.clips.length-1)+')');return c};
+function trimClip(i,a,b){const c=clipAt(+i),mx=c.photo?60:c.dur,x=a===undefined?c.in:Math.max(0,+a),y=b===undefined?c.out:Math.min(mx,+b);if(!isFinite(x)||!isFinite(y)||y-x<.1)throw new Error('Ungültiger Bereich: Ende muss mindestens 0.1 s nach dem Start liegen (Clip '+i+' hat '+mx.toFixed(1)+' s)');c.in=x;c.out=y;build();rClips();return 'Clip '+(+i+1)+' läuft jetzt '+x.toFixed(2)+'–'+y.toFixed(2)+' s'}
+function dupClipObj(c){const n={...c,g:null,source:null};if(c.photo){n.v={...c.v};n.v.rig=c.v.rig?JSON.parse(JSON.stringify(c.v.rig)):undefined}else{const v=document.createElement('video');v.setAttribute('playsinline','');v.preload='auto';v.src=c.url;if(c.v.rig)v.rig=JSON.parse(JSON.stringify(c.v.rig));n.v=v}return n}
+function splitClip(i,t,tl){const c=clipAt(+i);let x=+t;if(tl){const g=S.segs.find(s=>s.c===c&&x>=s.start&&x<s.start+s.len);if(!g)throw new Error('Die Projektzeit '+x.toFixed(2)+' s liegt nicht in Clip '+(+i+1));x=g.src+(x-g.start)*S.speed}
+ if(!isFinite(x)||x<=c.in+.1||x>=c.out-.1)throw new Error('Schnittpunkt muss zwischen '+c.in.toFixed(2)+' und '+c.out.toFixed(2)+' s (Sekunden im Original) liegen');
+ const n=dupClipObj(c);n.in=x;c.out=x;S.clips.splice(+i+1,0,n);if(AC&&!n.photo)try{connClip(n)}catch(e){}build();rClips();return 'Clip '+(+i+1)+' bei '+x.toFixed(2)+' s geteilt → jetzt '+S.clips.length+' Clips'}
+function dupClip(i){const c=clipAt(+i),n=dupClipObj(c);S.clips.splice(+i+1,0,n);if(AC&&!n.photo)try{connClip(n)}catch(e){}build();rClips();return 'Clip '+(+i+1)+' dupliziert'}
+function delClip(i){clipAt(+i);ACT.rm(String(+i));return 'Clip '+(+i+1)+' entfernt'}
+function moveClip(i,to){clipAt(+i);to=Math.max(0,Math.min(S.clips.length-1,+to));const[c]=S.clips.splice(+i,1);S.clips.splice(to,0,c);build();rClips();return 'Clip nach Position '+(to+1)+' verschoben'}
+/* Charakter freistellen: Hintergrund per Flood-Fill von den Rändern aus entfernen, Ergebnis = Bildebene exakt über dem Clip */
+async function cutout(i,o){o=o||{};let c=(i===undefined||i===null)?null:clipAt(+i);if(!c){const g=S.segs[segAt(S.T)];c=g&&g.c}if(!c)throw new Error('Kein Clip geladen');
+ const v=c.v.img||c.v,iw=v.naturalWidth||v.videoWidth,ih=v.naturalHeight||v.videoHeight;if(!iw||!ih)throw new Error('Der Clip hat noch kein Bild. Kurz zur Stelle springen oder abspielen.');
+ const s=S.fill==='fill'?Math.max(W/iw,H/ih):Math.min(W/iw,H/ih),full=mk(W,H),fq=g2(full);fq.drawImage(v,(W-iw*s)/2,(H-ih*s)/2,iw*s,ih*s);
+ const sw=360,sh=Math.round(sw*H/W),sm=mk(sw,sh),sq=g2(sm);sq.drawImage(full,0,0,sw,sh);const id=sq.getImageData(0,0,sw,sh),d=id.data,N=sw*sh;
+ let R=0,G=0,B=0,cn=0;const edge=p=>{const k=p*4;if(d[k+3]>200){R+=d[k];G+=d[k+1];B+=d[k+2];cn++}};
+ for(let x=0;x<sw;x++){edge(x);edge((sh-1)*sw+x)}for(let y=0;y<sh;y++){edge(y*sw);edge(y*sw+sw-1)}
+ if(!cn)throw new Error('Kein Rand zum Messen');R/=cn;G/=cn;B/=cn;const tol=Math.max(8,Math.min(120,+o.tol||40)),t2=tol*tol;
+ const near=p=>{const k=p*4;if(d[k+3]<10)return true;const a=d[k]-R,b=d[k+1]-G,e=d[k+2]-B;return a*a+b*b+e*e<t2};
+ const bg=new Uint8Array(N),stk=[];const push=p=>{if(!bg[p]&&near(p)){bg[p]=1;stk.push(p)}};
+ for(let x=0;x<sw;x++){push(x);push((sh-1)*sw+x)}for(let y=0;y<sh;y++){push(y*sw);push(y*sw+sw-1)}
+ while(stk.length){const p=stk.pop(),x=p%sw,y=(p/sw)|0;if(x>0)push(p-1);if(x<sw-1)push(p+1);if(y>0)push(p-sw);if(y<sh-1)push(p+sw)}
+ let nb=0;for(let p=0;p<N;p++)nb+=bg[p];const fr=nb/N;
+ if(fr>.95)throw new Error('Es blieb fast nichts übrig (Figur hat die Hintergrundfarbe). Mit kleinerem tol (z.B. 20) probieren.');
+ if(fr<.03)throw new Error('Hintergrund ist nicht einfarbig, nichts freigestellt. Mit größerem tol (60–90) probieren oder per js ein eigenes Verfahren bauen.');
+ const mm=mk(sw,sh),mq=g2(mm),mi=mq.createImageData(sw,sh);for(let p=0;p<N;p++){const k=p*4;mi.data[k]=mi.data[k+1]=mi.data[k+2]=255;mi.data[k+3]=bg[p]?0:255}mq.putImageData(mi,0,0);
+ const out=mk(W,H),oq=g2(out);oq.drawImage(full,0,0);oq.globalCompositeOperation='destination-in';oq.imageSmoothingEnabled=true;try{oq.filter='blur(1.6px)'}catch(e){}oq.drawImage(mm,0,0,W,H);oq.filter='none';oq.globalCompositeOperation='source-over';
+ if(o.noLayer)return{canvas:out,layer:null,info:'Freigestellt'};
+ const L=await ED.overlayFromCanvas(out,{name:'Charakter · '+c.name,x:.5,y:.5,w:1,h:1});
+ return{canvas:out,layer:L,info:'Charakter freigestellt ('+Math.round((1-fr)*100)+'% der Fläche), Ebene '+S.images.length+' liegt exakt über dem Clip (Standbild der aktuellen Stelle)'}}
+/* Song wirklich schneiden: dekodieren, Bereich ausschneiden, als WAV neu laden */
+function wavOf(ab,a,b){const ch=Math.min(2,ab.numberOfChannels),n=b-a,sr=ab.sampleRate,buf=new ArrayBuffer(44+n*ch*2),dv=new DataView(buf),ws=(o,s)=>{for(let k=0;k<s.length;k++)dv.setUint8(o+k,s.charCodeAt(k))};
+ ws(0,'RIFF');dv.setUint32(4,36+n*ch*2,true);ws(8,'WAVE');ws(12,'fmt ');dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,ch,true);dv.setUint32(24,sr,true);dv.setUint32(28,sr*ch*2,true);dv.setUint16(32,ch*2,true);dv.setUint16(34,16,true);ws(36,'data');dv.setUint32(40,n*ch*2,true);
+ const cd=[];for(let c=0;c<ch;c++)cd.push(ab.getChannelData(c));let o=44;for(let k=a;k<b;k++)for(let c=0;c<ch;c++){const x=Math.max(-1,Math.min(1,cd[c][k]));dv.setInt16(o,x<0?x*32768:x*32767,true);o+=2}return new Blob([buf],{type:'audio/wav'})}
+async function trimSong(s,e){if(!S.song)throw new Error('Kein Song geladen');let data;
+ try{data=S.song.file?await S.song.file.arrayBuffer():await (await fetch(songEl.currentSrc||songEl.src)).arrayBuffer()}catch(err){throw new Error('Song-Daten nicht lesbar (Stream blockiert). Lade den Song als Datei hoch, dann geht das Schneiden.')}
+ const OC=window.OfflineAudioContext||window.webkitOfflineAudioContext;let ab;try{ab=await new OC(2,2,44100).decodeAudioData(data.slice(0))}catch(err){throw new Error('Song konnte nicht dekodiert werden')}
+ const sr=ab.sampleRate,a=Math.max(0,Math.floor((+s||0)*sr)),b=Math.min(ab.length,Math.floor((e?+e:ab.duration)*sr));if(b-a<sr*.3)throw new Error('Bereich zu kurz (Song hat '+ab.duration.toFixed(1)+' s)');
+ const blob=wavOf(ab,a,b),u=URL.createObjectURL(blob),old=S.song.blobUrl,nm=String(S.song.name).replace(/ ✂.*$/,'')+' ✂';
+ try{songEl.pause()}catch(err){}songEl.removeAttribute('crossorigin');
+ await new Promise(res=>{songEl.onloadedmetadata=()=>{songEl.onloadedmetadata=null;songReady(nm,blob,null);S.song.blobUrl=u;old&&URL.revokeObjectURL(old);res()};songEl.src=u});
+ S.T=0;S.seg=-1;return 'Song geschnitten: '+(a/sr).toFixed(2)+'–'+(b/sr).toFixed(2)+' s ('+((b-a)/sr).toFixed(1)+' s lang)'}
+Object.assign(ED,{trimClip,splitClip,dupClip,delClip,moveClip,cutout,trimSong});
+Object.assign(ACT,{split:v=>{try{st('✂ '+splitClip(+v,S.T,true))}catch(e){st('⚠ '+e.message)}},dup:v=>st('⧉ '+dupClip(+v))});
+Object.assign(DO,{
+ clip_trim:o=>trimClip(o.i,o.in,o.out),
+ clip_split:o=>splitClip(o.i,o.t,!!o.timeline),
+ clip_dup:i=>dupClip(i),clip_del:i=>delClip(i),clip_move:o=>moveClip(o.i,o.to),
+ cutout:async o=>(await cutout(o&&o.i,o)).info,
+ song_trim:o=>trimSong(o&&o.s,o&&o.e),
+ overlay_set:o=>{const L=S.images[o.i];if(!L)throw new Error('Ebene '+o.i+' existiert nicht (gültig 0..'+(S.images.length-1)+')');Object.assign(L,o.p||{});renderOverlayList();return 'Ebene '+(o.i+1)+' angepasst'},
+ overlay_del:i=>{if(!S.images[i])throw new Error('Ebene '+i+' existiert nicht');S.images.splice(i,1);renderOverlayList();return 'Ebene entfernt'},
+ vol:o=>{if(o&&o.clip!==undefined)S.clipVol=Math.max(0,Math.min(1.5,+o.clip));if(o&&o.song!==undefined)S.songVol=Math.max(0,Math.min(1.5,+o.song));vols();volUI()},
+ afx:o=>{const tg=o&&o.target==='clip'?['clip']:(o&&o.target==='both'?['song','clip']:['song']);tg.forEach(k=>['bass','tre','rv','dl','lp','hp','p8'].forEach(f=>{if(o[f]!==undefined)S.afx[k][f]=+o[f]}));applyFx();afxUI()}
+});
+$('songinfo').insertAdjacentHTML('afterend','<div class="row" style="margin:8px 0 2px;gap:6px"><input id="strimS" class="field" type="number" min="0" step="0.1" placeholder="Start s"><input id="strimE" class="field" type="number" min="0" step="0.1" placeholder="Ende s"><button class="btn" id="strimGo" type="button" style="flex:0 0 auto">✂ Song schneiden</button></div>');
+$('strimGo').onclick=async()=>{try{st('✂ '+await trimSong($('strimS').value||0,$('strimE').value||0))}catch(e){st('⚠ '+e.message)}};
 /* ---------- Viewport-Fix (Handy) ---------- */
 function vh(){document.documentElement.style.setProperty('--vh',(window.visualViewport?.height||innerHeight)+'px');fit()}
 addEventListener('resize',vh);addEventListener('orientationchange',()=>setTimeout(vh,200));window.visualViewport&&visualViewport.addEventListener('resize',vh);addEventListener('pagehide',()=>{try{pause();exportStream?.getTracks().forEach(t=>t.stop());S.clips.forEach(c=>{if(c.url)URL.revokeObjectURL(c.url)});S.images.forEach(x=>{if(x.url)URL.revokeObjectURL(x.url)});if(S.song?.blobUrl)URL.revokeObjectURL(S.song.blobUrl)}catch(e){}});vh();setTimeout(vh,400);
