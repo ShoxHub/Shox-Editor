@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ShoxyEditor Studio · Improved Build</title>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ShoxyEditor v23 · KI-Fix</title>
 <style>
 :root{color-scheme:dark;--pink:#3b82ff;--vio:#22d3ee;--cy:#62e6ff;--line:#2a2a47;--mut:#9a9cbc;--grad:linear-gradient(100deg,#3b82ff,#22d3ee)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -141,13 +141,55 @@ a{color:#fff;text-decoration:underline}
 .tplgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
 .qgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
 .tplgrid .btn,.qgrid .btn{padding:10px 4px;font-size:12.5px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-
-body[data-shx-theme="plasma"] .btn,body[data-shx-theme="plasma"] .mini,body[data-shx-theme="plasma"] .chip,body[data-shx-theme="plasma"] .pre,body[data-shx-theme="plasma"] #tabs button,
-body[data-shx-theme="celestial"] .btn,body[data-shx-theme="celestial"] .mini,body[data-shx-theme="celestial"] .chip,body[data-shx-theme="celestial"] .pre,body[data-shx-theme="celestial"] #tabs button,
-body[data-shx-theme="mix"] .btn,body[data-shx-theme="mix"] .mini,body[data-shx-theme="mix"] .chip,body[data-shx-theme="mix"] .pre,body[data-shx-theme="mix"] #tabs button{filter:none}
-</style></head><body>
+</style><style id="themeCss">
+:root,:root[data-theme=plasma]{--ac:#18e4ff;--ac2:#2f6bff;--acg:linear-gradient(100deg,#00f0ff,#2f6bff);--on:#001018;--bg:#010611;--bg2:#06142a;--pan:#071428;--bd:#12356b;--glow:#18e4ff;--txt2:#a9d6ff;--pink:var(--ac);--vio:var(--ac2);--cy:var(--ac);--line:var(--bd);--mut:#7fa3cc;--grad:var(--acg)}
+:root[data-theme=celestial]{--ac:#ffb21a;--ac2:#ff3d00;--acg:linear-gradient(100deg,#ffe600,#ff8a00,#ff2d00);--on:#1a0700;--bg:#0b0301;--bg2:#220a02;--pan:#1a0802;--bd:#6b2a08;--glow:#ff7a00;--txt2:#ffd9a8;--pink:var(--ac);--vio:var(--ac2);--cy:var(--ac);--line:var(--bd);--mut:#cc9a72;--grad:var(--acg)}
+body{background:radial-gradient(ellipse 90% 55% at 12% -8%,color-mix(in srgb,var(--ac2) 38%,transparent),transparent),radial-gradient(ellipse 70% 50% at 100% 105%,color-mix(in srgb,var(--ac) 28%,transparent),transparent),var(--bg);color:#fff;transition:background .4s}
+body:before{background:repeating-linear-gradient(0deg,rgba(255,255,255,.014) 0 1px,transparent 1px 4px)}
+#app{background:linear-gradient(180deg,var(--bg),var(--bg2));box-shadow:0 0 0 1px var(--bd),0 0 80px color-mix(in srgb,var(--glow) 18%,transparent)}
+header{background:color-mix(in srgb,var(--bg) 88%,transparent);border-bottom:1px solid var(--bd);position:relative}
+header:after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--acg);box-shadow:0 0 14px var(--glow);opacity:.9}
+.logo{color:#fff;letter-spacing:4px;text-shadow:0 0 18px var(--glow)}
+.logo b{background:var(--acg);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 4s linear infinite;filter:drop-shadow(0 0 8px var(--glow))}
+.btn,.mini{background:linear-gradient(180deg,color-mix(in srgb,var(--pan) 90%,#fff 4%),var(--pan));border:1px solid var(--bd);color:#fff;border-radius:12px;box-shadow:inset 0 1px 0 #ffffff14}
+.btn:hover,.mini:hover{border-color:var(--ac);box-shadow:0 0 16px color-mix(in srgb,var(--glow) 40%,transparent)}
+.btn.hot,.btn.hot:hover{background:var(--acg);color:var(--on);border:0;font-weight:900;box-shadow:0 6px 26px color-mix(in srgb,var(--glow) 55%,transparent)}
+#play{animation:pw2 2.4s ease-in-out infinite}@keyframes pw2{0%,100%{box-shadow:0 0 14px color-mix(in srgb,var(--glow) 35%,transparent)}50%{box-shadow:0 0 34px color-mix(in srgb,var(--glow) 85%,transparent)}}
+#pv{box-shadow:0 0 0 1px var(--ac),0 0 60px color-mix(in srgb,var(--glow) 40%,transparent),0 24px 50px #000}
+#status{color:var(--txt2)}#time{color:var(--ac)}#empty small{color:var(--txt2)}
+#panel{background:linear-gradient(180deg,color-mix(in srgb,var(--pan) 96%,transparent),var(--bg));border-top:1px solid var(--bd);box-shadow:0 -12px 50px #000,0 -1px 0 color-mix(in srgb,var(--ac) 35%,transparent)}
+#tabs button{background:var(--pan);border:1px solid var(--bd);color:var(--txt2);border-radius:14px}
+#tabs button.on{background:var(--acg);color:var(--on);border-color:transparent;font-weight:900;box-shadow:0 4px 20px color-mix(in srgb,var(--glow) 60%,transparent)}
+.btn,.mini,.chip,.chip i,.pre,.chip2,#tabs button,.fontitem,.card h3,.mb,.grp,#empty{filter:none}
+.card{background:linear-gradient(180deg,color-mix(in srgb,var(--pan) 92%,#fff 3%),color-mix(in srgb,var(--bg) 85%,transparent));border:1px solid var(--bd);border-radius:18px;box-shadow:0 8px 30px #0008}
+.card:before{background:linear-gradient(90deg,transparent,var(--ac),transparent);opacity:.8}
+.card h3,.grp{color:var(--ac);text-shadow:0 0 12px color-mix(in srgb,var(--glow) 50%,transparent)}
+.small{color:var(--mut)}label.l b,.stat b{color:var(--ac);text-shadow:0 0 12px color-mix(in srgb,var(--glow) 50%,transparent)}
+.field,select,input[type=number]{background:var(--bg);border:1px solid var(--bd);color:#fff}
+.field:focus,select:focus,input[type=number]:focus{border-color:var(--ac);box-shadow:0 0 0 1px var(--ac),0 0 20px color-mix(in srgb,var(--glow) 35%,transparent)}
+input[type=range]{accent-color:var(--ac);background:color-mix(in srgb,var(--bd) 80%,#000)}
+input[type=range]::-webkit-slider-thumb{background:var(--bg);border:3px solid var(--ac);box-shadow:0 0 14px var(--glow)}
+input[type=range]::-moz-range-thumb{background:var(--bg);border:3px solid var(--ac)}
+.chip,.pre,.clip,.fontitem,.mrow,.fxbox,.stat div{background:var(--pan);border-color:var(--bd)}
+.chip:hover,.pre:hover{border-color:var(--ac)}
+.chip.on,.chip2.on{background:var(--acg);color:var(--on);border-color:transparent;box-shadow:0 0 20px color-mix(in srgb,var(--glow) 55%,transparent);font-weight:800}
+.chip2{background:var(--pan);border-color:var(--bd);color:#fff}
+.pre:before{background:var(--c,var(--ac))}.pre.on{border-color:var(--ac)!important;background:color-mix(in srgb,var(--pan) 80%,var(--ac) 12%);box-shadow:0 0 22px color-mix(in srgb,var(--glow) 40%,transparent)!important}
+.seg{background:var(--bg);border:1px solid var(--bd)}.seg button.on{background:var(--acg);color:var(--on)}
+.sw input:checked+i{background:var(--ac)}.sw input:checked+i:after{background:var(--on)}
+.clip>b{background:var(--acg);color:var(--on)}.fontitem.on{border-color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)}
+#timeline,#kftl{background:var(--bg);border-color:var(--bd)}#timeline i{background:color-mix(in srgb,var(--ac) 45%,transparent)}#timeline i.db{background:var(--ac)}#timeline i.drop{background:var(--ac2);box-shadow:0 0 10px var(--glow)}
+.kfd{background:var(--acg);border-color:#fff}.kfd.on{background:#fff;box-shadow:0 0 14px var(--glow)}
+.mb.me{background:var(--acg);color:var(--on)}.mb.ai{background:var(--pan);border:1px solid var(--bd)}
+a{color:var(--ac)}.auto{background:var(--acg);color:var(--on)}
+#tabs::-webkit-scrollbar,#body::-webkit-scrollbar{height:0;width:4px}*{scrollbar-color:var(--bd) transparent}
+#themeBtn{min-width:40px;font-size:15px;padding:6px 8px}
+.tab.on{animation:in2 .3s ease}@keyframes in2{from{opacity:0;transform:translateY(10px) scale(.99)}to{opacity:1;transform:none}}
+</style>
+<script>try{document.documentElement.dataset.theme=localStorage.shoxy_theme||'plasma'}catch(e){document.documentElement.dataset.theme='plasma'}</script>
+</head><body>
 <div id="app">
-<header><div class="logo">Shoxy<b>Editor</b></div><div style="display:flex;align-items:center;gap:5px"><button class="mini" id="undoBtn" title="Rückgängig (Strg+Z)" aria-label="Rückgängig">↶</button><button class="mini" id="redoBtn" title="Redo (Ctrl+Y)" aria-label="Redo">↷</button><button class="mini" id="projectShortcut" type="button">▣ Projects</button><button class="btn hot" id="exp">⬇ Export</button></div></header>
+<header><div class="logo">Shoxy<b>Editor</b></div><div style="display:flex;align-items:center;gap:5px"><button class="mini" id="undoBtn" title="Rückgängig (Strg+Z)" aria-label="Rückgängig">↶</button><button class="mini" id="redoBtn" title="Wiederholen (Strg+Y)" aria-label="Wiederholen">↷</button><button class="btn hot" id="exp">⬇ Export</button></div></header>
 <main>
 <section id="stage"><div id="wrap"><div id="pv"><canvas id="cv" width="720" height="1280"></canvas><div id="empty"><div>🎬 TIPPEN &amp; CLIPS LADEN<small>① Clips rein · ② selbst bearbeiten<br>③ Vorschau · ④ Export</small></div></div></div></div>
 <div id="transport"><button class="btn hot" id="play" style="padding:8px 14px">▶</button><input type="range" id="scrub" min="0" max="1000" value="0"><span id="time">0:00 / 0:00</span></div><div id="status">Bereit. Lade deine Clips 👇</div></section>
@@ -256,7 +298,11 @@ body[data-shx-theme="mix"] .btn,body[data-shx-theme="mix"] .mini,body[data-shx-t
    <input id="kikey" class="field" type="password" placeholder="Gemini API-Key (AIza...)">
    <select id="kimodel" style="max-width:175px">
     <option value="gemini-3.8-flash">Gemini 3.8 Flash</option>
+    <option value="gemini-3.7-flash">Gemini 3.7 Flash</option>
+    <option value="gemini-3.6-flash">Gemini 3.6 Flash</option>
+    <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
     <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite</option>
+    <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
    </select>
   </div>
  </div>
@@ -289,44 +335,6 @@ body[data-shx-theme="mix"] .btn,body[data-shx-theme="mix"] .mini,body[data-shx-t
 <label class="l">Dumpf (Muffled) <b></b></label><input type="range" data-af="lp" min="0" max="100" value="0">
 <label class="l">Telefon / dünn <b></b></label><input type="range" data-af="hp" min="0" max="100" value="0">
 <label class="sw" style="margin-top:8px"><input type="checkbox" data-af="p8"><i></i>8D-Audio (wandert links↔rechts)</label></div><p class="small">Bibliothek: Audius – wird nur gestreamt, nichts wird heruntergeladen. Spotify und YouTube Music lassen sich technisch und rechtlich nicht in einen Editor einbauen.</p></div>
-
-<div class="tab" id="t-settings">
- <div class="card">
-  <h3>Studio settings</h3>
-  <label class="l">Language</label>
-  <select id="shxLanguage"><option value="en">English</option><option value="de">Deutsch</option></select>
-  <p class="small">English is the current interface default. Language preference is saved in this browser.</p>
-  <label class="l">Theme</label>
-  <div class="pres">
-   <button class="pre on" type="button" data-shx-theme="mono" style="--c:#fff"><b>◐ Mono</b><small>Black / white</small></button>
-   <button class="pre" type="button" data-shx-theme="plasma" style="--c:#19cfff"><b>⚡ Plasma</b><small>Electric blue / cyan</small></button>
-   <button class="pre" type="button" data-shx-theme="celestial" style="--c:#ff7a18"><b>☀ Celestial</b><small>Orange / gold / red</small></button>
-   <button class="pre" type="button" data-shx-theme="mix" style="--c:#a78bfa"><b>✦ Mix</b><small>Choose your own colors</small></button>
-  </div>
-  <div id="shxMix" style="display:none;margin-top:10px">
-   <label class="l">Background</label><input type="color" id="shxBg" value="#050505">
-   <label class="l">Primary</label><input type="color" id="shxPrimary" value="#38bdf8">
-   <label class="l">Secondary</label><input type="color" id="shxSecondary" value="#ffffff">
-   <label class="l">Highlight</label><input type="color" id="shxHighlight" value="#ff8a24">
-  </div>
- </div>
- <div class="card">
-  <h3>Headbop controls</h3>
-  <p class="small">Changing these values does not remove Headbop. Closing this tab also leaves the effect enabled.</p>
-  <label class="l">Intensity <b id="shxHBIV">100%</b></label><input id="shxHBI" type="range" min="0" max="200" value="100">
-  <label class="l">Speed <b id="shxHBSV">1.00×</b></label><input id="shxHBS" type="range" min=".25" max="3" step=".05" value="1">
-  <label class="l">Beat response <b id="shxHBBV">100%</b></label><input id="shxHBB" type="range" min="0" max="100" value="100">
-  <button class="btn hot" id="shxHBApply" type="button" style="width:100%;margin-top:8px">Apply Headbop settings</button>
- </div>
- <div class="card">
-  <h3>Projects</h3>
-  <div class="row"><input class="field" id="shxProjectName" maxlength="40" placeholder="Project name"><button class="btn hot" id="shxProjectNew" type="button">＋ New project</button></div>
-  <div id="shxProjectList"></div>
-  <p class="small">Project edits and settings are saved locally. Imported videos, photos and songs must be re-imported when opening a saved project in a fresh browser session.</p>
-  <div class="row"><button class="btn" id="shxProjectExport" type="button">Export backup</button><label class="btn" style="text-align:center">Import backup<input id="shxProjectImport" type="file" accept="application/json" hidden></label></div>
- </div>
-</div>
-
 </div></section></main></div>
 <script>
 const $=id=>document.getElementById(id),W=720,H=1280,esc=s=>s.replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
@@ -872,7 +880,7 @@ $('videos').onchange=e=>{addClips(e.target.files);e.target.value=''};
 function songReady(name,file,url){const sp=S.songSpeed||1;S.song={name,dur:songEl.duration/sp,file,url};if(AC)connSong();vols();$('songinfo').textContent='🎵 '+name+' ('+fm(songEl.duration)+')';build();volUI();st('Song geladen – Musik bleibt unverändert, bis du sie selbst änderst');if($('autoan')&&$('autoan').checked)analyse()}
 $('audiofile').onchange=e=>{const f=e.target.files[0];if(!f)return;songEl.removeAttribute('crossorigin');const old=S.song&&S.song.blobUrl;const u=URL.createObjectURL(f);songEl.onloadedmetadata=()=>{songEl.onloadedmetadata=null;songReady(f.name,f,null);S.song.blobUrl=u;old&&URL.revokeObjectURL(old)};songEl.src=u;e.target.value=''};
 /* ---------- UI ---------- */
-const TABS=[['music','🎧','Music'],['ki','🤖','AI'],['clips','🎬','Clips'],['vibe','🔥','Vibe'],['fx','🎛','Effects'],['kf','⏱','Keyframes'],['trans','🔀','Transitions'],['text','🔤','Text'],['settings','⚙️','Settings']];
+const TABS=[['music','🎧','Musik'],['ki','🤖','KI'],['clips','🎬','Clips'],['vibe','🔥','Vibe'],['fx','🎛','Effekte'],['kf','⏱','Keyframes'],['trans','🔀','Übergänge'],['text','🔤','Text']];
 $('tabs').innerHTML=TABS.map(t=>`<button type=button data-a=tab data-v=${t[0]} aria-label="${t[2]}">${t[1]} ${t[2]}</button>`).join('');
 function setTab(v){S.tab=v;document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id==='t-'+v));$('body').scrollTop=0;$('body').scrollTop=0;const panel=$('body');if(panel)panel.scrollTop=0;const content=$('body').parentElement?.querySelector('#body');if(content)content.scrollTop=0}
 function rClips(){$('cliplist').innerHTML=S.clips.map((c,i)=>`<div class=clip><b>${i+1}</b><div class=cn><div class=nm>${esc(c.name)}</div><div class=tin>Start <input type=number step=.1 min=0 max=${(c.photo?60:c.dur).toFixed(1)} value=${c.in.toFixed(1)} data-trim=${i} data-k=in> Ende <input type=number step=.1 min=0 max=${(c.photo?60:c.dur).toFixed(1)} value=${c.out.toFixed(1)} data-trim=${i} data-k=out> / ${c.photo?'Foto':c.dur.toFixed(1)+'s'}</div></div><button class=mini data-a=split data-v=${i} title="Am Playhead teilen">✂</button><button class=mini data-a=dup data-v=${i} title="Duplizieren">⧉</button><button class=mini data-a=mv data-v="${i},-1">◀</button><button class=mini data-a=mv data-v="${i},1">▶</button><button class=mini data-a=rm data-v=${i}>✕</button></div>`).join('')||'<div class=small style="margin:8px 2px">Noch keine Clips – wähle „➕ Clips/Fotos“. Du kannst mehrere Dateien auf einmal und später weitere hinzufügen.</div>'}
@@ -986,7 +994,7 @@ nudgeUI();build();requestAnimationFrame(tick);
 
 /* ---------- KI-Chat (Gemini 3.8 Flash + kompatible Fallbacks) ---------- */
 const KI={h:[],key:'',model:'gemini-3.8-flash',focus:''};
-const VALID_MODELS=['gemini-3.8-flash','gemini-3.5-flash-lite'];
+const VALID_MODELS=['gemini-3.8-flash','gemini-3.7-flash','gemini-3.6-flash','gemini-3.5-flash','gemini-3.5-flash-lite','gemini-2.5-flash'];
 try{
  KI.key=localStorage.ki_key||'';
  KI.h=[];try{localStorage.removeItem('ki_h')}catch(x){}
@@ -995,17 +1003,22 @@ try{
 }catch(e){}
 $('kikey').value=KI.key;
 $('kimodel').value=KI.model;
-$('kikey').onchange=e=>{KI.key=e.target.value.trim();try{localStorage.ki_key=KI.key}catch(x){}};
+$('kikey').oninput=$('kikey').onchange=e=>{KI.key=e.target.value.replace(/\s+/g,'');try{localStorage.ki_key=KI.key}catch(x){}};
 $('kimodel').onchange=e=>{KI.model=e.target.value;try{localStorage.ki_model=KI.model}catch(x){}};
 const kiAdd=(w,t)=>{const d=document.createElement('div');d.className='mb '+w;const msg=document.createElement('span');msg.textContent=t;const del=document.createElement('button');del.className='mbdel';del.type='button';del.title='Nachricht löschen';del.textContent='×';del.onclick=()=>d.remove();d.append(msg,del);$('kilog').append(d);$('kilog').scrollTop=$('kilog').scrollHeight;return d};
-$('kiclear').onclick=()=>{$('kilog').replaceChildren();KI.h=[];kiAdd('ai','Chat cleared. Your clips, music and project settings remain unchanged.')};
-kiAdd('ai','I am your editing assistant. I can adjust individual effects, animate photo parts with natural follow-through, and help build custom visual effects. I report each action with ✓ or ⚠ and verify the result against the preview. I never change clips or music unless you ask.');
+$('kiclear').onclick=()=>{$('kilog').replaceChildren();KI.h=[];kiAdd('ai','Chat geleert. Deine Clips, Musik und Projekteinstellungen bleiben unverändert.')};
+kiAdd('ai','Ich bin dein Schnitt-Assistent und kann auch Dinge, die nicht als fester Button existieren: Körperteile mit natürlichem Follow-through bewegen (Kopf, Oberkörper, Arme und Beine), jeden Effekt einzeln feinsteuern und neue Effekte selbst programmieren und beliebigen Code im Editor ausführen. Ich zeige dir bei jeder Aktion ✓ oder ⚠ und prüfe mein Ergebnis am Bild. Clips und Musik fasse ich nicht ohne Auftrag an.');
 const snap=()=>({clips:S.clips.map((c,i)=>({i,n:c.name,in:c.in,out:c.out,dur:c.dur,photo:!!c.photo,rig:rigSig(c.v&&c.v.rig)})),song:S.song&&{n:S.song.name,dur:S.song.dur},fx:[...S.fx],fxi:S.fxi,fxp:S.fxp,kfs:S.kfs,vibe:S.vibe,str:S.str,trans:S.trans,tdur:S.tdur,autoCut:S.autoCut,cutBeats:S.cutBeats,speed:S.speed,look:{bright:S.bright,contrast:S.contrast,sat:S.sat,hue:S.hue},bpm:S.bpm,drop:S.dropT,beat:{mode:S.ba.mode,conf:S.ba.conf,nudge:S.nudge,bo:S.ba.bo},total:S.total,T:S.T,texts:S.texts,images:S.images.map((L,i)=>({i,name:L.name,x:L.x,y:L.y,w:L.w,h:L.h,opacity:L.opacity,blend:L.blend,s:L.s,e:L.e,rot:L.rot,rig:rigSig(L.rig)})),background:S.background?.name||null,fill:S.fill,custom:Object.values(CUSTOM).map(f=>({id:f.id,name:f.name,len:f.code.length,off:!!f.off}))});
-const SYS=()=>`You are Shoxy AI, a careful editing assistant for this mobile video editor. Respond in clear, concise English. Analysiere zuerst den gesamten Wunsch und den Projektzustand, plane die kleinste sichere Änderung und prüfe das Ergebnis anhand der Bilder. Rate keine Koordinaten, erfinde keine Funktionen und behaupte nichts ohne ausgeführte Aktion. Die zugrunde liegende Intelligenz bleibt vom gewählten Gemini-Modell abhängig; nutze präzise Analyse, Rückfragen bei echter Mehrdeutigkeit und konsequente Ergebnisprüfung.
+const SYS=()=>`Du bist ULTRA-BOSS, ein hochintelligenter Schnitt-Assistent für diesen mobilen Videoeditor. Antworte in der Sprache: ${window.LANGNAME?LANGNAME():'Deutsch'}, locker, kurz und klar.
+BÜRO (intern, erwähne es dem Nutzer gegenüber nie): Du hast ein eigenes Büro mit Notizbuch, das auch nach Verbindungsabbruch oder Neuladen erhalten bleibt. Aktueller Inhalt: ${KI.notes||'(noch leer)'}\nSchreibe bei mehrstufigen oder längeren Aufgaben im JSON-Feld "notes" fortlaufend den kompletten neuen Notizstand (Ziel, Plan, erledigte und offene Schritte, Entscheidungen, Vorlieben des Nutzers, max. 1500 Zeichen). Nach einem Abbruch machst du anhand der Notizen und STATE genau dort weiter, ohne von vorn zu beginnen.
+PERSÖNLICHKEIT: Du bist kein Befehlsempfänger, sondern ein erfahrener, selbstbewusster Editor-Kumpel mit eigenem Geschmack, der mit dem Nutzer zusammen ein richtig gutes Video baut. Du redest locker und direkt in der Sprache und im Ton des Nutzers (Slang ist okay, nie steif, nie unterwürfig, kein "Gerne!" oder "Natürlich!"-Geschwafel). Du hast Meinungen: Findest du eine Idee schwach, sag es kurz und schlag etwas Besseres vor, mach es aber trotzdem wenn der Nutzer darauf besteht. Du darfst Ideen einwerfen, Fragen stellen und mitdenken, wann immer du es für sinnvoll hältst, und du musst NICHT jedes Mal nachfragen. Ist der Wunsch klar, handle sofort. Ist etwas wirklich offen oder riskant (Stil, Länge, was gelöscht oder überschrieben würde), stell eine gezielte Frage, auch zwei wenn es sich lohnt, und biete dabei gleich deinen Vorschlag an, damit der Nutzer nur "ja" sagen muss.
+EHRLICHKEIT (wichtigste Regel): Sag NIE "erledigt", "fertig" oder "habe ich gemacht", wenn du es nicht durch ausgeführte Aktionen UND das Vorschaubild belegen kannst. Das Ergebnis der Aktionen (✓/⚠) und das neue Bild sind die Wahrheit, nicht dein Plan. Setze bei jeder sichtbaren Änderung "more":true, damit du danach das Ergebnisbild siehst und prüfst, ob es wirklich nach dem Wunsch aussieht. Siehst du ein Problem, sag es offen und korrigiere es. Weißt du etwas nicht oder kann der Editor etwas nicht, sag das klar und biete die beste echte Alternative an, statt etwas Halbes als fertig zu verkaufen. Gib ehrlich an, wie sicher du dir bist, wenn du rätst. Beschreibe im "say" immer konkret, WAS du geändert hast, WIE (Effekt, Wert, Zeitraum) und was du im Bild tatsächlich siehst, nie nur "fertig". Nach deinen Aktionen bekommst du einen SELBSTCHECK mit dem neuen Bild: sei dort dein strengster Kritiker und antworte mit "verdict":"ok" oder "problem".
+DENKWEISE: Gib im JSON IMMER zuerst das Feld "think" aus (3 bis 6 knappe Sätze: Was will der Nutzer wirklich, was zeigt STATE und Bild, was könnte schiefgehen, was ist mein Plan, was würde ich als Profi anders machen). Dann "say" (deine Antwort an den Nutzer, kurz, mit Haltung) und "do" (Aktionen). Prüfe Logik und Rechnung ehrlich: Beat-Abstand = 60/BPM Sekunden, Zeitfenster brauchen start<ende, Werte nur im erlaubten Bereich, nichts doppelt oder widersprüchlich setzen. Erledige bei Aufgaben mit mehreren Teilen alle Teile und sag am Ende ehrlich, was geklappt hat und was nicht. Bei Fragen, Erklärungen oder Brainstorming antworte ohne Aktionen (do:[] und noop:true). Ändere nichts, was nicht verlangt wurde.
+ Analysiere zuerst den gesamten Wunsch und den Projektzustand, plane die kleinste sichere Änderung und prüfe das Ergebnis anhand der Bilder. Rate keine Koordinaten, erfinde keine Funktionen und behaupte nichts ohne ausgeführte Aktion. Die zugrunde liegende Intelligenz bleibt vom gewählten Gemini-Modell abhängig; nutze präzise Analyse, Rückfragen bei echter Mehrdeutigkeit und konsequente Ergebnisprüfung.
 
-DENKWEISE: Zerlege jeden Wunsch in Teilziele (was genau, wann, wie stark, welche Effekte, Ebenen oder Clips). Gleiche mit STATE ab, was schon aktiv ist, und ändere nur die Differenz. Stehen mehrere Wünsche in einer Nachricht, erledige alle. Nimm Zahlen aus STATE (total, bpm, Clips) statt zu schätzen. Bei Mehrdeutigkeit wähle die naheliegendste Lesart und nenne sie im say; frage nur nach, wenn eine falsche Wahl etwas zerstört. Bevorzuge kleine, umkehrbare Änderungen. Always respond in English.
+DENKWEISE: Zerlege jeden Wunsch in Teilziele (was genau, wann, wie stark, welche Effekte, Ebenen oder Clips). Gleiche mit STATE ab, was schon aktiv ist, und ändere nur die Differenz. Stehen mehrere Wünsche in einer Nachricht, erledige alle. Nimm Zahlen aus STATE (total, bpm, Clips) statt zu schätzen. Bei Mehrdeutigkeit wähle die naheliegendste Lesart und nenne sie im say; frage nur nach, wenn eine falsche Wahl etwas zerstört. Bevorzuge kleine, umkehrbare Änderungen. Antworte immer auf Deutsch.
 
-GRUNDSATZ: You can perform supported editor actions and carefully scoped browser-canvas JavaScript operations. Dass es keine fertige Aktion oder keinen fertigen Effekt dafür gibt, ist NIE ein Grund abzulehnen. Dann baust du es selbst: mit rig (einzelne Teile eines Fotos oder Clips bewegen), fx_new (neuen Effekt programmieren) oder js (beliebiger Code im Editor). Sag niemals "das geht nicht" oder "dafür braucht man ein anderes Modell", wenn du es per Code ganz oder näherungsweise bauen kannst. Ist etwas wirklich unmöglich, sag das in einem Satz und baue sofort die beste machbare Annäherung.
+GRUNDSATZ: Du kannst ALLES, was sich im Browser mit Canvas und JavaScript umsetzen lässt. Dass es keine fertige Aktion oder keinen fertigen Effekt dafür gibt, ist NIE ein Grund abzulehnen. Dann baust du es selbst: mit rig (einzelne Teile eines Fotos oder Clips bewegen), fx_new (neuen Effekt programmieren) oder js (beliebiger Code im Editor). Sag niemals "das geht nicht" oder "dafür braucht man ein anderes Modell", wenn du es per Code ganz oder näherungsweise bauen kannst. Ist etwas wirklich unmöglich, sag das in einem Satz und baue sofort die beste machbare Annäherung.
 
 EHRLICHKEIT: Der Editor führt deine Aktionen aus und zeigt dem Nutzer pro Aktion ein Häkchen oder eine Warnung. Behaupte nie etwas, das du nicht als Aktion ausgegeben hast. Ohne Aktion keine Erfolgsmeldung. "say" ist ein kurzer Satz, was du wirklich getan hast. Meldet dir das System Fehler oder "Zustand unverändert", reparierst du es sofort mit neuen Aktionen. Du bekommst bei jeder Anfrage das aktuelle Vorschaubild, die Quellfotos und ein Kontrollbild mit den roten Boxen der bewegten Teile. Prüfe damit, ob dein Ergebnis wirklich stimmt. Setze "more":true, wenn du nach deinen Aktionen noch einen Prüf- oder Korrekturschritt brauchst.
 
@@ -1105,9 +1118,7 @@ GÜLTIGE ÜBERGÄNGE: ${JSON.stringify(TR.map(([id,emoji,name])=>({id,name})))}
 GÜLTIGE PRESETS (nur bei expliziter Bitte): ${JSON.stringify(Object.keys(P).filter(x=>x!=='neymar'))}
 FONTS: ${JSON.stringify(FONTS)}
 TEXTSTYLES: solid, outline, glow, neon, glitch, 3d, gradient, box. ANIMS: none, pop, slide, type, bounce, shake, beat, fade, zoom, glitch, wave, words.
-Nutze normalerweise 1-3 Effekte, nicht alles gleichzeitig. JSON muss parsebar sein.
-
-LANGUAGE REQUIREMENT: Respond to the user in clear, natural English only. All JSON string values, explanations, confirmations, error-recovery messages, and questions must be in English. Do not answer in German even if older instructions or examples above are German. Keep action names, IDs, numeric values, and JSON structure unchanged. Never translate technical action IDs or parameter names.`;
+Nutze normalerweise 1-3 Effekte, nicht alles gleichzeitig. JSON muss parsebar sein.`;
 const validFx=k=>FX.some(g=>g[1].some(x=>x[0]===k))||!!CUSTOM[k];
 const DO={
  overlay:v=>{if(v==='blue_black_hole'||v==='blackhole'||v?.type==='blue_black_hole')addBlueBlackHole()},
@@ -1468,7 +1479,7 @@ function rigApply(o){
   let part=rig.parts.find(p=>p.name===name),origin='vorhanden';
   if(!part){
    const isHead=/kopf|head/i.test(name),auto=!o.box&&!o.poly?(autoPartBox(src,name)||(isHead?autoHeadBoxOld(src):null)):null;
-   part={name,box:o.box||(auto&&auto.box)||[.3,.05,.7,.3],poly:(auto&&auto.poly)||null,pivot:(auto&&auto.pivot)||[.5,.9],feather:.07,overlap:.30,erase:'auto',motion:{type:isHead||/arm|hand|antenne|antenna/i.test(name)?'pro':'nod',amount:1,beat:1,speed:1,dir:1,...PROSTYLE.tiktok}};
+   part={name,box:o.box||(auto&&auto.box)||[.3,.05,.7,.3],poly:(auto&&auto.poly)||null,pivot:(auto&&auto.pivot)||[.5,.9],feather:.04,overlap:.18,erase:'auto',motion:{type:isHead||/arm|hand|antenne|antenna/i.test(name)?'pro':'nod',amount:1,beat:1,speed:1,dir:1,...PROSTYLE.tiktok}};
    rig.parts.push(part);origin=o.box?'Box von der KI':auto?auto.src:'Standardbox';
   }
   if(o.box){let b=o.box.map(Number);if(Math.max(...b)>1.5)b=b.map(v=>v/1000);b=b.map(v=>Math.max(0,Math.min(1,v)));if(b[2]<=b[0]||b[3]<=b[1])throw new Error('box ungültig, erwartet [x0,y0,x1,y1] mit 0..1, x1>x0, y1>y0');part.box=b;if(!o.poly)part.poly=null;origin='Box von der KI'}
@@ -1495,13 +1506,12 @@ function renderRigList(){
  const hs=allRigHolders().filter(x=>x.h.rig&&x.h.rig.parts.length);
  card.style.display=hs.length?'block':'none';root.innerHTML='';
  hs.forEach(({h,label})=>h.rig.parts.forEach((p,i)=>{
-  if(p._uiHidden)return;
   const d=document.createElement('div');d.className='fxbox';
   const head=document.createElement('div');head.className='fxhead';
   const nm=document.createElement('span');nm.textContent=label+' · '+p.name+' · '+(p.motion.type||'nod');
-  const del=document.createElement('button');del.className='mini';del.type='button';del.textContent='✕';del.title='Hide these controls (the animation stays active)';
-  del.onclick=()=>{d.remove();p._uiHidden=true;};
-  head.append(nm,del);
+  const del=document.createElement('button');del.className='mini';del.type='button';del.textContent='✕';
+  del.onclick=()=>{h.rig.parts.splice(i,1);h.rig.v++;if(!h.rig.parts.length)h.rig=null;renderRigList()};
+  head.append(nm);
   d.append(head);
   const mt=p.motion;
   const sel=document.createElement('select');sel.className='field';
@@ -1654,31 +1664,30 @@ function stateSig(){
 }
 
 async function callGemini(model,body){
- const controller=new AbortController();
- const timeoutId=setTimeout(()=>controller.abort(),60000);
- try{
-  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,{
-   method:'POST',
-   headers:{'Content-Type':'application/json','x-goog-api-key':KI.key},
-   body:JSON.stringify(body),
-   signal:controller.signal
-  });
-  clearTimeout(timeoutId);
-  let j={};try{j=await r.json()}catch(parseErr){throw new Error('Gemini returned an unreadable response (HTTP '+r.status+').')}
-  if(!r.ok){
-   const detail=j.error?.message||('HTTP '+r.status);
-   if(r.status===400)throw new Error('Gemini rejected the request: '+detail+' Check the selected model and request format.');
-   if(r.status===401||r.status===403)throw new Error('Gemini API key rejected or missing permission. Check the key and its API access.');
-   if(r.status===404)throw new Error('Selected Gemini model is unavailable for this API key: '+model+'. Choose another model.');
-   if(r.status===429)throw new Error('Gemini quota or rate limit reached. Wait a little or check your API quota.');
-   if(r.status>=500)throw new Error('Gemini service is temporarily unavailable (HTTP '+r.status+'). Try again shortly.');
-   throw new Error(detail);
+ const key=($('kikey').value||KI.key||'').replace(/\s+/g,'');if(key){KI.key=key}
+ if(!KI.key)throw new Error('Kein API-Key eingetragen');
+ const post=async b2=>{
+  if(KI.busy&&KI.stop)throw new Error('__stop');const controller=new AbortController();KI.ctl=controller;const tid=setTimeout(()=>controller.abort(),90000);
+  try{
+   const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':KI.key},body:JSON.stringify(b2),signal:controller.signal});
+   let j={};try{j=await r.json()}catch(e){}
+   if(!r.ok)throw new Error((j.error&&j.error.message)||('HTTP '+r.status));
+   return j;
+  }catch(err){
+   if(err.name==='AbortError')throw new Error(KI.busy&&KI.stop?'__stop':'Zeitüberschreitung (Server antwortet nicht)');
+   if(err instanceof TypeError)throw new Error('Netzwerkfehler (kein Internet, Adblock/VPN oder Seite nicht per https geöffnet)');
+   throw err;
+  }finally{clearTimeout(tid)}
+ };
+ const retry=async fn=>{for(let i=0;;i++){try{return await fn()}catch(e){if(KI.stop||!/Netzwerkfehler|HTTP 5\d\d/.test(e.message)||i>=3)throw e;setLive('📡 Verbindung wackelt – Versuch '+(i+2)+'/4 …');await kiSleep(1200*Math.pow(2,i));for(let k=0;k<30&&navigator.onLine===false&&!KI.stop;k++)await kiSleep(500)}}};
+ try{return await retry(()=>post(body))}
+ catch(e){
+  /* 400 durch nicht unterstützte Parameter: einmal mit schlanker Konfiguration wiederholen */
+  if(/HTTP 400|invalid argument|unsupported|not supported|thinking|temperature/i.test(e.message)&&!/API key|API_KEY/i.test(e.message)){
+   const b2={...body,generationConfig:{responseMimeType:'application/json',maxOutputTokens:8192}};
+   return await post(b2);
   }
-  return j;
- }catch(err){
-  clearTimeout(timeoutId);
-  if(err.name==='AbortError')throw new Error('Request timed out. The Gemini server did not respond.');
-  throw err;
+  throw e;
  }
 }
 async function callAny(body){
@@ -1691,7 +1700,7 @@ async function callAny(body){
    break;
   }catch(err){
    lastErr=err;
-   if(!/high demand|overloaded|not found|not supported|deprecated|resource_exhausted|exhaust|quota|rate limit|429|503|unavailable|Zeitüberschreitung|model.*(invalid|unavailable)|invalid.*model/i.test(err.message))throw err;
+   if(!/high demand|overloaded|not found|not supported|deprecated|resource_exhausted|exhaust|quota|rate limit|429|503|unavailable|Zeitüberschreitung|model.*(invalid|unavailable)|invalid.*model|HTTP 404|HTTP 5\d\d/i.test(err.message))throw err;
   }
  }
  if(!j)throw lastErr;
@@ -1748,45 +1757,51 @@ async function kiSend(){
   if(!KI.key)return;
  }
  if(!KI.key){$('cmd').value=q;cmd();return kiAdd('ai',$('cmdout').textContent+'\n(Für die echte KI oben den Gemini-Key eintragen)')}
- $('kigo').disabled=true;
- let userText=q+localNote,imgParts=kiImages(false);
+ kiBusy(true);let failed=false;
+ let userText=q+localNote,imgParts=[];
  try{
-  for(let round=0;round<5;round++){
-   const before=stateSig();
-   const hist=KI.h.slice(-14);while(hist.length&&hist[0].role!=='user')hist.shift();
+  imgParts=kiImages(false);
+  let reviews=0;for(let round=0;round<6;round++){
+   if(KI.stop)throw new Error('__stop');kiThink();
+   const before=stateSig(),beforeSnap=JSON.parse(JSON.stringify(snap()));
+   const hist=KI.h.slice(-24);while(hist.length&&hist[0].role!=='user')hist.shift();
    const contents=[...hist,{role:'user',parts:[{text:userText+'\n\nSTATE:'+JSON.stringify(snap())},...imgParts]}];
-   const j=await callAny({systemInstruction:{parts:[{text:SYS()}]},contents,generationConfig:{responseMimeType:'application/json',temperature:.15,topP:.9,maxOutputTokens:16384}});
+   const j=await callAny({systemInstruction:{parts:[{text:SYS()}]},contents,generationConfig:{responseMimeType:'application/json',temperature:.6,topP:.95,maxOutputTokens:24576,thinkingConfig:{thinkingLevel:'high'}}});
    const cand=j.candidates?.[0],rawTxt=(cand?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join('');
-   if(!rawTxt)throw new Error('Leere KI-Antwort ('+(cand?.finishReason||j.promptFeedback?.blockReason||'unbekannt')+')');
+   if(!rawTxt){if(round<3){userText='[SYSTEM-RÜCKMELDUNG, nicht vom Nutzer] Leere Antwort ('+(cand?.finishReason||j.promptFeedback?.blockReason||'unbekannt')+'). Antworte erneut NUR mit kurzem JSON.';imgParts=kiImages(true);continue}throw new Error('Leere KI-Antwort ('+(cand?.finishReason||j.promptFeedback?.blockReason||'unbekannt')+')')}
    let o;try{o=parseAI(rawTxt)}catch(pe){
     /* v10: abgeschnittenes/kaputtes JSON crasht nicht mehr, die KI bekommt einen zweiten Versuch */
     if(round>=3)throw pe;
     userText='[SYSTEM-RÜCKMELDUNG, nicht vom Nutzer] Deine letzte Antwort war kein gültiges bzw. vollständiges JSON ('+pe.message+'). Antworte erneut NUR mit dem JSON, kürzer, ohne Erklärtext.';imgParts=kiImages(true);continue;
    }
+   if(o.think&&String(o.think).trim()){kiAdd('ai','💭 '+String(o.think).trim().slice(0,900)).classList.add('think')}
    KI.h.push({role:'user',parts:[{text:userText}]},{role:'model',parts:[{text:JSON.stringify(o).slice(0,6000)}]});
+   if(typeof o.notes==='string'){setNotes(o.notes.slice(0,3000))}officeSave();
    const acts=Array.isArray(o.do)?o.do:[],res=[];
    for(const x of acts){
+    if(KI.stop)break;kiLive('🛠 '+String(x.a).replace(/_/g,' ')+' …');
     const f=DO[x.a];
     if(!f){res.push({a:x.a,ok:false,m:'unbekannte Aktion'});continue}
     try{const r=await f(x.v);res.push({a:x.a,ok:true,m:r===undefined||r===null?'':String(r).slice(0,500)})}
     catch(e){res.push({a:x.a,ok:false,m:e.message})}
    }
-   syncUI();rText();renderRigList();
+   if(KI.stop)throw new Error('__stop');kiLive('👀 prüft das Ergebnis …');syncUI();rText();renderRigList();
    const changed=stateSig()!==before;
    kiAdd('ai',(o.say||'')+(res.length?'\n'+res.map(r=>(r.ok?'✓ ':'⚠ ')+r.a+(r.m?': '+r.m:'')).join('\n'):''));
    const failed=res.filter(r=>!r.ok);let fb='';
    if(failed.length)fb='FEHLER bei: '+failed.map(r=>r.a+' → '+r.m).join(' | ')+'. Repariere es und gib die korrigierten Aktionen aus.';
    else if(acts.length&&!changed)fb='Die Aktionen liefen ohne Fehler, aber der Projektzustand hat sich NICHT verändert, dein Ergebnis ist wirkungslos. Finde die Ursache und mache es richtig. Ergebnisse: '+JSON.stringify(res);
    else if(!acts.length&&!o.noop&&/^(ich habe|erledigt|fertig|done|ok\b|okay|gemacht)/i.test((o.say||'').trim()))fb='Du hast keine Aktion ausgegeben, behauptest aber Erledigung. Gib die nötigen Aktionen aus oder erkläre ehrlich, was fehlt.';
-   else if(o.more&&acts.length)fb='Prüfschritt: Du siehst jetzt das neue Vorschaubild und das Kontrollbild. Passt das Ergebnis zum Wunsch des Nutzers? Wenn ja antworte mit do:[] und noop:true, wenn nein korrigiere. Ergebnisse: '+JSON.stringify(res);
+   else if(acts.length&&changed&&!o.noop&&reviews<2){reviews++;const aS=snap(),dk=Object.keys(aS).filter(k=>JSON.stringify(aS[k])!==JSON.stringify(beforeSnap[k]));
+    fb='SELBSTCHECK (nicht vom Nutzer): Du hast '+acts.length+' Aktion(en) ausgeführt. Verändert wurde laut Editor: '+(dk.join(', ')||'nur interner Zustand/eigener Code')+'. Ergebnisse: '+JSON.stringify(res)+'. Du siehst jetzt das NEUE Vorschaubild. Prüfe ehrlich und kritisch: Siehst du den Effekt/die Änderung WIRKLICH im Bild? Passt sie genau zum Wunsch des Nutzers (richtiger Zeitraum, Stärke, Ort)? Hat sich etwas verändert, das nicht verlangt war? Antworte mit "verdict":"ok" oder "verdict":"problem", sag im "say" konkret was du siehst und was du geändert hast (Was, Wie, Wert) und ob du dir sicher bist. Bei "problem" korrigiere sofort per do. Bei "ok" do:[] und noop:true.'}
    if(!fb)break;
-   if(round===4){kiAdd('ai','⚠ Nach 5 Durchgängen noch nicht sauber gelöst. Beschreib mir genauer, was du siehst, dann korrigiere ich gezielt.');break}
+   if(round===5){kiAdd('ai','⚠ Nach 6 Durchgängen noch nicht sauber gelöst. Beschreib mir genauer, was du siehst, dann korrigiere ich gezielt.');break}
    userText='[SYSTEM-RÜCKMELDUNG, nicht vom Nutzer] '+fb;
    await new Promise(r=>setTimeout(r,350));
    imgParts=kiImages(true);
   }
- }catch(e){kiAdd('ai','❌ '+e.message+(/API key|API_KEY|PERMISSION|403|400/i.test(e.message)?'\n💡 Prüf deinen Gemini-Key oben im KI-Tab.':''))}
- $('kigo').disabled=false;
+ }catch(e){failed=true;if(!kiFail(e,q))kiAdd('ai','❌ '+e.message+(/API key|API_KEY|PERMISSION|403|Kein API-Key/i.test(e.message)?'\n💡 Prüf deinen Gemini-Key oben im KI-Tab (aistudio.google.com/apikey).':/quota|exhaust|429/i.test(e.message)?'\n💡 Kontingent erreicht – kurz warten oder oben ein anderes Modell wählen.':''))}
+ kiBusy(false);if(!failed)KI.pending=null;officeSave();
 }
 $('kigo').onclick=kiSend;$('kiin').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!$('kigo').disabled)kiSend()}};
 
@@ -1919,571 +1934,168 @@ $('strimGo').onclick=async()=>{try{st('✂ '+await trimSong($('strimS').value||0
 function vh(){document.documentElement.style.setProperty('--vh',(window.visualViewport?.height||innerHeight)+'px');fit()}
 addEventListener('resize',vh);addEventListener('orientationchange',()=>setTimeout(vh,200));window.visualViewport&&visualViewport.addEventListener('resize',vh);addEventListener('pagehide',()=>{try{pause();exportStream?.getTracks().forEach(t=>t.stop());S.clips.forEach(c=>{if(c.url)URL.revokeObjectURL(c.url)});S.images.forEach(x=>{if(x.url)URL.revokeObjectURL(x.url)});if(S.song?.blobUrl)URL.revokeObjectURL(S.song.blobUrl)}catch(e){}});vh();setTimeout(vh,400);
 
-/* Shoxy Studio recovery-safe enhancements: kept separate from the original editor core. */
+/* ---------- v23: Komfort-Upgrades ---------- */
 (function(){
- 'use strict';
- const $id=id=>document.getElementById(id);
- const PREF='shoxy_recovery_prefs_v1', PROJECTS='shoxy_recovery_projects_v1';
- let theme='mono', language='en', projects=[], active='default';
- const safe=(fn)=>{try{fn()}catch(err){console.warn('[Shoxy settings]',err)}};
- function getSnapshot(){
-  return {edit:editSnapshot(),fxi:{...(S.fxi||{})},fxp:{...(S.fxp||{})},theme,language,
-   clips:(S.clips||[]).map(c=>({name:String(c.name||''),in:Number(c.in)||0,out:Number(c.out)||0,dur:Number(c.dur)||0,photo:!!c.photo,speed:Number.isFinite(+c.speed)?+c.speed:1,volume:Number.isFinite(+c.volume)?+c.volume:1}))};
- }
- function persist(){
-  safe(()=>localStorage.setItem(PROJECTS,JSON.stringify({projects,active})));
-  safe(()=>localStorage.setItem(PREF,JSON.stringify({theme,language,
-   bg:$id('shxBg').value,primary:$id('shxPrimary').value,secondary:$id('shxSecondary').value,highlight:$id('shxHighlight').value})));
- }
- function applyTheme(t){
-  theme=t;document.body.dataset.shxTheme=t;
-  let bg='#050505',a='#ffffff',b='#bdbdbd',glow='#ffffff';
-  if(t==='plasma'){bg='#030a18';a='#19bfff';b='#55f4ff';glow='#20cfff'}
-  if(t==='celestial'){bg='#160600';a='#ff7a18';b='#ffd447';glow='#ff4b1f'}
-  if(t==='mix'){bg=$id('shxBg').value;a=$id('shxPrimary').value;b=$id('shxSecondary').value;glow=$id('shxHighlight').value}
-  const root=document.documentElement;
-  root.style.setProperty('--pink',a);root.style.setProperty('--vio',b);root.style.setProperty('--cy',b);
-  root.style.setProperty('--grad',`linear-gradient(100deg,${a},${b})`);
-  document.body.style.background=`radial-gradient(ellipse 65% 40% at 10% -10%,${a}30,transparent),radial-gradient(ellipse 55% 35% at 100% 100%,${glow}24,transparent),${bg}`;
-  const panel=$id('panel');if(panel)panel.style.background=`linear-gradient(180deg,${bg}ee,${bg})`;
-  document.querySelectorAll('[data-shx-theme]').forEach(el=>el.classList.toggle('on',el.dataset.shxTheme===t));
-  $id('shxMix').style.display=t==='mix'?'block':'none';persist();
- }
- function renderProjects(){
-  const root=$id('shxProjectList');if(!root)return;
-  root.innerHTML=projects.map(p=>`<div class="clip"><div class="cn"><div class="nm">${String(p.name).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</div><div class="tin">${p.id===active?'Current project':''}</div></div><button class="mini" type="button" data-shx-open="${p.id}">Open</button><button class="mini" type="button" data-shx-rename="${p.id}">Rename</button></div>`).join('')||'<p class="small">No projects yet.</p>';
- }
- function saveActive(){
-  const p=projects.find(x=>x.id===active);if(p){p.data=getSnapshot();p.updated=Date.now();persist()}
- }
- function restore(p){
-  if(!p||!p.data)return;
-  const d=p.data.edit||{};
-  histBusy=true;
+ const typing=t=>t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)&&!/^(range|checkbox|button)$/.test(t.type||''));
+ const seek=d=>{S.T=Math.max(0,Math.min(S.total||0,S.T+d));S.seg=-1;try{st('⏱ '+S.T.toFixed(2)+' s')}catch(e){}};
+ document.addEventListener('keydown',e=>{
+  if(e.ctrlKey||e.metaKey||e.altKey||typing(e.target))return;
+  const k=e.key;
   try{
-   S.vibe=d.vibe||'custom';S.fx=new Set(d.fx||[]);
-   ['str','trans','tdur','autoCut','cutBeats','fill','bright','contrast','sat','hue','speed','clipVol','songVol','kfon','kfease'].forEach(k=>{if(d[k]!==undefined)S[k]=d[k]});
-   S.texts=Array.isArray(d.texts)?d.texts:[];S.sel=Math.min(S.texts.length-1,Math.max(-1,Number(d.sel??-1)));
-   S.kfs=Array.isArray(d.kfs)?d.kfs:[];S.kfsel=Math.min(S.kfs.length-1,Math.max(-1,Number(d.kfsel??-1)));
-   S.fxi=p.data.fxi||{};S.fxp=p.data.fxp||{};
-   // Restore trims only when the currently loaded media still matches by index and name.
-   if(Array.isArray(p.data.clips))p.data.clips.forEach((saved,i)=>{
-    const c=S.clips[i];if(!c||String(c.name||'')!==String(saved.name||''))return;
-    const duration=Math.max(0,Number(c.dur)||Number(saved.dur)||0);
-    const start=Math.max(0,Math.min(duration,Number(saved.in)||0));
-    const end=Math.max(start,Math.min(duration,Number(saved.out)||duration));
-    c.in=start;c.out=end;
-    if(Number.isFinite(+saved.speed))c.speed=Math.max(.25,Math.min(4,+saved.speed));
-    if(Number.isFinite(+saved.volume))c.volume=Math.max(0,Math.min(2,+saved.volume));
-   });
-   if(AC)applyFx();build();syncUI();rClips();rText();volUI();lastHist=snapString();
-  }finally{histBusy=false;updateHistoryButtons()}
- }
- function newProject(name){
-  saveActive();const id='p'+Date.now().toString(36);
-  projects.push({id,name:(name||'Untitled Project').trim().slice(0,40)||'Untitled Project',data:getSnapshot(),updated:Date.now()});
-  active=id;persist();renderProjects();$id('shxProjectName').value='';st('Project created. Current media stays loaded.');
- }
- $id('projectShortcut').addEventListener('click',()=>setTab('settings'));
- $id('shxProjectNew').addEventListener('click',()=>newProject($id('shxProjectName').value));
- $id('shxProjectList').addEventListener('click',e=>{
-  const open=e.target.closest('[data-shx-open]'),rename=e.target.closest('[data-shx-rename]');
-  if(open){saveActive();const p=projects.find(x=>x.id===open.dataset.shxOpen);if(p){active=p.id;restore(p);persist();renderProjects();setTab('clips');st('Project opened. Re-import media if it is not already loaded.')}}
-  if(rename){const p=projects.find(x=>x.id===rename.dataset.shxRename);if(p){const n=prompt('Project name',p.name);if(n&&n.trim()){p.name=n.trim().slice(0,40);persist();renderProjects()}}}
+   if(k===' '){e.preventDefault();S.playing?pause():play()}
+   else if(k==='ArrowLeft'){e.preventDefault();seek(e.shiftKey?-1:-.1)}
+   else if(k==='ArrowRight'){e.preventDefault();seek(e.shiftKey?1:.1)}
+   else if(k==='Home'){seek(-1e9)}
+   else if(k.toLowerCase()==='k'){kfAdd(S.T)}
+   else if(k.toLowerCase()==='s'){const g=S.segs[segAt(S.T)];if(!g)return st('Erst Clips laden 🎬');st('✂ '+splitClip(S.clips.indexOf(g.c),S.T,true))}
+  }catch(err){try{st('⚠ '+err.message)}catch(x){}}
  });
- $id('shxProjectExport').addEventListener('click',()=>{saveActive();const blob=new Blob([JSON.stringify({projects,active},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='shoxy-projects.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)});
- $id('shxProjectImport').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>safe(()=>{const d=JSON.parse(r.result);if(!Array.isArray(d.projects))throw Error('Invalid backup');projects=d.projects;active=d.active||projects[0]?.id||'default';persist();renderProjects();const p=projects.find(x=>x.id===active);if(p)restore(p);st('Backup imported. Re-import media files if required.')});r.readAsText(f);e.target.value=''});
- $id('shxLanguage').addEventListener('change',e=>{language=e.target.value;persist();st(language==='en'?'Language preference saved. Some legacy labels remain in their original language.':'Spracheinstellung gespeichert.')});
- document.querySelectorAll('[data-shx-theme]').forEach(el=>el.addEventListener('click',()=>applyTheme(el.dataset.shxTheme)));
- ['shxBg','shxPrimary','shxSecondary','shxHighlight'].forEach(id=>$id(id).addEventListener('input',()=>applyTheme('mix')));
- const updateHB=()=>{$id('shxHBIV').textContent=$id('shxHBI').value+'%';$id('shxHBSV').textContent=(+$id('shxHBS').value).toFixed(2)+'×';$id('shxHBBV').textContent=$id('shxHBB').value+'%'};
- ['shxHBI','shxHBS','shxHBB'].forEach(id=>$id(id).addEventListener('input',updateHB));
- $id('shxHBApply').addEventListener('click',()=>{
-  S.fx.add('headbop');S.fxi.headbop=+$id('shxHBI').value/100;
-  S.fxp.headbop={...(S.fxp.headbop||{}),sp:+$id('shxHBS').value,b:+$id('shxHBB').value/100};
-  syncUI();rFx();saveActive();st('Headbop settings applied. The effect remains enabled.');
- });
- // Load only this enhancement's own data. Original editor autosave remains untouched.
- safe(()=>{
-  const pref=JSON.parse(localStorage.getItem(PREF)||'{}');theme=pref.theme||'mono';language=pref.language||'en';
-  if(pref.bg)$id('shxBg').value=pref.bg;if(pref.primary)$id('shxPrimary').value=pref.primary;
-  if(pref.secondary)$id('shxSecondary').value=pref.secondary;if(pref.highlight)$id('shxHighlight').value=pref.highlight;
-  const data=JSON.parse(localStorage.getItem(PROJECTS)||'{}');projects=Array.isArray(data.projects)?data.projects:[];active=data.active||'default';
-  if(!projects.length)projects=[{id:'default',name:'My First Project',data:getSnapshot(),updated:Date.now()}];
-  if(!projects.some(p=>p.id===active))active=projects[0].id;
-  $id('shxLanguage').value=language;applyTheme(theme);renderProjects();updateHB();
-  setInterval(saveActive,5000);addEventListener('pagehide',saveActive);
- });
+ /* Beispiel-Prompts für die KI */
+ const ex=['Mach es wie ein Phonk-Edit','Shake auf jeden Beat','Kopf nickt im Takt (Headbop)','Rainbow nur die ersten 3 Sekunden','Schneide alle 2 Beats mit Whip-Übergang','Füge einen Titel „MEIN EDIT“ ein'];
+ const box=document.createElement('div');box.className='row';box.style.cssText='margin:8px 0;gap:6px';
+ ex.forEach(t=>{const b=document.createElement('button');b.type='button';b.className='chip2';b.textContent=t;b.style.cssText='flex:0 0 auto;font-size:11.5px;padding:6px 10px';b.onclick=()=>{$('kiin').value=t;if(!$('kigo').disabled)kiSend()};box.append(b)});
+ $('kilog').before(box);
+ /* Schutz vor versehentlichem Schließen: Clips/Song liegen nur im Arbeitsspeicher */
+ addEventListener('beforeunload',e=>{if(S.clips.length&&!S.exporting){e.preventDefault();e.returnValue=''}});
 })();
 
-</script>
-
-<!-- SHoxy Part 1 recovery patch -->
-<style>
-/* Part 1: accessible controls and stable settings surfaces */
-#t-settings .card, #t-ki .card { overflow-wrap:anywhere; }
-#shxAiStatus { min-height:18px; margin:6px 2px; color:var(--cy); font-size:11px; }
-#shxRememberKey { display:flex; gap:8px; align-items:center; margin:8px 2px; color:var(--mut); font-size:11px; }
-#shxRememberKey input { width:16px; height:16px; accent-color:var(--pink); }
-</style>
-<script>
+/* ---------- v23: Projekt-Datei, Standbild, KI-Undo ---------- */
 (function(){
- 'use strict';
- const $=id=>document.getElementById(id);
- const safe=(fn)=>{try{return fn()}catch(e){console.warn('[Shoxy Part 1]',e);return null}};
-
- /* ---------- AI reliability + safer API-key handling ---------- */
- const keyInput=$('kikey'), modelSelect=$('kimodel'), send=$('kigo');
- if(keyInput && modelSelect && send){
-  // Use the current stable model IDs already supported by the Gemini API.
-  const models=[
-   ['gemini-3.8-flash','Gemini 3.8 Flash · Recommended'],
-   ['gemini-3.5-flash-lite','Gemini 3.5 Flash-Lite · Faster / lighter']
-  ];
-  modelSelect.replaceChildren(...models.map(([value,label])=>{
-   const o=document.createElement('option');o.value=value;o.textContent=label;return o;
-  }));
-  const modelSaved=safe(()=>localStorage.getItem('ki_model'));
-  modelSelect.value=models.some(x=>x[0]===modelSaved)?modelSaved:'gemini-3.8-flash';
-  // API keys should not be silently persisted in plain localStorage.
-  const oldKey=safe(()=>localStorage.getItem('ki_key'))||'';
-  safe(()=>localStorage.removeItem('ki_key'));
-  keyInput.value='';
-  keyInput.autocomplete='off';
-  keyInput.spellcheck=false;
-  keyInput.placeholder='Gemini API key (used for this session)';
-  const remember=document.createElement('label');
-  remember.id='shxRememberKey';
-  remember.innerHTML='<input type="checkbox" id="shxRememberKeyCheck"> Remember key on this device (not recommended)';
-  const row=keyInput.closest('.row');
-  if(row && ! $('shxRememberKey')) row.insertAdjacentElement('afterend',remember);
-  const status=document.createElement('div');status.id='shxAiStatus';status.setAttribute('role','status');
-  const aiCard=$('t-ki')?.querySelector('.card');
-  if(aiCard)aiCard.append(status);
-  const stored=safe(()=>sessionStorage.getItem('shoxy_ai_key'))||'';
-  keyInput.value=stored;
-  $('shxRememberKeyCheck')?.addEventListener('change',e=>{
-   if(e.target.checked){
-    try{localStorage.setItem('ki_key',keyInput.value.trim())}
-    catch(err){status.textContent='Could not save the key in this browser.'}
-   }else safe(()=>localStorage.removeItem('ki_key'));
-  });
-  keyInput.addEventListener('input',()=>{
-   const value=keyInput.value.trim();
-   safe(()=>sessionStorage.setItem('shoxy_ai_key',value));
-   if($('shxRememberKeyCheck')?.checked){
-    safe(()=>localStorage.setItem('ki_key',value));
-   }else safe(()=>localStorage.removeItem('ki_key'));
-  });
-  modelSelect.addEventListener('change',()=>{
-   safe(()=>localStorage.setItem('ki_model',modelSelect.value));
-   status.textContent='Model selected: '+modelSelect.options[modelSelect.selectedIndex].text;
-  });
-  // Migrate an old saved key only into this session, never re-save it automatically.
-  if(oldKey){keyInput.value=oldKey;safe(()=>sessionStorage.setItem('shoxy_ai_key',oldKey));status.textContent='Your previously saved key was loaded for this session only.'}
-  else if(stored)status.textContent='Session key loaded.';
-
-  // Patch the API request at the boundary so the key is always read from the live field.
-  const originalFetch=window.fetch.bind(window);
-  window.fetch=function(input,init){
-   const url=typeof input==='string'?input:(input&&input.url)||'';
-   if(url.includes('generativelanguage.googleapis.com/v1beta/models/') && url.includes(':generateContent')){
-    const opts={...(init||{}),headers:{...((init&&init.headers)||{}),'x-goog-api-key':keyInput.value.trim()}};
-    return originalFetch(input,opts);
-   }
-   return originalFetch(input,init);
-  };
-  // Clear a remembered key immediately when the user unchecks the option.
-  $('shxRememberKeyCheck')?.addEventListener('change',e=>{
-   if(!e.target.checked)safe(()=>localStorage.removeItem('ki_key'));
-  });
-  const originalSend=send.onclick;
-  send.addEventListener('click',()=>{
-   if(!keyInput.value.trim()){
-    status.textContent='Enter a Gemini API key to use the live AI assistant. Local quick commands still work without one.';
-   }else{
-    status.textContent='Connecting to Gemini…';
-   }
-  },true);
-  // The existing send handler remains responsible for the actual request and result.
-  window.addEventListener('unhandledrejection',e=>{
-   if(String(e.reason||'').includes('generativelanguage'))status.textContent='AI request failed. Check the key, model access, connection and API quota.';
-  });
- }
-
- /* ---------- English interface layer ---------- */
- document.documentElement.lang='en';
- document.title='ShoxyEditor · Creator Studio';
- const replacements=[
-  ['Bereit. Lade deine Clips 👇','Ready. Import your clips below.'],
-  ['Clips/Fotos (mehrere)','Clips / Photos (multiple)'],
-  ['Song','Song'],['Schnitt','Editing'],['Schnell bearbeiten','Quick edits'],
-  ['Clean Look','Clean Look'],['Cinematic','Cinematic'],['Velocity','Velocity'],
-  ['Beat-Schnitt','Beat Cut'],['Zoom-Punch','Zoom Punch'],['Titel einfügen','Add Title'],
-  ['Ein Tipp wendet die Änderung direkt an. Du kannst danach alles weiter anpassen oder rückgängig machen, indem du einen anderen Look wählst.','One tap applies the edit. Keep adjusting it or undo it by choosing another look.'],
-  ['Auto-Cut auf den Beat','Auto-cut to the beat'],['Schnitt alle','Cut every'],
-  ['1 Beat (hektisch)','1 beat (fast)'],['2 Beats','2 beats'],['4 Beats (1 Takt)','4 beats (1 bar)'],['8 Beats','8 beats'],
-  ['Bildformat','Frame mode'],['Füllen','Fill'],['Einpassen','Fit'],['Speed','Speed'],
-  ['Auflösung','Resolution'],['Format','Format'],['Automatisch','Automatic'],['MP4 (wenn unterstützt)','MP4 (if supported)'],
-  ['Bitrate','Bitrate'],['Normal','Normal'],['Hoch','High'],['Sehr hoch','Very high'],['FPS','FPS'],
-  ['Ultra-HD-Hochskalierung (High Quality)','Ultra-HD upscaling (high quality)'],
-  ['Effekt-Stärke (Global)','Global effect strength'],['Helligkeit','Brightness'],['Kontrast','Contrast'],['Sättigung','Saturation'],['Farbton','Hue'],
-  ['Manuelle Keyframes','Manual keyframes'],['Keyframes aktiv','Enable keyframes'],['Alle','All'],
-  ['Dauer','Duration'],['Übergang testen','Test transition'],
-  ['Text hinzufügen','Add text'],['Text bearbeiten','Edit text'],['Größe','Size'],['Farbe','Color'],['Akzent','Accent'],
-  ['Start (s)','Start (s)'],['Ende (s, 0 = bis Schluss)','End (s, 0 = until the end)'],
-  ['Fonts','Fonts'],['Font suchen …','Search fonts…'],
-  ['Sag was du willst','Describe your edit'],['Zufalls-Remix','Random remix'],
-  ['Gemini API-Key (AIza...)','Gemini API key'],['Chat leeren','Clear chat'],
-  ['Song / Artist suchen …','Search song / artist…'],['Trending','Trending'],
-  ['Gratis Musik','Free music'],['Beat-Analyse','Beat analysis'],['Beats analysieren','Analyze beats'],
-  ['BPM manuell','Manual BPM'],['Tap-Tempo','Tap tempo'],['Beat-Timing Offset','Beat timing offset'],
-  ['Studio settings','Studio settings'],['Language','Language'],['Theme','Theme'],
-  ['◐ Mono','◐ Mono'],['Electric blue / cyan','Electric blue / cyan'],['Orange / gold / red','Orange / gold / red'],
-  ['Choose your own colors','Choose your own colors'],['Background','Background'],['Primary','Primary'],['Secondary','Secondary'],['Highlight','Highlight'],
-  ['Headbop controls','Headbop controls'],['Intensity','Intensity'],['Beat response','Beat response'],
-  ['Apply Headbop settings','Apply Headbop settings'],['Projects','Projects'],['Project name','Project name'],
-  ['New project','New project'],['Export backup','Export backup'],['Import backup','Import backup']
- ];
- const exact=new Map(replacements);
- function translateNode(node){
-  if(node.nodeType!==Node.TEXT_NODE)return;
-  const raw=node.nodeValue;
-  const trimmed=raw.trim();
-  if(!trimmed)return;
-  if(exact.has(trimmed)){node.nodeValue=raw.replace(trimmed,exact.get(trimmed));return}
-  // Translate safe UI phrases inside generated labels, without touching user-authored clip/text names.
-  const parent=node.parentElement;
-  if(!parent || parent.closest('input,textarea,canvas,code,pre,.nm,[contenteditable="true"]'))return;
-  let out=raw;
-  const partial=[
-   [/Noch keine Keyframes\./g,'No keyframes yet.'],
-   [/Scrolle im Video zur gewünschten Stelle/g,'Move the playhead to the desired position'],
-   [/Noch kein Text – wähle oben eine Vorlage\./g,'No text yet — choose a template above.'],
-   [/Noch keine Clips/g,'No clips yet'],
-   [/Lade deine Clips/g,'Import your clips'],
-   [/Song wird gestreamt/g,'Streaming song'],
-   [/Song geschnitten/g,'Song trimmed'],
-   [/Alle Keyframes gelöscht/g,'All keyframes deleted'],
-   [/Wähle einen anderen/g,'Choose another'],
-   [/Kein Song geladen/g,'No song loaded'],
-   [/Musik-Speed/g,'Music speed'],
-   [/Clip-Ton/g,'Clip audio'],
-   [/SICHERHEIT/g,'CONFIDENCE'],
-   [/MODUS/g,'MODE'],
-   [/RASTER/g,'GRID'],
-   [/Taktanfang/g,'bar start'],
-   [/Takt-Start hier/g,'Set bar start here'],
-   [/Takt 1 Beat/g,'bar by 1 beat'],
-   [/Noch kein Song geladen/g,'No song loaded']
-  ];
-  for(const [re,to] of partial)out=out.replace(re,to);
-  if(out!==raw)node.nodeValue=out;
- }
- function translateTree(root){
-  if(!root)return;
-  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
-  const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
-  nodes.forEach(translateNode);
-  root.querySelectorAll?.('input[placeholder],textarea[placeholder],button[title],button[aria-label]').forEach(el=>{
-   if(el.placeholder)el.placeholder=exact.get(el.placeholder)||el.placeholder;
-   if(el.title)el.title=exact.get(el.title)||el.title;
-   if(el.getAttribute('aria-label'))el.setAttribute('aria-label',exact.get(el.getAttribute('aria-label'))||el.getAttribute('aria-label'));
-  });
- }
- translateTree(document.getElementById('app'));
- $('shxLanguage')?.addEventListener('change',()=>translateTree(document.getElementById('app')));
- const observer=new MutationObserver(records=>{
-  for(const rec of records){
-   if(rec.type==='characterData')translateNode(rec.target);
-   for(const n of rec.addedNodes||[])if(n.nodeType===Node.TEXT_NODE)translateNode(n);else if(n.nodeType===Node.ELEMENT_NODE)translateTree(n);
-  }
- });
- observer.observe(document.getElementById('app'),{subtree:true,childList:true,characterData:true});
-
- /* ---------- Project backup validation / safer project IDs ---------- */
- const projectList=$('shxProjectList');
- if(projectList){
-  const cleanId=v=>String(v||'').replace(/[^a-zA-Z0-9_-]/g,'').slice(0,64);
-  // Validate imported backups before they are allowed into the project store.
-  const importInput=$('shxProjectImport');
-  if(importInput){
-   let validatedDispatch=false;
-   importInput.addEventListener('change',e=>{
-    if(validatedDispatch){validatedDispatch=false;return}
-    e.stopImmediatePropagation();
-    const f=importInput.files&&importInput.files[0];if(!f)return;
-    const reader=new FileReader();
-    reader.onload=()=>{
-     try{
-      const parsed=JSON.parse(String(reader.result||''));
-      if(!parsed||!Array.isArray(parsed.projects))throw new Error('Backup must contain a projects array.');
-      if(parsed.projects.length>100)throw new Error('Backup contains too many projects (maximum 100).');
-      const normalized=parsed.projects.filter(p=>p&&typeof p==='object'&&p.data&&typeof p.data==='object').map((p,i)=>({
-       id:cleanId(p.id)||('imported_'+i+'_'+Date.now().toString(36)),
-       name:String(p.name||'Imported Project').replace(/[<>]/g,'').trim().slice(0,40)||'Imported Project',
-       data:{edit:(p.data.edit&&typeof p.data.edit==='object')?p.data.edit:{},fxi:(p.data.fxi&&typeof p.data.fxi==='object')?p.data.fxi:{},fxp:(p.data.fxp&&typeof p.data.fxp==='object')?p.data.fxp:{},clips:Array.isArray(p.data.clips)?p.data.clips.slice(0,500).map(c=>({name:String(c?.name||'').slice(0,160),in:Number.isFinite(+c?.in)?Math.max(0,+c.in):0,out:Number.isFinite(+c?.out)?Math.max(0,+c.out):0,dur:Number.isFinite(+c?.dur)?Math.max(0,+c.dur):0,photo:!!c?.photo,speed:Number.isFinite(+c?.speed)?Math.max(.25,Math.min(4,+c.speed)):1,volume:Number.isFinite(+c?.volume)?Math.max(0,Math.min(2,+c.volume)):1})):[]},
-       updated:Number.isFinite(+p.updated)?+p.updated:Date.now()
-      }));
-      if(!normalized.length)throw new Error('No valid projects were found in this backup.');
-      const usedIds=new Set();normalized.forEach((p,i)=>{if(usedIds.has(p.id))p.id+='_'+i;usedIds.add(p.id)});
-      parsed.projects=normalized;const wanted=cleanId(parsed.active);parsed.active=normalized.some(p=>p.id===wanted)?wanted:normalized[0].id;
-      const blob=new Blob([JSON.stringify(parsed)],{type:'application/json'});
-      const transfer=new DataTransfer();transfer.items.add(new File([blob],'validated-shoxy-backup.json',{type:'application/json'}));
-      importInput.files=transfer.files;validatedDispatch=true;
-      const note=$('status');if(note)note.textContent='Backup validated. Importing projects…';
-      importInput.dispatchEvent(new Event('change',{bubbles:true}));
-     }catch(err){
-      const note=$('status');if(note)note.textContent='Backup import blocked: '+err.message;
-      importInput.value='';
-     }
-    };
-    reader.onerror=()=>{const note=$('status');if(note)note.textContent='Backup import failed: file could not be read.';importInput.value=''};
-    reader.readAsText(f);
-   },{capture:true});
-  }
-  // Avoid same-millisecond project ID collisions for new projects.
-  const newBtn=$('shxProjectNew');
-  if(newBtn)newBtn.addEventListener('click',()=>{
-   const input=$('shxProjectName');
-   if(input && !input.value.trim())input.value='Project '+new Date().toLocaleString('en-GB');
-  },{capture:true});
- }
+ const dl=(blob,name)=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)};
+ const card=document.createElement('div');card.className='card';
+ card.innerHTML='<h3>💾 Projekt & Standbild</h3><div class="qgrid"><button class="btn" id="prjSave" type="button">💾 Projekt sichern</button><label class="btn">📂 Projekt laden<input id="prjLoad" type="file" accept=".json,application/json" hidden></label><button class="btn" id="shotBtn" type="button">📸 Standbild (PNG)</button><button class="btn" id="kiUndo" type="button">↶ Letzte Änderung zurück</button></div><p class="small">Die Projektdatei enthält Looks, Effekte, Texte und Keyframes (keine Videos). Standbild = aktuelles Vorschaubild in voller Auflösung.</p>';
+ $('t-clips').append(card);
+ $('prjSave').onclick=()=>{try{dl(new Blob([JSON.stringify(editSnapshot())],{type:'application/json'}),'shoxy-projekt.json');st('💾 Projekt gesichert')}catch(e){st('⚠ '+e.message)}};
+ $('prjLoad').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const t=await f.text(),d=JSON.parse(t);if(!d||d.v!==1)throw new Error('Keine gültige Projektdatei');pushHistory();restoreSnapshot(t);st('📂 Projekt geladen')}catch(err){st('⚠ '+err.message)}};
+ $('shotBtn').onclick=()=>{try{cv.toBlob(b=>{if(!b)return st('⚠ Standbild fehlgeschlagen');dl(b,'standbild-'+S.T.toFixed(2)+'s.png');st('📸 Standbild gespeichert')},'image/png')}catch(e){st('⚠ '+e.message)}};
+ $('kiUndo').onclick=()=>{try{undoEdit();st('↶ Zurückgesetzt')}catch(e){st('⚠ '+e.message)}};
+ const kb=document.createElement('button');kb.type='button';kb.className='btn';kb.textContent='↶ KI-Änderung zurück';kb.onclick=()=>{try{undoEdit();kiAdd('ai','↶ Letzte Änderung rückgängig gemacht.')}catch(e){kiAdd('ai','⚠ '+e.message)}};
+ $('kiclear').before(kb);
 })();
-</script>
 
-
-<!-- SHoxy Part 2: AI, headbop, project continuity, music discovery and UI reliability -->
-<style>
-:root{--shx-focus:var(--pink,#fff)}
-body[data-shx-theme="plasma"]{--shx-focus:#19cfff}
-body[data-shx-theme="celestial"]{--shx-focus:#ff8a24}
-body[data-shx-theme="mix"]{--shx-focus:var(--pink,#a78bfa)}
-#t-settings .shx-note{font-size:11px;line-height:1.5;color:var(--mut);margin:7px 2px}
-#t-settings input[type=color]{width:100%;height:38px;border:1px solid var(--line);border-radius:10px;background:var(--card);padding:3px}
-#shxProjectList .clip{align-items:center;gap:6px}
-#shxProjectList .mini{white-space:nowrap}
-#riglist .fxbox{position:relative}
-#shxPart2Status{font-size:11px;line-height:1.45;color:var(--cy);margin-top:6px;min-height:15px}
-</style>
-<script>
+/* ---------- v23: Mehrere Projekte + Auto-Speichern ---------- */
 (function(){
- 'use strict';
- const $=id=>document.getElementById(id);
- const safe=(fn,fallback)=>{try{return fn()}catch(e){console.warn('[Shoxy Part 2]',e);return fallback}};
- const clone=v=>{try{return JSON.parse(JSON.stringify(v))}catch(_){return null}};
- const PREF='shoxy_recovery_prefs_v1', PROJECTS='shoxy_recovery_projects_v1';
+ const IDX='shoxy_prjs',PK='shoxy_prj_',BLANK={v:1,vibe:'custom',fx:[],str:1,trans:'cut',tdur:.25,autoCut:false,cutBeats:4,fill:'fill',bright:1,contrast:1,sat:1,hue:0,texts:[],sel:-1,kfs:[],kfsel:-1,kfon:true,kfease:'smooth',speed:1,clipVol:1,songVol:1,fxi:{},fxp:{}};
+ let idx={cur:'',list:[]},last='',busy=false;
+ const rd=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
+ const wr=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){st('⚠ Speichern nicht möglich (Speicher voll/blockiert)');return false}};
+ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+ const cur=()=>idx.list.find(p=>p.id===idx.cur);
+ const snapNow=()=>JSON.stringify({...JSON.parse(snapString()),fxi:S.fxi,fxp:S.fxp});
+ const saveIdx=()=>wr(IDX,JSON.stringify(idx));
+ function save(){if(busy||!cur())return;let t;try{t=snapNow()}catch(e){return}if(t===last)return;if(wr(PK+idx.cur,t)){last=t;cur().t=Date.now();saveIdx();stamp()}}
+ function load(raw){busy=true;try{const d=JSON.parse(raw);restoreSnapshot(raw);S.fxi=d.fxi||{};S.fxp=d.fxp||{};try{rFx()}catch(e){}try{syncUI()}catch(e){}last=snapNow()}catch(e){st('⚠ Projekt konnte nicht geladen werden')}finally{busy=false}}
+ const sel=document.createElement('select');sel.id='prjSel';
+ const card=document.createElement('div');card.className='card';
+ card.innerHTML='<h3>📁 Projekte</h3><div id="prjSelBox"></div><div class="row" style="margin-top:8px;gap:6px"><button class="mini" id="prjNew" type="button">＋ Neu</button><button class="mini" id="prjRen" type="button">✎ Name</button><button class="mini" id="prjDup" type="button">⧉ Kopie</button><button class="mini" id="prjDel" type="button">🗑</button></div><p class="small" id="prjStat">Alles wird automatisch gespeichert.</p>';
+ $('t-clips').prepend(card);$('prjSelBox').append(sel);
+ function stamp(){const e=$('prjStat');if(e)e.textContent='✓ Automatisch gespeichert · '+new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+' (Videos/Songs nur in dieser Sitzung)'}
+ function ui(){sel.innerHTML=idx.list.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join('');sel.value=idx.cur}
+ function sw(id){if(id===idx.cur)return;save();idx.cur=id;saveIdx();const raw=rd(PK+id);load(raw||JSON.stringify(BLANK));if(!raw)wr(PK+id,snapNow());ui();st('📁 '+cur().name+' geöffnet')}
+ function add(name,raw){save();const p={id:uid(),name,t:Date.now()};idx.list.push(p);idx.cur=p.id;wr(PK+p.id,raw);saveIdx();load(raw);ui();st('📁 '+name+' erstellt')}
+ sel.onchange=()=>sw(sel.value);
+ $('prjNew').onclick=()=>{const n=prompt('Name des neuen Projekts:','Projekt '+(idx.list.length+1));if(n&&n.trim())add(n.trim().slice(0,40),JSON.stringify(BLANK))};
+ $('prjDup').onclick=()=>{save();add((cur().name+' Kopie').slice(0,40),snapNow())};
+ $('prjRen').onclick=()=>{const n=prompt('Neuer Name:',cur().name);if(n&&n.trim()){cur().name=n.trim().slice(0,40);saveIdx();ui()}};
+ $('prjDel').onclick=()=>{if(idx.list.length<2)return st('⚠ Das letzte Projekt kann nicht gelöscht werden');if(!confirm('Projekt „'+cur().name+'“ wirklich löschen?'))return;const id=idx.cur;idx.list=idx.list.filter(p=>p.id!==id);try{localStorage.removeItem(PK+id)}catch(e){}idx.cur='';sw(idx.list[0].id)};
+ /* Start: Index laden oder aus dem aktuellen Stand das erste Projekt anlegen */
+ try{const r=rd(IDX);if(r)idx=JSON.parse(r)}catch(e){}
+ if(!idx.list||!idx.list.length||!cur()){idx={cur:'',list:[]};const p={id:uid(),name:'Projekt 1',t:Date.now()};idx.list.push(p);idx.cur=p.id;wr(PK+p.id,snapNow());saveIdx()}
+ else{const raw=rd(PK+idx.cur);if(raw)load(raw)}
+ last=snapNow();ui();stamp();
+ setInterval(save,1500);
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});addEventListener('pagehide',save);
+})();
 
- // ---------- AI: fix the key/state split that prevented requests from reaching Gemini ----------
- const key=$('kikey'),model=$('kimodel'),send=$('kigo');
- if(key){
-  const syncKey=()=>{KI.key=key.value.trim();safe(()=>sessionStorage.setItem('shoxy_ai_key',KI.key));};
-  syncKey();
-  key.addEventListener('input',syncKey);
-  key.addEventListener('change',syncKey);
-  key.addEventListener('blur',syncKey);
- }
- if(model){
-  const syncModel=()=>{if(VALID_MODELS.includes(model.value))KI.model=model.value;};
-  syncModel();model.addEventListener('change',syncModel);
- }
- if(send){
-  send.addEventListener('click',()=>{if(key && key.value.trim())KI.key=key.value.trim();},true);
- }
- // Clear stale key state when the field is emptied, and never echo the key into chat/status.
- if(key)key.addEventListener('input',()=>{if(!key.value.trim())KI.key='';});
+/* ---------- v23: Themes ---------- */
+(function(){
+ const TH=[['plasma','🌌','Plasma','#010611'],['celestial','🔥','Celestial','#0b0301']];
+ const meta=document.querySelector('meta[name=theme-color]');
+ const b=document.createElement('button');b.id='themeBtn';b.type='button';b.className='mini';
+ const set=n=>{const t=TH.find(x=>x[0]===n)||TH[0];document.documentElement.dataset.theme=t[0];b.textContent=t[1];b.title='Theme: '+t[2]+' (tippen zum Wechseln)';b.setAttribute('aria-label','Theme wechseln, aktuell '+t[2]);if(meta)meta.content=t[3];try{localStorage.shoxy_theme=t[0]}catch(e){}return t};
+ b.onclick=()=>{const i=TH.findIndex(x=>x[0]===document.documentElement.dataset.theme);const t=set(TH[(i+1)%TH.length][0]);try{st(t[1]+' Theme: '+t[2])}catch(e){}};
+ $('undoBtn').before(b);set(document.documentElement.dataset.theme);
+})();
 
- // ---------- Headbop: persistent controls; X hides controls, never disables the animation ----------
- const hbIds=['shxHBI','shxHBS','shxHBB'];
- const hbRead=()=>({intensity:Math.max(0,Math.min(2,(+$('shxHBI').value||100)/100)),speed:Math.max(.25,Math.min(3,+$('shxHBS').value||1)),beat:Math.max(0,Math.min(1,(+$('shxHBB').value||100)/100))});
- const prefRead=()=>safe(()=>JSON.parse(localStorage.getItem(PREF)||'{}'),{} )||{};
- const prefWrite=extra=>{const old=prefRead();safe(()=>localStorage.setItem(PREF,JSON.stringify({...old,...extra})));};
- const hbApply=()=>{
-  const cfg=hbRead();
-  S.fxi.headbop=cfg.intensity;
-  S.fxp.headbop={...(S.fxp.headbop||{}),sp:cfg.speed,b:cfg.beat};
-  // If a per-part head rig exists, tune it too; otherwise keep the global whole-frame fallback.
-  let tuned=0;
-  for(const {h} of allRigHolders()){
-   const rig=h&&h.rig;if(!rig||!Array.isArray(rig.parts))continue;
-   for(const part of rig.parts){
-    if(!/^(head|kopf)$/i.test(String(part.name||'')))continue;
-    part.on=true;part.feather=Math.max(.07,part.feather||0);part.overlap=Math.max(.30,part.overlap||0);
-    part.erase=part.erase===false?false:'auto';
-    part.motion=part.motion||{};Object.assign(part.motion,{type:'pro',amount:cfg.intensity,speed:cfg.speed,beat:cfg.beat,body:.85,bodySpan:.9,blur:0,plug:0,spring:.45});
-    rig.v=(rig.v||0)+1;tuned++;
-   }
-  }
-  if(tuned)S.fx.delete('headbop');else S.fx.add('headbop');
-  syncUI();rFx();
-  safe(()=>localStorage.setItem('shoxy_headbop_settings_v1',JSON.stringify(cfg)));
-  prefWrite({headbop:cfg});
-  const st=$('shxPart2Status');if(st)st.textContent=tuned?`Headbop saved and applied to ${tuned} head rig(s).`:'Headbop saved and enabled. Add a photo/head rig for head-only movement.';
-  safe(()=>saveActive());
- };
- if($('shxHBApply'))$('shxHBApply').onclick=hbApply;
- const updateHBLabels=()=>{
-  if($('shxHBIV'))$('shxHBIV').textContent=$('shxHBI').value+'%';
-  if($('shxHBSV'))$('shxHBSV').textContent=(+$('shxHBS').value).toFixed(2)+'×';
-  if($('shxHBBV'))$('shxHBBV').textContent=$('shxHBB').value+'%';
-  safe(()=>localStorage.setItem('shoxy_headbop_settings_v1',JSON.stringify(hbRead())));
- };
- hbIds.forEach(id=>$(id)?.addEventListener('input',updateHBLabels));
- const hbPref=safe(()=>JSON.parse(localStorage.getItem('shoxy_headbop_settings_v1')||'null'),null)||prefRead().headbop;
- if(hbPref){
-  $('shxHBI').value=Math.round(Math.max(0,Math.min(2,Number.isFinite(+hbPref.intensity)?+hbPref.intensity:1))*100);
-  $('shxHBS').value=Math.max(.25,Math.min(3,Number.isFinite(+hbPref.speed)?+hbPref.speed:1));
-  $('shxHBB').value=Math.round(Math.max(0,Math.min(1,Number.isFinite(+hbPref.beat)?+hbPref.beat:1))*100);
-  updateHBLabels();
+/* ---------- v23: Sprachen (KI-Übersetzung der Oberfläche, wird gecacht) ---------- */
+(function(){
+ const L=[['de','Deutsch'],['en','English'],['es','Español'],['fr','Français'],['it','Italiano'],['pt','Português'],['nl','Nederlands'],['pl','Polski'],['tr','Türkçe'],['ru','Русский'],['uk','Українська'],['ar','العربية'],['hi','हिन्दी'],['ja','日本語'],['ko','한국어'],['zh','中文'],['id','Bahasa Indonesia'],['vi','Tiếng Việt']];
+ let lang='de',name='Deutsch',cache={},q=new Set(),timer=0,busy=false;
+ const orig=new WeakMap(),shown=new WeakMap(),AT=['placeholder','title','aria-label'];
+ window.LANGNAME=()=>name;
+ const ok=t=>/\p{L}/u.test(t)&&t.trim().length>1;
+ const tpl=t=>{const n=[];const k=t.replace(/\d+(?:[.,:]\d+)*/g,m=>{n.push(m);return '§'});return{k:k.trim(),n,lead:t.match(/^\s*/)[0],tail:t.match(/\s*$/)[0]}};
+ const out=(t,tr)=>{let i=0;return t.lead+tr.replace(/§/g,()=>t.n[i++]??'')+t.tail};
+ const skip=n=>{const e=n.nodeType===3?n.parentElement:n;return !e||e.closest('script,style,canvas,#kilog,#cmdout,textarea,[data-notr]')||(e.id==='langSel')};
+ function apply(node,isAttr,attr){
+  const cur=isAttr?node.getAttribute(attr):node.data,key=isAttr?attr:'';
+  let o=orig.get(node)||{};if(o[key]===undefined||(shown.get(node)||{})[key]!==cur){o[key]=cur;orig.set(node,o)}
+  const src=o[key];if(!ok(src))return;
+  if(lang==='de'){if(cur!==src){(shown.get(node)||{})[key]=src;isAttr?node.setAttribute(attr,src):node.data=src}return}
+  const t=tpl(src),tr=cache[t.k];
+  if(tr){const v=out(t,tr);if(v!==cur){const sh=shown.get(node)||{};sh[key]=v;shown.set(node,sh);isAttr?node.setAttribute(attr,v):node.data=v}}
+  else{q.add(t.k);sched()}
  }
- if($('shxPart2Status')===null){const c=$('shxHBApply')?.parentElement;if(c){const n=document.createElement('div');n.id='shxPart2Status';n.setAttribute('role','status');c.append(n)}}
-
- // ---------- Project continuity: preserve rig/overlay edits separately from legacy project autosave ----------
- const RIG_STORE='shoxy_project_rig_state_v2';
- function rigProjectSnapshot(){
-  return {
-   clips:(S.clips||[]).map((c,i)=>({i,name:String(c.name||''),rig:clone(c.v?.rig||null)})),
-   images:(S.images||[]).map((L,i)=>({i,name:String(L.name||''),x:L.x,y:L.y,w:L.w,h:L.h,opacity:L.opacity,blend:L.blend,s:L.s,e:L.e,rot:L.rot,rig:clone(L.rig||null)})),
-   fxi:clone(S.fxi||{}),fxp:clone(S.fxp||{})
-  };
+ function walk(root){
+  if(root.nodeType===3){if(!skip(root))apply(root);return}
+  if(root.nodeType!==1||skip(root))return;
+  AT.forEach(a=>root.hasAttribute&&root.hasAttribute(a)&&apply(root,true,a));
+  root.childNodes.forEach(walk);
  }
- function rigStoreRead(){return safe(()=>JSON.parse(localStorage.getItem(RIG_STORE)||'{}'),{})||{};}
- function persistCurrentProject(){
+ function sched(){if(!timer)timer=setTimeout(()=>{timer=0;flush()},500)}
+ async function flush(){
+  if(busy||lang==='de'||!q.size)return;
+  const key=(KI&&KI.key)||'';if(!key){try{st('🌐 Für Übersetzung zuerst den Gemini-Key im KI-Tab eintragen')}catch(e){}q.clear();return}
+  busy=true;const items=[...q].filter(k=>!cache[k]);q.clear();
   try{
-   const projectMeta=JSON.parse(localStorage.getItem(PROJECTS)||'{}');
-   const active=projectMeta.active||'default';
-   const store=rigStoreRead();store[active]=rigProjectSnapshot();
-   localStorage.setItem(RIG_STORE,JSON.stringify(store));
-  }catch(e){console.warn('[Shoxy Part 2] Rig autosave skipped:',e)}
- }
- function restoreRigState(data){
-  if(!data)return;
-  (data.clips||[]).forEach(saved=>{
-   const c=S.clips[saved.i];
-   if(c&&c.v&&String(c.name||'')===String(saved.name||'')){c.v.rig=clone(saved.rig);c.v._rigC=null;}
-  });
-  (data.images||[]).forEach(saved=>{
-   const L=S.images[saved.i];
-   if(L&&String(L.name||'')===String(saved.name||'')){
-    ['x','y','w','h','opacity','blend','s','e','rot'].forEach(k=>{if(saved[k]!==undefined)L[k]=saved[k]});
-    L.rig=clone(saved.rig);if(L.img)L.img._rigC=null;
+   for(let i=0;i<items.length;i+=70){
+    const part=items.slice(i,i+70),prompt='Translate these UI strings from German into '+name+'. Keep every § character exactly where it is, keep emojis and symbols, keep it short like a mobile app UI. Return ONLY a JSON array of strings with exactly '+part.length+' items in the same order.\n'+JSON.stringify(part);
+    const j=await callAny({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{responseMimeType:'application/json',temperature:.1,maxOutputTokens:16384}});
+    const txt=(j.candidates?.[0]?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join('');
+    const arr=JSON.parse(txt.replace(/^```(?:json)?\s*|```\s*$/g,'').trim());
+    if(Array.isArray(arr))part.forEach((k,n)=>{if(typeof arr[n]==='string'&&arr[n])cache[k]=arr[n]});
    }
-  });
-  if(data.fxi)S.fxi=clone(data.fxi)||{};if(data.fxp)S.fxp=clone(data.fxp)||{};
-  renderOverlayList();renderRigList();syncUI();rFx();
+   try{localStorage.setItem('shoxy_i18n_'+lang,JSON.stringify(cache))}catch(e){}
+   walk(document.body);try{st('🌐 '+name)}catch(e){}
+  }catch(e){try{st('⚠ Übersetzung: '+e.message)}catch(x){}}
+  busy=false;if(q.size)sched();
  }
- // Capture the old project before the original click handler changes the active ID.
- $('shxProjectList')?.addEventListener('click',e=>{
-  const b=e.target.closest('[data-shx-open]');if(!b)return;
-  persistCurrentProject();
-  setTimeout(()=>{const store=rigStoreRead();restoreRigState(store[b.dataset.shxOpen]);},0);
- },true);
- setInterval(persistCurrentProject,7000);
- addEventListener('pagehide',persistCurrentProject);
- // Restore the active project's rig settings on reload when its source media is still loaded.
- setTimeout(()=>{const meta=safe(()=>JSON.parse(localStorage.getItem(PROJECTS)||'{}'),{})||{};const store=rigStoreRead();if(meta.active&&store[meta.active])restoreRigState(store[meta.active]);},300);
-
- // ---------- Music discovery: more useful genre shortcuts, no fake catalog entries ----------
- const genreBox=$('mslist')?.parentElement?.querySelector('.card .row');
- const genreButtons=[
-  ['Brazilian Phonk','brazilian phonk'],['Drift Phonk','drift phonk'],['Trap','trap'],['House','house'],
-  ['Drum & Bass','drum and bass'],['Synthwave','synthwave'],['Hyperpop','hyperpop'],['Bass','bass music'],
-  ['Ambient','ambient'],['Orchestral','orchestral cinematic'],['Breakbeat','breakbeat'],['Electronic','electronic'],['Misery search','Misery']
- ];
- const chips=$('mslist')?.parentElement?.querySelector('.card');
- if(chips){
-  const host=document.createElement('div');host.className='pres';host.style.marginTop='8px';host.setAttribute('aria-label','More music genres');
-  genreButtons.forEach(([label,q])=>{const b=document.createElement('button');b.type='button';b.className='chip2';b.textContent=label;b.addEventListener('click',()=>{$('msq').value=q;msearch(q)});host.append(b)});
-  chips.append(host);
- }
- // Handle API errors cleanly instead of rendering an empty/partial result as a successful search.
- const originalMusicSearch=window.msearch;
-
- // ---------- English UI pass for common legacy strings and dynamic labels ----------
- document.documentElement.lang='en';
- const pairs=[
-  ['Clips/Fotos (mehrere)','Clips / Photos (multiple)'],['Song suchen','Search songs'],['Song / Artist suchen …','Search song / artist…'],
-  ['Song wird gestreamt …','Streaming song…'],['Lade …','Loading…'],['Nix gefunden','No results found'],
-  ['Kein Song geladen – der Ton der Clips wird genutzt.','No song loaded — clip audio will be used.'],
-  ['Gratis Musik','Free music'],['Song & Lautstärke','Song & Volume'],['Clip-Ton','Clip audio'],['Beats analysieren','Analyze beats'],
-  ['BPM manuell','Manual BPM'],['Tap-Tempo','Tap tempo'],['Beat-Timing Offset','Beat timing offset'],['SICHERHEIT','CONFIDENCE'],
-  ['RASTER','GRID'],['MODUS','MODE'],['Taktanfang','Bar start'],['Takt-Start hier','Set bar start here'],
-  ['Auto-Analyse beim Song-Laden','Auto-analyze when a song loads'],['Metronom-Klick (nur Vorschau – zum Prüfen)','Metronome click (preview only)'],
-  ['Manuelle Keyframes (Zoom · Position · Rotation · Look)','Manual keyframes (Zoom · Position · Rotation · Look)'],
-  ['Keyframes aktiv','Enable keyframes'],['Alle Keyframes gelöscht','All keyframes deleted'],['Noch keine Keyframes.','No keyframes yet.'],
-  ['Übergang testen','Test transition'],['Text hinzufügen','Add text'],['Text bearbeiten','Edit text'],
-  ['Effekt-Stärke (Global)','Global effect strength'],['Helligkeit','Brightness'],['Kontrast','Contrast'],['Sättigung','Saturation'],['Farbton','Hue'],
-  ['Wähle einen anderen','Choose another'],['Song geladen','Song loaded'],['Song geschnitten','Song trimmed'],
-  ['Wähle oben eine Vorlage','Choose a template above'],['Noch kein Text','No text yet'],
-  ['Foto-Teile (Rig)','Photo parts (Rig)'],['Stärke','Intensity'],['Kippung','Tilt'],['Nachfedern','Spring'],
-  ['Wippen pro Beat','Bops per beat'],['Nicken','Nod'],['Tempo','Tempo'],['Schnitt','Edit'],['Schnell bearbeiten','Quick edit'],
-  ['Auflösung','Resolution'],['Format','Format'],['Automatisch','Automatic'],['Hoch','High'],['Sehr hoch','Very high'],
-  ['Rückgängig','Undo'],['Wiederholen','Redo'],['Bereit. Lade deine Clips 👇','Ready. Import your clips below.'],
-  ['Lade deine Clips','Import your clips'],['Erst Song oder Video-Clip laden','Load a song or video clip first'],
-  ['Analyse fehlgeschlagen (kein Audio?) – nutze Tap-Tempo oder BPM manuell','Analysis failed (no audio?). Use tap tempo or enter BPM manually']
- ];
- const dict=new Map(pairs);
- function translateTextNode(n){
-  if(!n||n.nodeType!==3)return;const raw=n.nodeValue,trim=raw.trim();if(!trim)return;
-  const parent=n.parentElement;if(parent?.closest('input,textarea,canvas,code,pre,.nm,[contenteditable="true"]'))return;
-  const lang=$('shxLanguage')?.value||'en';
-  const target=lang==='de'?new Map([...dict].map(([a,b])=>[b,a])).get(trim):dict.get(trim);
-  if(target)n.nodeValue=raw.replace(trim,target);
- }
- function translateTree(root){
-  if(!root)return;const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),nodes=[];while(w.nextNode())nodes.push(w.currentNode);nodes.forEach(translateTextNode);
-  root.querySelectorAll?.('input[placeholder],textarea[placeholder],button[title],button[aria-label]').forEach(el=>{
-   const lang=$('shxLanguage')?.value||'en',rev=lang==='de'?new Map([...dict].map(([a,b])=>[b,a])):dict;
-   if(el.placeholder&&rev.has(el.placeholder))el.placeholder=rev.get(el.placeholder);
-   if(el.title&&rev.has(el.title))el.title=rev.get(el.title);
-   const a=el.getAttribute('aria-label');if(a&&rev.has(a))el.setAttribute('aria-label',rev.get(a));
-  });
- }
- translateTree(document.getElementById('app'));
- $('shxLanguage')?.addEventListener('change',()=>translateTree(document.getElementById('app')));
- const observer=new MutationObserver(records=>records.forEach(r=>{
-  if(r.type==='characterData')translateTextNode(r.target);
-  (r.addedNodes||[]).forEach(n=>{if(n.nodeType===3)translateTextNode(n);else if(n.nodeType===1)translateTree(n)});
- }));
- const app=document.getElementById('app');if(app)observer.observe(app,{subtree:true,childList:true,characterData:true});
-
- // Persist preferences when the page is reloaded; restore mix palette and headbop controls.
- const pref=prefRead();
- if(pref.bg)$('shxBg').value=pref.bg;if(pref.primary)$('shxPrimary').value=pref.primary;
- if(pref.secondary)$('shxSecondary').value=pref.secondary;if(pref.highlight)$('shxHighlight').value=pref.highlight;
- if(pref.theme&&document.body.dataset.shxTheme!==pref.theme){document.querySelector(`[data-shx-theme="${pref.theme}"]`)?.click();}
- ['shxBg','shxPrimary','shxSecondary','shxHighlight'].forEach(id=>$(id)?.addEventListener('input',()=>prefWrite({[id==='shxBg'?'bg':id==='shxPrimary'?'primary':id==='shxSecondary'?'secondary':'highlight']:$(id).value})));
+ const mo=new MutationObserver(ms=>{if(lang==='de'&&!ms.some(()=>true))return;for(const m of ms){if(m.type==='characterData')walk(m.target);else m.addedNodes.forEach(walk);if(m.type==='attributes')AT.includes(m.attributeName)&&apply(m.target,true,m.attributeName)}});
+ function setLang(c,n){lang=c;name=n;try{localStorage.shoxy_lang=c+'|'+n}catch(e){}document.documentElement.lang=c;document.documentElement.dir=['ar','he','fa','ur'].includes(c)?'rtl':'ltr';try{cache=JSON.parse(localStorage.getItem('shoxy_i18n_'+c)||'{}')}catch(e){cache={}}walk(document.body);if(c!=='de')try{st('🌐 '+n+' …')}catch(e){}}
+ const card=document.createElement('div');card.className='card';card.setAttribute('data-notr','');
+ card.innerHTML='<h3>🌐 Sprache / Language</h3><select id="langSel"></select><div class="row" style="margin-top:8px;gap:6px"><input id="langOther" class="field" placeholder="Andere Sprache, z.B. Swahili / Thai …" data-notr><button class="btn" id="langGo" type="button" style="flex:0 0 auto">OK</button></div><p class="small" data-notr>Die Oberfläche wird per KI übersetzt (Gemini-Key im KI-Tab nötig) und gemerkt. Die KI antwortet dann auch in dieser Sprache.</p>';
+ $('t-clips').prepend(card);const sel=$('langSel');sel.innerHTML=L.map(x=>'<option value="'+x[0]+'">'+x[1]+'</option>').join('');
+ sel.onchange=()=>setLang(sel.value,L.find(x=>x[0]===sel.value)[1]);
+ $('langGo').onclick=()=>{const v=$('langOther').value.trim();if(v){const c='x-'+v.toLowerCase().replace(/[^a-z0-9]+/g,'');setLang(c,v);$('langOther').value=''}};
+ mo.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:AT});
+ let sv='';try{sv=localStorage.shoxy_lang||''}catch(e){}
+ if(sv){const[c,n]=sv.split('|');if(L.some(x=>x[0]===c))sel.value=c;if(c&&n&&c!=='de')setLang(c,n)}
 })();
-</script>
 
-
-<!-- Shoxy Studio stability and usability layer -->
-<style>
-:focus-visible{outline:2px solid var(--cy,#fff)!important;outline-offset:2px}
-button:disabled,[aria-disabled="true"]{cursor:not-allowed;filter:grayscale(.35)}
-@media (max-width:380px){header{padding-left:10px;padding-right:10px}.logo{font-size:12px;letter-spacing:2px}#stage{padding-left:7px;padding-right:7px}#tabs{gap:5px;padding-left:7px;padding-right:7px}#tabs button{min-width:56px;padding:7px 8px}}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
-</style>
-<script>
+/* ---------- v23: KI-Büro, Stopp, Live-Status ---------- */
+const OFF_KEY='shoxy_ki_office';KI.notes='';KI.pending=null;KI.stop=false;KI.busy=false;KI.ctl=null;
+const kiSleep=ms=>new Promise(r=>setTimeout(r,ms));let liveT=[];
+function setLive(t){const e=$('kiLive');if(!e)return;e.style.display=t?'block':'none';const b=e.querySelector('b');if(b)b.textContent=t||''}
+function kiLive(t){liveT.forEach(clearTimeout);liveT=[];setLive(t)}
+function kiThink(){kiLive('👀 schaut sich Vorschau & Zustand an');liveT=[setTimeout(()=>setLive('🧠 denkt nach'),900),setTimeout(()=>setLive('🤔 wägt Möglichkeiten ab'),5000),setTimeout(()=>setLive('📝 plant die Schritte'),11000),setTimeout(()=>setLive('⏳ komplexe Sache, das dauert kurz …'),22000)]}
+function kiBusy(on){KI.busy=on;if(on)KI.stop=false;$('kigo').disabled=on;$('kistop').style.display=on?'':'none';if(on)$('kiResume').style.display='none';else kiLive('')}
+function setNotes(v){KI.notes=v;const e=$('kiNotes');if(e&&e.value!==v)e.value=v}
+function officeSave(){try{const log=[...$('kilog').querySelectorAll('.mb')].slice(-60).map(d=>({w:d.classList.contains('me')?'me':'ai',t:(d.querySelector('span')||d).textContent.slice(0,1500)}));localStorage.setItem(OFF_KEY,JSON.stringify({h:KI.h.slice(-24),log,notes:KI.notes,pending:KI.pending}))}catch(e){}}
+function kiFail(e,q){const m=e.message||'';
+ if(m==='__stop'){KI.pending=null;kiAdd('ai','⏹ Gestoppt. Was schon lief, bleibt – mit „↶ KI-Änderung zurück“ nimmst du es zurück.');return true}
+ if(/Netzwerkfehler|Zeitüberschreitung|HTTP 5\d\d|overload|high demand|unavailable/i.test(m)){KI.pending={q};kiAdd('ai','📡 Verbindung abgebrochen ('+m+'). Mein Fortschritt ist gespeichert. Ich mache genau da weiter, sobald du „Weitermachen“ drückst oder das Internet wieder da ist.');$('kiResume').style.display='';return true}
+ return false}
+function kiResume(){if($('kigo').disabled||!KI.pending)return;const q=KI.pending.q||'';$('kiResume').style.display='none';$('kiin').value='Verbindung war weg, mach genau da weiter wo du aufgehört hast (nutze deine Notizen und den STATE, nicht von vorn). Meine Aufgabe war: '+q;kiSend()}
 (function(){
- 'use strict';
- // Pause when the editor is backgrounded to avoid stale playback and unnecessary rendering.
- let wasPlayingBeforeHide=false;
- document.addEventListener('visibilitychange',()=>{
-  if(document.hidden){
-   wasPlayingBeforeHide=!!(typeof S!=='undefined'&&S.playing);
-   if(wasPlayingBeforeHide&&typeof pause==='function'){
-    try{pause();const status=document.getElementById('status');if(status)status.textContent='Playback paused while the editor is in the background.'}catch(e){console.warn('[Shoxy visibility]',e)}
-   }
-  }else if(typeof S!=='undefined'){
-   S.last=performance.now();
-   if(wasPlayingBeforeHide){const status=document.getElementById('status');if(status)status.textContent='Ready. Press Play to continue.'}
-   wasPlayingBeforeHide=false;
-  }
- });
- const exportButton=document.getElementById('export');
- if(exportButton&&!('MediaRecorder' in window))exportButton.title='Video export is not supported by this browser. Try a current version of Chrome.';
+ const st_=document.createElement('style');st_.textContent='.mb.think{opacity:.78;font-style:italic;border:1px dashed var(--bd)}.kid{animation:kb 1s infinite;letter-spacing:2px;color:var(--ac)}@keyframes kb{50%{opacity:.2}}#kiNotes{min-height:80px;resize:vertical}';document.head.append(st_);
+ const live=document.createElement('div');live.id='kiLive';live.className='mb ai';live.style.cssText='display:none;margin:6px 0';live.innerHTML='<b></b> <i class="kid">●●●</i>';$('kilog').after(live);
+ const rb=document.createElement('button');rb.id='kiResume';rb.type='button';rb.className='btn hot';rb.style.cssText='display:none;width:100%;margin:6px 0';rb.textContent='▶ Weitermachen (da, wo ich war)';rb.onclick=kiResume;live.after(rb);
+ const sb=document.createElement('button');sb.id='kistop';sb.type='button';sb.className='btn';sb.textContent='⏹';sb.title='Stopp';sb.style.cssText='flex:0 0 auto;display:none;background:#b3202a;border-color:#ff5d6a;color:#fff';sb.onclick=()=>{if(!KI.busy)return;KI.stop=true;kiLive('⏹ stoppe …');try{KI.ctl&&KI.ctl.abort()}catch(e){}};$('kigo').after(sb);
+ const card=document.createElement('div');card.className='card';card.style.display='none';card.setAttribute('data-notr','');card.innerHTML='<h3>🗂 Büro der KI</h3><textarea id="kiNotes" class="field" placeholder="Notizbuch der KI (Plan, Fortschritt, Vorlieben). Du kannst auch selbst etwas reinschreiben."></textarea><div class="row" style="margin-top:6px"><button class="btn" id="kiNotesClr" type="button">Notizen leeren</button><button class="btn" id="kiMemClr" type="button">Gedächtnis löschen</button></div><p class="small">Gespräch und Notizen bleiben nach Neuladen oder Verbindungsabbruch erhalten.</p>';$('rigcard').before(card);card.style.display='none';
+ $('kiNotes').oninput=e=>{KI.notes=e.target.value.slice(0,3000);officeSave()};$('kiNotesClr').onclick=()=>{setNotes('');officeSave()};$('kiMemClr').onclick=()=>{KI.h=[];KI.pending=null;setNotes('');$('kilog').replaceChildren();kiAdd('ai','Gedächtnis gelöscht.');$('kiResume').style.display='none';officeSave()};
+ $('kiclear').addEventListener('click',()=>{setNotes('');KI.pending=null;$('kiResume').style.display='none';officeSave()});
+ try{const d=JSON.parse(localStorage.getItem(OFF_KEY)||'null');if(d){KI.h=Array.isArray(d.h)?d.h:[];setNotes(d.notes||'');KI.pending=d.pending||null;if(d.log&&d.log.length){$('kilog').replaceChildren();d.log.forEach(m=>{const e=kiAdd(m.w,m.t);if(m.t.startsWith('💭'))e.classList.add('think')})}if(KI.pending){kiAdd('ai','Ich war mitten in einer Aufgabe, als es abgebrochen ist. Drück „Weitermachen“, dann mache ich da weiter.');$('kiResume').style.display=''}}}catch(e){}
+ setInterval(officeSave,3000);addEventListener('pagehide',officeSave);
+ addEventListener('online',()=>{if(KI.pending&&KI.key&&!KI.busy)setTimeout(kiResume,800)});
 })();
-</script>
-
-</body></html>
+</script></body></html>
