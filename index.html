@@ -142,7 +142,7 @@ a{color:#fff;text-decoration:underline}
 .tplgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
 .qgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
 .tplgrid .btn,.qgrid .btn{padding:10px 4px;font-size:12.5px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-#kikeyBtn,#kicfg{display:none!important}
+#kicfg{display:none}
 </style><style id="themeCss">
 :root,:root[data-theme=plasma]{--ac:#18e4ff;--ac2:#2f6bff;--acg:linear-gradient(100deg,#00f0ff,#2f6bff);--on:#001018;--bg:#010611;--bg2:#06142a;--pan:#071428;--bd:#12356b;--glow:#18e4ff;--txt2:#a9d6ff;--pink:var(--ac);--vio:var(--ac2);--cy:var(--ac);--line:var(--bd);--mut:#7fa3cc;--grad:var(--acg)}
 :root[data-theme=celestial]{--ac:#ffb21a;--ac2:#ff3d00;--acg:linear-gradient(100deg,#ffe600,#ff8a00,#ff2d00);--on:#1a0700;--bg:#0b0301;--bg2:#220a02;--pan:#1a0802;--bd:#6b2a08;--glow:#ff7a00;--txt2:#ffd9a8;--pink:var(--ac);--vio:var(--ac2);--cy:var(--ac);--line:var(--bd);--mut:#cc9a72;--grad:var(--acg)}
@@ -203,11 +203,17 @@ a{color:var(--ac)}.auto{background:var(--acg);color:var(--on)}
 #t-ki .kl:empty:before{content:'Tell me what kind of edit you want ';margin:auto;color:var(--mut);font-size:13px;text-align:center}
 .mb{max-width:84%;padding:8px 12px!important;border-radius:18px;font-size:14px;line-height:1.35;white-space:pre-wrap;word-break:break-word}
 .mb.me{border-bottom-right-radius:5px}.mb.ai{border-bottom-left-radius:5px}
-.mbdel{display:none!important}.mb.think{display:none}
+.mbdel{display:none!important}.mb.think{display:block}
 #kiLive{margin:0!important;padding:6px 12px!important;font-size:12px;opacity:.8;flex:0 0 auto;align-self:flex-start}
 #t-ki #kiin{border-radius:22px;padding:11px 14px}#t-ki #kigo{border-radius:50%;width:42px;height:42px;padding:0;flex:0 0 42px!important}
 #t-ki>.row{flex:0 0 auto;margin:0!important;flex-wrap:nowrap}#kistop{border-radius:50%;width:42px;height:42px;padding:0}
 #kitools:empty{display:none}#kiResume{margin:0!important}
+.kitrail{max-width:94%!important;display:flex;flex-direction:column;gap:4px;background:transparent!important;border:0!important;padding:2px 0!important;box-shadow:none!important}
+.kitrailh{font:800 10px 'Orbitron',sans-serif;letter-spacing:1.4px;color:var(--ac,#fff);opacity:.85}
+.kistep{font-size:12.5px;line-height:1.35;color:#d5d5d5;background:#0c0c0c;border:1px solid #2a2a2a;border-radius:12px;padding:6px 10px;white-space:pre-wrap}
+.kistep b{display:block;color:#fff;font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;margin-bottom:2px}
+.kistep.on{border-color:#fff;box-shadow:0 0 14px #ffffff44}
+.mb.think{display:block!important}
 </style>
 </head><body>
 <div id="app">
@@ -315,21 +321,21 @@ a{color:var(--ac)}.auto{background:var(--acg);color:var(--on)}
 </div>
 
 <div class="tab" id="t-ki">
-<div class="kihead"><b>Shoxy KI</b><span class="sp"></span><button class="mini" id="kikeyBtn" type="button" title="API-Key & Modell">⚙</button><span id="kiacts"><button class="mini" id="kiclear" type="button" title="Chat leeren">Delete</button></span></div>
+<div class="kihead"><b>Shoxy KI</b><span id="teamBadge" title="Grok baut, Gemini prüft, Claude feilt" style="font:800 9px Orbitron,sans-serif;letter-spacing:.6px;border:1px solid #444;border-radius:999px;padding:3px 7px">TEAM</span><span class="sp"></span><button class="mini" id="kikeyBtn" type="button" title="API-Key & Modell">⚙</button><span id="kiacts"><button class="mini" id="kiclear" type="button" title="Chat leeren">Delete</button></span></div>
  <div class="card" id="kicfg" style="display:none">
-  <div class="row">
-   <input id="kikey" class="field" type="password" placeholder="Gemini API-Key (AIza...)">
-   <select id="kimodel" style="max-width:175px">
-    <option value="gemini-3.8-flash">Gemini 3.8 Flash</option>
-    <option value="gemini-3.7-flash">Gemini 3.7 Flash</option>
-    <option value="gemini-3.6-flash">Gemini 3.6 Flash</option>
-    <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
-    <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite</option>
-    <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-   </select>
-  </div>
-  <div class="row" style="margin-top:6px"><input id="kikey2" class="field" type="password" placeholder="OpenAI API-Key (sk-...) = Prüfer"><input id="kimodel2" class="field" style="max-width:110px" placeholder="Modell"></div>
-  <label class="sw" style="margin:6px 0"><input type="checkbox" id="kiteam" checked><i></i>Team-Prüfung (Gemini baut, OpenAI + Detail-Kritiker prüfen)</label>
+  <h3>OpenRouter Team</h3>
+  <input id="kikey" class="field" type="password" placeholder="OpenRouter Key (sk-or-v1-...)" autocomplete="off">
+  <label class="l">Bauer</label>
+  <select id="kimodel">
+    <option value="x-ai/grok-4.6">Grok 4.6</option>
+    <option value="google/gemini-3.7-flash">Gemini 3.7 Flash</option>
+    <option value="anthropic/claude-sonnet-5">Claude Sonnet 5</option>
+    <option value="google/gemini-3.5-flash-lite">Gemini 3.5 Flash Lite</option>
+  </select>
+  <input id="kikey2" type="hidden" value="">
+  <input id="kimodel2" type="hidden" value="google/gemini-3.7-flash">
+  <label class="sw" style="margin:8px 0"><input type="checkbox" id="kiteam" checked><i></i>Team an: Grok baut, Gemini prüft, Claude feilt</label>
+  <p class="small">Ein OpenRouter-Key, drei Modelle, eine KI. Der Bauer führt aus. Die anderen beiden schauen das Bild an und korrigieren, bevor etwas als fertig gilt.</p>
  </div>
 <div class="kl" id="kilog"></div>
  <div class="row" style="margin-top:6px"><input id="kiin" class="field" placeholder="Schreib einfach, was du willst …"><button class="btn hot" id="kigo" style="flex:0 0 auto;min-width:48px;font-size:18px">➤</button></div>
@@ -1020,30 +1026,68 @@ lastHist=snapString();updateHistoryButtons();rClips();rText();rLayers();setTab('
 nudgeUI();build();requestAnimationFrame(tick);
 
 /* ---------- KI-Chat (Gemini 3.8 Flash + kompatible Fallbacks) ---------- */
-const KI={h:[],key:'',model:'gemini-3.8-flash',focus:''};
-const VALID_MODELS=['gemini-3.8-flash','gemini-3.7-flash','gemini-3.6-flash','gemini-3.5-flash','gemini-3.5-flash-lite','gemini-2.5-flash'];
+const OR_KEY='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';
+const BUILDER='x-ai/grok-4.6',CHECKER='google/gemini-3.7-flash',CRITIC='anthropic/claude-sonnet-5',LITE='google/gemini-3.5-flash-lite';
+const VALID_MODELS=[BUILDER,CHECKER,CRITIC,LITE];
+const KI={h:[],key:OR_KEY,model:BUILDER,focus:'',team:true};
 try{
- KI.key=localStorage.ki_key||'';
+ const saved=localStorage.ki_key||'';
+ if(/^sk-or-/.test(saved))KI.key=saved;
  KI.h=[];try{localStorage.removeItem('ki_h')}catch(x){}
  const savedModel=localStorage.ki_model||'';
- if(VALID_MODELS.includes(savedModel))KI.model=savedModel;
+ KI.model=VALID_MODELS.includes(savedModel)?savedModel:BUILDER;
 }catch(e){}
 $('kikey').value=KI.key;
 $('kimodel').value=KI.model;
 $('kikey').oninput=$('kikey').onchange=e=>{KI.key=e.target.value.replace(/\s+/g,'');try{localStorage.ki_key=KI.key}catch(x){}};
 $('kimodel').onchange=e=>{KI.model=e.target.value;try{localStorage.ki_model=KI.model}catch(x){}};
 const kiAdd=(w,t)=>{const d=document.createElement('div');d.className='mb '+w;const msg=document.createElement('span');msg.textContent=t;const del=document.createElement('button');del.className='mbdel';del.type='button';del.title='Nachricht löschen';del.textContent='×';del.onclick=()=>d.remove();d.append(msg,del);$('kilog').append(d);$('kilog').scrollTop=$('kilog').scrollHeight;return d};
+function kiStep(title,detail){
+ let box=document.getElementById('kiTrail');
+ const log=document.getElementById('kilog');
+ if(!log)return;
+ if(!box){
+  box=document.createElement('div');
+  box.id='kiTrail';
+  box.className='mb ai kitrail';
+  const h=document.createElement('div');
+  h.className='kitrailh';
+  h.textContent='Team arbeitet';
+  box.append(h);
+  log.append(box);
+ }
+ const row=document.createElement('div');
+ row.className='kistep on';
+ const b=document.createElement('b');
+ b.textContent=String(title||'Schritt');
+ row.append(b);
+ if(detail){
+  const s=document.createElement('span');
+  s.textContent=String(detail).slice(0,700);
+  row.append(s);
+ }
+ box.querySelectorAll('.kistep.on').forEach(e=>e.classList.remove('on'));
+ box.append(row);
+ log.scrollTop=log.scrollHeight;
+ try{kiLive(String(title)+(detail?': '+String(detail).slice(0,90):''))}catch(e){}
+}
+function kiTrailFreeze(){
+ const box=document.getElementById('kiTrail');
+ if(!box)return;
+ const h=box.querySelector('.kitrailh');
+ if(h)h.textContent='So ist das Team vorgegangen';
+ box.removeAttribute('id');
+}
 $('kiclear').onclick=()=>{$('kilog').replaceChildren();KI.h=[]};
 /* v29: keine Begrüßung mehr */
 const snap=()=>({clips:S.clips.map((c,i)=>({i,n:c.name,in:c.in,out:c.out,dur:c.dur,photo:!!c.photo,w:(c.v&&c.v.videoWidth)||0,h:(c.v&&c.v.videoHeight)||0,rig:rigSig(c.v&&c.v.rig)})),song:S.song&&{n:S.song.name,dur:S.song.dur},fx:[...S.fx],fxi:S.fxi,fxp:S.fxp,kfs:S.kfs,vibe:S.vibe,str:S.str,trans:S.trans,tdur:S.tdur,autoCut:S.autoCut,cutBeats:S.cutBeats,speed:S.speed,look:{bright:S.bright,contrast:S.contrast,sat:S.sat,hue:S.hue},bpm:S.bpm,drop:S.dropT,beat:{mode:S.ba.mode,conf:S.ba.conf,nudge:S.nudge,bo:S.ba.bo},total:S.total,T:S.T,texts:S.texts,images:S.images.map((L,i)=>({i,name:L.name,x:L.x,y:L.y,w:L.w,h:L.h,opacity:L.opacity,blend:L.blend,s:L.s,e:L.e,rot:L.rot,rig:rigSig(L.rig)})),background:S.background?.name||null,fill:S.fill,canvas:[W,H],format:S.fmt,beatLen:S.bpm?+(60/S.bpm).toFixed(3):null,nextBeats:S.beats.filter(b=>b>=S.T).slice(0,8).map(b=>+b.toFixed(2)),segs:S.segs.slice(0,80).map(g=>({clip:S.clips.indexOf(g.c),start:+g.start.toFixed(2),len:+g.len.toFixed(2)})),vol:{clip:S.clipVol,song:S.songVol},afx:S.afx,songSpeed:S.songSpeed||1,playing:S.playing,selText:S.sel,ev:S.ev,cutMap:S.cutMap,custom:Object.values(CUSTOM).map(f=>({id:f.id,name:f.name,len:f.code.length,off:!!f.off}))});
-const TEAMSYS='IHR SEID EINE KI. Bauer (Gemini), Prüfer (OpenAI) und Detail-Kritiker sind drei Modelle, aber ein Kopf mit einem Ziel: der beste Edit für den Nutzer. Denkweise: 1) Verstehen, was der Nutzer wirklich will, auch das Unausgesprochene. 2) Zustand aus STATE und Bildern lesen, mit echten Zahlen rechnen statt zu schätzen. 3) Die kleinste Änderung planen, die das Ziel trifft, Alternativen kurz abwägen. 4) Ausführen. 5) Ergebnis selbst kritisch prüfen und nachbessern, bevor du fertig sagst. 6) Ehrlich berichten: was du getan hast, was gut ist, was nicht oder nur unsicher. Kein Ja-Sager und kein Sklave: Widersprich dem Nutzer und dem Team mit Begründung, wenn etwas schlechter wird oder ein besserer Weg existiert; sag klar, wenn etwas nicht geht oder du dir nicht sicher bist; erfinde nichts, auch keine Ergebnisse, die du nicht gesehen hast. Führe aber nur aus, was der Nutzer verlangt, und nenne Besseres als Vorschlag. Kann die App etwas nicht direkt, baue es: eigene Effekte per Code, Kombinationen, Keyframes, Clip-Tempo/Lautstärke/Reverse oder cloud_render, statt abzulehnen. Aktion cloud_render {urls:[https-URLs]} rendert per JSON2Video in der Cloud. Nutze sie NUR, wenn der Nutzer ausdrücklich Cloud-Render will UND öffentliche https-Video-URLs nennt; lokale Clips gehen damit nicht. WICHTIG: Jede Antwort enthält ein konkretes say (was, wie, welcher Wert, ob du dir sicher bist). Nie stumm bleiben.\n';
+const TEAMSYS='IHR SEID EINE KI. Bauer (Grok), Prüfer (Gemini) und Detail-Kritiker (Claude) sind drei Modelle, aber ein Kopf mit einem Ziel: der beste Edit für den Nutzer. Denkweise: 1) Verstehen, was der Nutzer wirklich will, auch das Unausgesprochene. 2) Zustand aus STATE und Bildern lesen, mit echten Zahlen rechnen statt zu schätzen. 3) Die kleinste Änderung planen, die das Ziel trifft, Alternativen kurz abwägen. 4) Ausführen. 5) Ergebnis selbst kritisch prüfen und nachbessern, bevor du fertig sagst. 6) Ehrlich berichten: was du getan hast, was gut ist, was nicht oder nur unsicher. Kein Ja-Sager und kein Sklave: Widersprich dem Nutzer und dem Team mit Begründung, wenn etwas schlechter wird oder ein besserer Weg existiert; sag klar, wenn etwas nicht geht oder du dir nicht sicher bist; erfinde nichts, auch keine Ergebnisse, die du nicht gesehen hast. Führe aber nur aus, was der Nutzer verlangt, und nenne Besseres als Vorschlag. Kann die App etwas nicht direkt, baue es: eigene Effekte per Code, Kombinationen, Keyframes, Clip-Tempo/Lautstärke/Reverse oder cloud_render, statt abzulehnen. Aktion cloud_render {urls:[https-URLs]} rendert per JSON2Video in der Cloud. Nutze sie NUR, wenn der Nutzer ausdrücklich Cloud-Render will UND öffentliche https-Video-URLs nennt; lokale Clips gehen damit nicht. WICHTIG: Jede Antwort enthält ein konkretes say (was, wie, welcher Wert, ob du dir sicher bist). Nie stumm bleiben. Das Wort erledigt ohne die konkrete Änderung ist verboten. think sind echte Arbeitsschritte: was du siehst, was du vorhast, was schiefgehen kann. say ist die eine Nachricht an den Nutzer danach.\n';
 const SYS=()=>TEAMSYS+`You are Shoxy AI, an expert mobile video-editing assistant built into this editor. Be concise, practical, and technically accurate. Your first message in a conversation is always in English; after that you follow the user's language (see LANGUAGE).
 BÜRO (intern, erwähne es dem Nutzer gegenüber nie): Du hast ein eigenes Büro mit Notizbuch, das auch nach Verbindungsabbruch oder Neuladen erhalten bleibt. Aktueller Inhalt: ${KI.notes||'(noch leer)'}\nSchreibe bei mehrstufigen oder längeren Aufgaben im JSON-Feld "notes" fortlaufend den kompletten neuen Notizstand (Ziel, Plan, erledigte und offene Schritte, Entscheidungen, Vorlieben des Nutzers, max. 1500 Zeichen). Nach einem Abbruch machst du anhand der Notizen und STATE genau dort weiter, ohne von vorn zu beginnen.
 PERSONALITY: Act like an experienced professional editor and creative director: friendly, direct, confident, honest. Never use emojis. Never claim an edit succeeded unless the editor confirms it.
 
-LANGUAGE AND STYLE MIRRORING: ${KI.h.length?'This is an ongoing conversation: mirror the user now.':'This is the first message of the conversation: answer in English.'}
-- If there is no earlier user message in the history, answer in plain, natural English.
-- From the second user message on, answer in the language the user actually writes in, and switch the moment they switch. If they mix languages (for example German with English words), mix the same way.
+LANGUAGE AND STYLE MIRRORING: Answer in the language the user writes in, starting with the first message. Casual German stays casual German.
+- Mirror their language from the first message, and switch the moment they switch. If they mix languages (for example German with English words), mix the same way.
 - Copy their register: slang level, humor, sarcasm, banter, formality, message length, capitalization, punctuation and typical filler words. If they joke, joke back in the same flavor; if they are dry and short, stay dry and short; if they are serious, stay serious. Do not overdo it or mock them, and never use emojis even if the user does.
 - Keep user-facing messages short. Explain technical terms only when useful. Never expose internal action names, IDs, variables or implementation details. Effect and action IDs in JSON stay exactly as defined.
 
@@ -1763,82 +1807,108 @@ function stateSig(){
 }
 
 async function callGemini(model,body){
- const key=($('kikey').value||KI.key||'').replace(/\s+/g,'');if(key){KI.key=key}
- if(!KI.key)throw new Error('Kein API-Key eingetragen');
- const post=async b2=>{
-  if(KI.busy&&KI.stop)throw new Error('__stop');const controller=new AbortController();KI.ctl=controller;const tid=setTimeout(()=>controller.abort(),240000);
+ const key=($('kikey').value||KI.key||OR_KEY).replace(/\s+/g,'');
+ if(key)KI.key=key;
+ if(!/^sk-or-/.test(KI.key||''))throw new Error('Kein OpenRouter-Key');
+ const sys=(body.systemInstruction&&body.systemInstruction.parts||[]).map(p=>p.text||'').filter(Boolean).join('\n');
+ const messages=[];
+ if(sys)messages.push({role:'system',content:sys});
+ for(const c of (body.contents||[])){
+  const role=c.role==='model'?'assistant':'user';
+  const texts=[],imgs=[];
+  for(const p of (c.parts||[])){
+   if(p.text)texts.push({type:'text',text:String(p.text).slice(0,24000)});
+   else if(p.inlineData&&p.inlineData.data)imgs.push({type:'image_url',image_url:{url:'data:'+(p.inlineData.mimeType||'image/jpeg')+';base64,'+p.inlineData.data}});
+  }
+  const content=texts.concat(imgs.slice(0,4));
+  if(!content.length)continue;
+  if(content.length===1&&content[0].type==='text')messages.push({role,content:content[0].text});
+  else messages.push({role,content});
+ }
+ const orModel=model&&String(model).indexOf('/')>=0?model:BUILDER;
+ const gen=body.generationConfig||{};
+ const payload={model:orModel,messages,temperature:(gen.temperature==null?0.4:gen.temperature),max_tokens:Math.min(gen.maxOutputTokens||6000,12000)};
+ if(gen.responseMimeType==='application/json')payload.response_format={type:'json_object'};
+ const post=async pl=>{
+  if(KI.busy&&KI.stop)throw new Error('__stop');
+  const controller=new AbortController();KI.ctl=controller;
+  const tid=setTimeout(()=>controller.abort(),120000);
   try{
-   const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':KI.key},body:JSON.stringify(b2),signal:controller.signal});
+   const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+KI.key,'HTTP-Referer':'https://shoxy.editor','X-Title':'Shoxy Editor'},body:JSON.stringify(pl),signal:controller.signal});
    let j={};try{j=await r.json()}catch(e){}
-   if(!r.ok)throw new Error((j.error&&j.error.message)||('HTTP '+r.status));
-   return j;
+   if(!r.ok){const msg=(j.error&&(j.error.message||j.error))||('HTTP '+r.status);throw new Error(typeof msg==='string'?msg:JSON.stringify(msg))}
+   const m=j.choices&&j.choices[0]&&j.choices[0].message||{};
+   let text=m.content;
+   if(Array.isArray(text))text=text.map(p=>p.text||p.content||'').join('');
+   text=String(text||'').trim();
+   if(!text&&m.reasoning){const rsn=String(m.reasoning),ia=rsn.indexOf('{'),ib=rsn.lastIndexOf('}');if(ia>=0&&ib>ia)text=rsn.slice(ia,ib+1)}
+   const finish=j.choices&&j.choices[0]&&j.choices[0].finish_reason||'stop';
+   return {candidates:[{content:{parts:text?[{text}]:[]},finishReason:finish}],model:j.model||orModel};
   }catch(err){
-   if(err.name==='AbortError')throw new Error(KI.busy&&KI.stop?'__stop':'Timeüberschreitung (Server antwortet nicht)');
-   if(err instanceof TypeError)throw new Error('Netzwerkfehler (kein Internet, Adblock/VPN oder Seite nicht per https geöffnet)');
+   if(err.name==='AbortError')throw new Error(KI.busy&&KI.stop?'__stop':'Zeitüberschreitung (OpenRouter antwortet nicht)');
+   if(err instanceof TypeError)throw new Error('Netzwerkfehler (kein Internet, Adblock oder VPN)');
    throw err;
   }finally{clearTimeout(tid)}
  };
- const retry=async fn=>{for(let i=0;;i++){try{return await fn()}catch(e){if(KI.stop||!/Netzwerkfehler|HTTP 5\d\d/.test(e.message)||i>=3)throw e;setLive('Verbindung wackelt – Versuch '+(i+2)+'/4 …');await kiSleep(1200*Math.pow(2,i));for(let k=0;k<30&&navigator.onLine===false&&!KI.stop;k++)await kiSleep(500)}}};
- try{return await retry(()=>post(body))}
+ const retry=async fn=>{for(let i=0;;i++){try{return await fn()}catch(e){if(KI.stop||!/Netzwerkfehler|HTTP 5\d\d|overloaded|rate/i.test(e.message)||i>=2)throw e;try{setLive('Verbindung wackelt, Versuch '+(i+2)+'/3')}catch(x){}await kiSleep(900*Math.pow(2,i))}}};
+ try{return await retry(()=>post(payload))}
  catch(e){
-  /* 400 durch nicht unterstützte Parameter: einmal mit schlanker Konfiguration wiederholen */
-  if(/HTTP 400|invalid argument|unsupported|not supported|thinking|temperature/i.test(e.message)&&!/API key|API_KEY/i.test(e.message)){
-   const b2={...body,generationConfig:{responseMimeType:'application/json',maxOutputTokens:32768}};
-   return await post(b2);
+  if(/response_format|json_object|unsupported|not supported|invalid argument|HTTP 400/i.test(e.message||'')&&payload.response_format){
+   const pl2={...payload};delete pl2.response_format;return await post(pl2);
   }
   throw e;
  }
 }
 async function callAny(body){
  const order=[KI.model,...VALID_MODELS].filter((v,i,a)=>a.indexOf(v)===i);
- let j=null,lastErr=null;
+ let lastErr=null;
  for(const m of order){
   try{
-   try{j=await callGemini(m,body)}catch(e1){if(/429|quota|rate|exhaust|overload|high demand|503|unavailable/i.test(e1.message)){await new Promise(r=>setTimeout(r,2500));j=await callGemini(m,body)}else throw e1}
-   if(m!==KI.model){KI.model=m;$('kimodel').value=m;try{localStorage.ki_model=m}catch(e){}}
-   break;
+   let j;
+   try{j=await callGemini(m,body)}catch(e1){
+    if(/429|quota|rate|exhaust|overload|high demand|503|unavailable/i.test(e1.message||'')){await new Promise(r=>setTimeout(r,1500));j=await callGemini(m,body)}
+    else throw e1;
+   }
+   const txt=(j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts||[]).map(p=>p.text||'').join('').trim();
+   if(!txt)throw new Error('Leere Antwort von '+m);
+   if(m!==KI.model){KI.model=m;try{$('kimodel').value=m;localStorage.ki_model=m}catch(e){}}
+   return j;
   }catch(err){
    lastErr=err;
-   if(!/high demand|overloaded|not found|not supported|deprecated|resource_exhausted|exhaust|quota|rate limit|429|503|unavailable|Timeüberschreitung|model.*(invalid|unavailable)|invalid.*model|HTTP 404|HTTP 5\d\d/i.test(err.message))throw err;
+   const msg=String(err&&err.message||err);
+   if(msg==='__stop'||/unauthorized|401|API key|API_KEY|invalid api key|invalid key|credits|402|Kein OpenRouter/i.test(msg))throw err;
+   try{kiStep('Wechsel', m.split('/').pop()+' antwortet nicht, nächstes Modell')}catch(e){}
   }
  }
- if(!j)throw lastErr;
- return j;
+ throw lastErr||new Error('Kein Modell hat geantwortet');
 }
 function parseAI(txt){
  const t=txt.trim().replace(/^```(?:json)?\s*/i,'').replace(/```\s*$/,'').trim();
  try{return JSON.parse(t)}catch(e){const a=t.indexOf('{'),b=t.lastIndexOf('}');if(a>=0&&b>a)return JSON.parse(t.slice(a,b+1));throw new Error('KI-Antwort war kein gültiges JSON')}
 }
-/* ---------- Team-KI: Gemini plant+baut, OpenAI prüft, Detail-Kritiker feilt (alle ohne Ego, gleiches Ziel) ---------- */
-KI.k2='';KI.m2='gpt-4o';KI.team=true;
-try{KI.k2=localStorage.ki_k2||'';KI.m2=localStorage.ki_m2||'gpt-4o';KI.team=localStorage.ki_team!=='0'}catch(e){}
-$('kikey2').value=KI.k2;$('kimodel2').value=KI.m2;$('kiteam').checked=KI.team;
+/* ---------- Team: 3 Modelle, 1 KI, ein OpenRouter-Key ---------- */
+KI.k2=OR_KEY;KI.m2=CHECKER;KI.team=true;
+try{KI.team=localStorage.ki_team!=='0'}catch(e){}
+if($('kikey2'))$('kikey2').value='';
+if($('kimodel2'))$('kimodel2').value=CHECKER;
+if($('kiteam'))$('kiteam').checked=KI.team!==false;
 const _sv=(k,v)=>{try{localStorage[k]=v}catch(e){}};
-$('kikey2').oninput=e=>{KI.k2=e.target.value.replace(/\s+/g,'');_sv('ki_k2',KI.k2)};
-$('kimodel2').onchange=e=>{KI.m2=e.target.value.trim()||'gpt-4o';_sv('ki_m2',KI.m2)};
-$('kiteam').onchange=e=>{KI.team=e.target.checked;_sv('ki_team',KI.team?'1':'0')};
-const TEAM='IHR SEID EINE KI. Bauer (Gemini), Prüfer (OpenAI) und Detail-Kritiker sind drei Modelle, aber ein Kopf mit einem Ziel: der beste Edit für den Nutzer. Denkweise: 1) Verstehen, was der Nutzer wirklich will, auch das Unausgesprochene. 2) Zustand aus STATE und Bildern lesen, mit echten Zahlen rechnen statt zu schätzen. 3) Die kleinste Änderung planen, die das Ziel trifft, Alternativen kurz abwägen. 4) Ausführen. 5) Ergebnis selbst kritisch prüfen und nachbessern, bevor du fertig sagst. 6) Ehrlich berichten: was du getan hast, was gut ist, was nicht oder nur unsicher. Kein Ja-Sager und kein Sklave: Widersprich dem Nutzer und dem Team mit Begründung, wenn etwas schlechter wird oder ein besserer Weg existiert; sag klar, wenn etwas nicht geht oder du dir nicht sicher bist; erfinde nichts, auch keine Ergebnisse, die du nicht gesehen hast. Führe aber nur aus, was der Nutzer verlangt, und nenne Besseres als Vorschlag. Kann die App etwas nicht direkt, baue es: eigene Effekte per Code, Kombinationen, Keyframes, Clip-Tempo/Lautstärke/Reverse oder cloud_render, statt abzulehnen. Du bist gerade in der Rolle des Prüfens: sei ehrlich, konkret (Zeit, Wert, Ort), nenne auch, was passt, und erfinde keine Probleme, nur was du im Bild/Zustand wirklich siehst. ';
-async function callOpenAI(sys,text,imgs){
- const content=[{type:'text',text}];
- imgs.slice(0,8).forEach(p=>{if(p.inlineData)content.push({type:'image_url',image_url:{url:'data:'+p.inlineData.mimeType+';base64,'+p.inlineData.data,detail:'low'}});else if(p.text)content[0].text+='\n'+p.text});
- const c=new AbortController(),t=setTimeout(()=>c.abort(),60000);
- try{
-  const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+KI.k2},body:JSON.stringify({model:KI.m2,messages:[{role:'system',content:sys},{role:'user',content}],response_format:{type:'json_object'},max_tokens:2000}),signal:c.signal});
-  const j=await r.json();if(!r.ok)throw new Error((j.error&&j.error.message)||'HTTP '+r.status);
-  return parseAI(j.choices[0].message.content);
- }finally{clearTimeout(t)}
-}
+if($('kikey2'))$('kikey2').oninput=()=>{};
+if($('kimodel2'))$('kimodel2').onchange=()=>{};
+if($('kiteam'))$('kiteam').onchange=e=>{KI.team=e.target.checked;_sv('ki_team',KI.team?'1':'0')};
+const TEAM='IHR SEID EINE KI. Bauer (Grok), Prüfer (Gemini) und Detail-Kritiker (Claude) sind drei Modelle, aber ein Kopf mit einem Ziel: der beste Edit für den Nutzer. Denkweise: 1) Verstehen, was der Nutzer wirklich will, auch das Unausgesprochene. 2) Zustand aus STATE und Bildern lesen, mit echten Zahlen rechnen statt zu schätzen. 3) Die kleinste Änderung planen, die das Ziel trifft, Alternativen kurz abwägen. 4) Ausführen. 5) Ergebnis selbst kritisch prüfen und nachbessern, bevor du fertig sagst. 6) Ehrlich berichten: was du getan hast, was gut ist, was nicht oder nur unsicher. Kein Ja-Sager und kein Sklave: Widersprich dem Nutzer und dem Team mit Begründung, wenn etwas schlechter wird oder ein besserer Weg existiert; sag klar, wenn etwas nicht geht oder du dir nicht sicher bist; erfinde nichts, auch keine Ergebnisse, die du nicht gesehen hast. Führe aber nur aus, was der Nutzer verlangt, und nenne Besseres als Vorschlag. Kann die App etwas nicht direkt, baue es: eigene Effekte per Code, Kombinationen, Keyframes, Clip-Tempo/Lautstärke/Reverse oder cloud_render, statt abzulehnen. Du bist gerade in der Rolle des Prüfens: sei ehrlich, konkret (Zeit, Wert, Ort), nenne auch, was passt, und erfinde keine Probleme, nur was du im Bild oder Zustand wirklich siehst. ';
 async function teamReview(q,summary,imgs){
  const base='WUNSCH DES NUTZERS: '+q+'\nBAUER SAGT/TAT: '+summary+'\nDie Bilder zeigen das aktuelle Ergebnis. Antworte NUR als JSON: {"verdict":"ok"|"problem","issues":["Problem + konkreter Fix (Aktion, Zeit, Wert)"],"praise":"was passt, kurz"}';
- const jobs=[];
- if(KI.k2)jobs.push(callOpenAI(TEAM+'Rolle: PRÜFER. Erfüllt das Bild den Wunsch wirklich (richtiger Ort, Zeitraum, Stärke, nichts Ungewolltes)?',base,imgs).then(r=>({who:'Prüfer (OpenAI)',...r})));
- jobs.push(callAny({systemInstruction:{parts:[{text:TEAM+'Rolle: DETAIL-KRITIKER. Nur Feinheiten: Timing, Beat-Sync, Text-Lesbarkeit, Übergänge, Kanten, Farben.'}]},contents:[{role:'user',parts:[{text:base},...imgs]}],generationConfig:{responseMimeType:'application/json',temperature:.2,maxOutputTokens:2000}}).then(j=>({who:'Detail-Kritiker',...parseAI((j.candidates?.[0]?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join(''))})));
- return (await Promise.allSettled(jobs)).map(x=>x.status==='fulfilled'?x.value:{who:'Teammitglied',verdict:'ok',issues:[],err:(x.reason&&x.reason.message)||'Fehler'});
+ const pool=[CHECKER,CRITIC,LITE].filter(m=>m!==KI.model);
+ const roles=[
+  [pool[0]||CHECKER,'Rolle: PRÜFER. Erfüllt das Bild den Wunsch wirklich (richtiger Ort, Zeitraum, Stärke, nichts Ungewolltes)?','Prüfer · Gemini'],
+  [pool[1]||CRITIC,'Rolle: DETAIL-KRITIKER. Nur Feinheiten: Timing, Beat-Sync, Text-Lesbarkeit, Übergänge, Kanten, Farben.','Kritiker · Claude']
+ ];
+ const ask=(model,role,who)=>callGemini(model,{systemInstruction:{parts:[{text:TEAM+role}]},contents:[{role:'user',parts:[{text:base},...(imgs||[]).slice(0,4)]}],generationConfig:{responseMimeType:'application/json',temperature:.2,maxOutputTokens:1800}}).then(j=>({who,...parseAI((j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts||[]).map(p=>p.text||'').join(''))}));
+ const jobs=roles.map(([m,role,who])=>ask(m,role,who));
+ return (await Promise.allSettled(jobs)).map(x=>x.status==='fulfilled'?x.value:{who:'Team',verdict:'ok',issues:[],err:(x.reason&&x.reason.message)||'Fehler'});
 }
-/* Private Standard-Keys (nur für dich, App nicht veröffentlichen!) */
-const DEF_G='AQ.Ab8RN6ICGwRMa6DxODTUG98w99i2bDLtpQniUiS_ta1Tph29Ng',DEF_O='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',J2V_KEY='MUDtoiHb2M8FVFFHxAAnwOZxWqq58a6uUYxTfJJl';
-KI.key=DEF_G;$('kikey').value=DEF_G;_sv('ki_key',DEF_G);
-KI.k2=DEF_O;$('kikey2').value=DEF_O;_sv('ki_k2',DEF_O);KI.team=true;
+_sv('ki_key',KI.key);_sv('ki_team','1');
 /* JSON2Video: unsichtbar, nur als KI-Aktion cloud_render (braucht öffentliche https-Video-URLs) */
 async function j2vRender(urls){
  const r=await fetch('https://api.json2video.com/v2/movies',{method:'POST',headers:{'x-api-key':J2V_KEY,'Content-Type':'application/json'},body:JSON.stringify({resolution:'custom',width:W,height:H,scenes:urls.map(u=>({elements:[{type:'video',src:u}]}))})}),j=await r.json();
@@ -1862,7 +1932,7 @@ async function kiSend(){
     !/\b(add|apply|make|create|edit|change|remove|delete|turn on|turn off|set|put|cut|trim|export)\b/i.test(q)){
   kiBusy(true);
   try{
-   const j=await callAny({systemInstruction:{parts:[{text:'You are Shoxy AI, an expert video-editing tutor. Answer in English only, clearly and briefly. No emojis. Do not modify the project. Give a direct answer in at most 3 short sentences.'}]},
+   const j=await callAny({systemInstruction:{parts:[{text:'You are Shoxy AI, an expert video-editing tutor. Answer in the language the user writes, clearly and briefly. No emojis. Do not modify the project. Give a direct answer in at most 3 short sentences.'}]},
     contents:[{role:'user',parts:[{text:q}]}],generationConfig:{temperature:.3,maxOutputTokens:420}});
    const answer=(j.candidates?.[0]?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join('').trim();
    kiAdd('ai',answer||'I could not get a clear answer. Please try asking that another way.');
@@ -1915,8 +1985,8 @@ async function kiSend(){
   }
   if(!KI.key)return;
  }
- if(!KI.key){$('cmd').value=q;cmd();return kiAdd('ai',$('cmdout').textContent+'\n(Für die echte KI oben den Gemini-Key eintragen)')}
- kiBusy(true);let failed=false,said=false,totalActsGlobal=0;
+ if(!KI.key){$('cmd').value=q;cmd();return kiAdd('ai',$('cmdout').textContent+'\n(OpenRouter-Key fehlt)')}
+ kiBusy(true);kiStep('Team startet','Grok baut, Gemini prüft, Claude feilt');let failed=false,said=false,totalActsGlobal=0;const roundSays=[],allRes=[];
  const planFirst=q.length>140||((q.match(/\b(und|dann|außerdem|zusätzlich|danach|plus)\b|,/gi)||[]).length>=4)||/\b(alles|komplett|ganze[ns]?|pro[- ]?edit|krass)\b/i.test(q);
  let userText=q+localNote+(planFirst?'\n[SYSTEM, nicht vom Nutzer] Das ist ein größerer Auftrag. RUNDE 1 = nur PLANEN, noch nichts ändern: schreib in think die nummerierte Auftragsliste, deine Annahmen, Risiken und die Reihenfolge, trag den Plan in notes ein, gib do:[] aus. Stell nur dann eine Rückfrage, wenn eine falsche Annahme etwas zerstören würde. Danach führst du den Plan aus.':''),imgParts=[];
  try{
@@ -1934,20 +2004,22 @@ async function kiSend(){
     if(round>=3)throw pe;
     userText='[SYSTEM-RÜCKMELDUNG, nicht vom Nutzer] Deine letzte Antwort war kein gültiges bzw. vollständiges JSON ('+pe.message+'). Antworte erneut NUR mit dem JSON, kürzer, ohne Erklärtext.';imgParts=kiImages(true);continue;
    }
-   if(o.think&&String(o.think).trim()){kiAdd('ai','Thinking:  '+String(o.think).trim().slice(0,900)).classList.add('think')}
+   if(o.think&&String(o.think).trim()){kiStep('Denkt', String(o.think).trim().slice(0,700))}
    if(typeof o.notes==='string'){setNotes(o.notes.slice(0,3000))}officeSave();
    const acts=Array.isArray(o.do)?o.do:[],res=[];
    for(const x of acts){
-    if(KI.stop)break;kiLive(''+String(x.a).replace(/_/g,' ')+' …');
+    if(KI.stop)break;
+    const label=String(x.a||'aktion').replace(/_/g,' ');
+    kiStep('Macht', label);
     const f=DO[x.a];
-    if(!f){res.push({a:x.a,ok:false,m:'unbekannte Aktion'});continue}
-    try{const r=await f(x.v);res.push({a:x.a,ok:true,m:r===undefined||r===null?'':String(r).slice(0,500)})}
-    catch(e){res.push({a:x.a,ok:false,m:e.message})}
+    if(!f){const row={a:x.a,ok:false,m:'unbekannte Aktion'};res.push(row);allRes.push(row);kiStep('Unbekannt', label);continue}
+    try{const r=await f(x.v);const row={a:x.a,ok:true,m:r===undefined||r===null?'':String(r).slice(0,500)};res.push(row);allRes.push(row);if(row.m)kiStep(label, row.m.slice(0,180))}
+    catch(e){const row={a:x.a,ok:false,m:e.message};res.push(row);allRes.push(row);kiStep('Fehler', label+': '+e.message)}
    }
    if(KI.stop)throw new Error('__stop');kiLive('checkt sein Ergebnis');syncUI();rText();renderRigList();
    {const ho={...o,do:acts.map(a=>({a:a.a,v:String(typeof a.v==='string'?a.v:JSON.stringify(a.v)).slice(0,300)})),results:res.map(r=>(r.ok?'':'')+r.a+(r.m?': '+String(r.m).slice(0,150):''))};KI.h.push({role:'user',parts:[{text:userText.slice(0,2000)}]},{role:'model',parts:[{text:JSON.stringify(ho).slice(0,4000)}]})}
    const quiet=acts.length&&acts.every(a=>['detect','seek','play','pause','analyse','export','look'].includes(a.a)),changed=quiet||stateSig()!==before;
-   {const bad=res.filter(r=>!r.ok),sy=String(o.say||'').trim();if(sy)said=true;if(sy||bad.length)kiAdd('ai',sy+(bad.length?(sy?'\n':'')+''+bad.map(r=>r.a+(r.m?': '+String(r.m).slice(0,120):'')).join(' · '):''))}
+   {const bad=res.filter(r=>!r.ok),sy=String(o.say||'').trim();if(sy)roundSays.push(sy);if(bad.length)kiStep('Fehler', bad.map(r=>r.a+(r.m?': '+String(r.m).slice(0,120):'')).join(' · '))}
    const failed=res.filter(r=>!r.ok);let fb='';
    if(failed.length)fb='FEHLER bei: '+failed.map(r=>r.a+' '+r.m).join(' | ')+'. Repariere es und gib die korrigierten Aktionen aus.';
    else if(acts.length&&acts.every(a=>a.a==='look'||a.a==='detect')&&reviews<4){reviews++;fb='Die angeforderten Bilder/Daten hängen an. Werte sie jetzt aus und handle per do, oder antworte mit noop:true.'}
@@ -1964,7 +2036,7 @@ async function kiSend(){
     try{const im=kiImages(true);try{im.push(...(await filmstrip(autoTimes())))}catch(e){}
      const sn=snap(),dk=Object.keys(sn).filter(k=>JSON.stringify(sn[k])!==JSON.stringify(startSnap[k])).join(', ');
      const tr=await teamReview(q,String(o.say||'').slice(0,400)+' | Aktionen: '+totalActs+' | geändert: '+(dk||'nichts'),im);
-     tr.forEach(x=>{kiAdd('ai','Team · '+x.who+': '+(x.verdict==='ok'?'passt. ':'')+(x.issues||[]).slice(0,3).join(' | ')+(x.err?' (nicht erreichbar: '+x.err+')':'')).classList.add('think')});
+     tr.forEach(x=>{kiStep(x.who||'Team', (x.verdict==='ok'?'passt. ':'')+(x.issues||[]).slice(0,3).join(' | ')+(x.err?' nicht erreichbar: '+x.err:''))});
      const bad=tr.filter(x=>x.verdict==='problem'&&(x.issues||[]).length);
      if(bad.length)fb='TEAM-FEEDBACK (nicht vom Nutzer): Deine Teamkollegen haben dein Ergebnis angeschaut: '+bad.map(x=>x.who+': '+x.issues.join('; ')).join(' || ')+'. Ihr seid ein Team ohne Ego: übernimm berechtigte Punkte per do, widersprich nur mit Begründung im say, wenn ein Punkt nicht stimmt. Danach verdict ok, do:[] und noop:true mit ehrlichem say.';
     }catch(e){kiAdd('ai','Team-Prüfung übersprungen: '+e.message)}}
@@ -1974,8 +2046,17 @@ async function kiSend(){
    await new Promise(r=>setTimeout(r,350));
    imgParts=kiImages(true);try{imgParts.push(...(await filmstrip(KI.look&&KI.look.length?KI.look:autoTimes())));KI.look=null}catch(e){}
   }
- }catch(e){failed=true;if(!kiFail(e,q))kiAdd('ai','X '+e.message+(/API key|API_KEY|PERMISSION|403|Kein API-Key/i.test(e.message)?'\nPrüf deinen Gemini-Key oben im KI-Tab (aistudio.google.com/apikey).':/quota|exhaust|429/i.test(e.message)?'\nKontingent erreicht – kurz warten oder oben ein anderes Modell wählen.':''))}
- if(!failed&&!said&&!KI.stop)kiAdd('ai',totalActsGlobal?'Erledigt ('+totalActsGlobal+' Aktionen). Sag mir, was ich noch ändern soll.':'Ich habe nichts geändert. Beschreib kurz genauer, was du willst, dann mach ich es gezielt.');
+ }catch(e){failed=true;if(!kiFail(e,q))kiAdd('ai',e.message+(/unauthorized|401|API key|API_KEY|Kein OpenRouter/i.test(e.message)?'\nOpenRouter-Key wird abgelehnt. Oben aufs Zahnrad und den Key prüfen.':/quota|credits|402|429/i.test(e.message)?'\nOpenRouter-Guthaben oder Limit. Kurz warten oder Key prüfen.':''))}
+ kiTrailFreeze();
+ if(!failed&&!KI.stop){
+  const thin=s=>/^(erledigt|fertig|done|ok|okay|gemacht|passt|alles klar|ich hab(?:e)?(?: es)? (?:gemacht|erledigt)|i(?:'ve| have) done it)[.! ]*$/i.test(String(s||'').trim());
+  const finalSay=roundSays.map(s=>String(s||'').trim()).filter(s=>s&&!thin(s)).pop()||'';
+  const ok=allRes.filter(r=>r&&r.ok&&r.a&&!['look','seek','detect','pause','play'].includes(r.a));
+  const sum=ok.slice(-8).map(r=>{const m=r.m?String(r.m).replace(/\s+/g,' ').slice(0,180):'';return m?String(r.a).replace(/_/g,' ')+' — '+m:String(r.a).replace(/_/g,' ')}).join(String.fromCharCode(10));
+  if(finalSay)kiAdd('ai',finalSay);
+  else if(sum)kiAdd('ai','Konkret geändert:'+String.fromCharCode(10)+sum);
+  else kiAdd('ai','Nichts geändert. Sag in einem Satz, was du sehen willst.');
+ }
  kiBusy(false);if(!failed)KI.pending=null;officeSave();
 }
 $('kigo').onclick=kiSend;$('kiin').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!$('kigo').disabled)kiSend()}};
@@ -2200,7 +2281,7 @@ const OFF_KEY='shoxy_ki_office';KI.notes='';KI.pending=null;KI.stop=false;KI.bus
 const kiSleep=ms=>new Promise(r=>setTimeout(r,ms));let liveT=[];
 function setLive(t){const e=$('kiLive');if(!e)return;e.style.display=t?'block':'none';const b=e.querySelector('b');if(b)b.textContent=t||''}
 function kiLive(t){liveT.forEach(clearTimeout);liveT=[];setLive(t)}
-function kiThink(){kiLive('denkt nach');liveT=[setTimeout(()=>setLive('checkt dein Projekt'),2500),setTimeout(()=>setLive('komplexe Sache, dauert kurz'),15000)]}
+function kiThink(){kiStep('Schaut hin','Zustand, Bild und dein Satz');liveT=[setTimeout(()=>setLive('prüft, ob das wirklich sitzt'),4000),setTimeout(()=>setLive('größerer Auftrag, das Team rechnet noch'),18000)]}
 function kiBusy(on){KI.busy=on;if(on)KI.stop=false;$('kigo').disabled=on;$('kistop').style.display=on?'':'none';if(on)$('kiResume').style.display='none';else kiLive('')}
 function setNotes(v){KI.notes=v;const e=$('kiNotes');if(e&&e.value!==v)e.value=v}
 function officeSave(){try{const log=[...$('kilog').querySelectorAll('.mb')].slice(-60).map(d=>({w:d.classList.contains('me')?'me':'ai',t:(d.querySelector('span')||d).textContent.slice(0,1500)}));localStorage.setItem(OFF_KEY,JSON.stringify({h:KI.h.slice(-24),log,notes:KI.notes,pending:KI.pending}))}catch(e){}}
