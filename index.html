@@ -142,6 +142,7 @@ a{color:#fff;text-decoration:underline}
 .tplgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
 .qgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
 .tplgrid .btn,.qgrid .btn{padding:10px 4px;font-size:12.5px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#kikeyBtn,#kicfg{display:none!important}
 </style><style id="themeCss">
 :root,:root[data-theme=plasma]{--ac:#18e4ff;--ac2:#2f6bff;--acg:linear-gradient(100deg,#00f0ff,#2f6bff);--on:#001018;--bg:#010611;--bg2:#06142a;--pan:#071428;--bd:#12356b;--glow:#18e4ff;--txt2:#a9d6ff;--pink:var(--ac);--vio:var(--ac2);--cy:var(--ac);--line:var(--bd);--mut:#7fa3cc;--grad:var(--acg)}
 :root[data-theme=celestial]{--ac:#ffb21a;--ac2:#ff3d00;--acg:linear-gradient(100deg,#ffe600,#ff8a00,#ff2d00);--on:#1a0700;--bg:#0b0301;--bg2:#220a02;--pan:#1a0802;--bd:#6b2a08;--glow:#ff7a00;--txt2:#ffd9a8;--pink:var(--ac);--vio:var(--ac2);--cy:var(--ac);--line:var(--bd);--mut:#cc9a72;--grad:var(--acg)}
@@ -228,7 +229,7 @@ a{color:var(--ac)}.auto{background:var(--acg);color:var(--on)}
  </div><p class="small">One tap applies the change instantly. You can keep adjusting afterwards, or undo it by choosing another look.</p></div>
  <div id="cliplist"></div>
  <div class="card"><h3>Cut</h3><label class="sw"><input type="checkbox" id="autocut"><i></i>Auto-Cut on the beat</label><label class="l">Cut every <b></b></label><select id="cutb"><option value="1">1 beat (hectic)</option><option value="2">2 Beats</option><option value="4" selected>4 beats (1 bar)</option><option value="8">8 Beats</option></select>
- <label class="l">Fit clip</label><div class="seg" id="fillseg"></div><label class="l">Speed <b id="speedv">1.0×</b></label><input id="speed" type="range" min=".5" max="2" step=".05" value="1"></div>
+ <button class="btn" data-a="splitHere" style="width:100%;margin:8px 0 2px">✂ Split at playhead</button><label class="l">Fit clip</label><div class="seg" id="fillseg"></div><label class="l">Speed <b id="speedv">1.0×</b></label><input id="speed" type="range" min=".5" max="2" step=".05" value="1"></div>
  <div class="card"><h3>Pro Export</h3>
  <div class="row"><div><label class="l" style="margin-top:0">Resolution</label><select id="expres"><option value="720">HD · 720p</option><option value="1080" selected>Full HD · 1080p</option><option value="1440">2K / QHD · 1440p</option><option value="2160">4K UHD · 2160p</option></select></div><div><label class="l" style="margin-top:0">Format</label><select id="expformat"><option value="auto">Automatisch</option><option value="mp4">MP4 (if supported)</option><option value="webm">WebM</option></select></div></div>
  <div class="row"><div><label class="l" style="margin-top:0">Bitrate</label><select id="expq"><option value="8000000">Normal · 8 Mbit</option><option value="14000000">High · 14 Mbit</option><option value="22000000" selected>Very high · 22 Mbit</option><option value="35000000">4K · 35 Mbit</option><option value="50000000">4K Max · 50 Mbit</option></select></div><div><label class="l" style="margin-top:0">FPS</label><select id="expfps"><option value="30">30 FPS</option><option value="60">60 FPS</option></select></div></div>
@@ -314,7 +315,7 @@ a{color:var(--ac)}.auto{background:var(--acg);color:var(--on)}
 </div>
 
 <div class="tab" id="t-ki">
-<div class="kihead"><b>Shoxy KI</b><span class="sp"></span><button class="mini" id="kikeyBtn" type="button" title="API-Key & Modell"></button><span id="kiacts"><button class="mini" id="kiclear" type="button" title="Chat leeren">Delete</button></span></div>
+<div class="kihead"><b>Shoxy KI</b><span class="sp"></span><button class="mini" id="kikeyBtn" type="button" title="API-Key & Modell">⚙</button><span id="kiacts"><button class="mini" id="kiclear" type="button" title="Chat leeren">Delete</button></span></div>
  <div class="card" id="kicfg" style="display:none">
   <div class="row">
    <input id="kikey" class="field" type="password" placeholder="Gemini API-Key (AIza...)">
@@ -327,9 +328,11 @@ a{color:var(--ac)}.auto{background:var(--acg);color:var(--on)}
     <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
    </select>
   </div>
+  <div class="row" style="margin-top:6px"><input id="kikey2" class="field" type="password" placeholder="OpenAI API-Key (sk-...) = Prüfer"><input id="kimodel2" class="field" style="max-width:110px" placeholder="Modell"></div>
+  <label class="sw" style="margin:6px 0"><input type="checkbox" id="kiteam" checked><i></i>Team-Prüfung (Gemini baut, OpenAI + Detail-Kritiker prüfen)</label>
  </div>
 <div class="kl" id="kilog"></div>
- <div class="row" style="margin-top:6px"><input id="kiin" class="field" placeholder="Schreib einfach, was du willst …"><button class="btn hot" id="kigo" style="flex:0 0 auto"></button></div>
+ <div class="row" style="margin-top:6px"><input id="kiin" class="field" placeholder="Schreib einfach, was du willst …"><button class="btn hot" id="kigo" style="flex:0 0 auto;min-width:48px;font-size:18px">➤</button></div>
  <div class="card" id="rigcard" style="display:none;margin-top:8px"><h3>Foto-Teile (Rig)</h3><div id="riglist"></div></div>
   <div class="row" id="kitools" style="margin-top:8px"></div>
 </div>
@@ -458,10 +461,10 @@ function rKf(){
 
 /* ---------- Audio-Graph ---------- */
 let AC,master,mon,expDest,rec,chunks,BUS,IRB,exportStream;
-function connClip(c){if(!AC||c.g||c.photo)return;c.g=AC.createGain();c.source=AC.createMediaElementSource(c.v);c.source.connect(c.g);c.g.connect(BUS.clip.in);c.g.gain.value=S.clipVol}
+function connClip(c){if(!AC||c.g||c.photo)return;c.g=AC.createGain();c.source=AC.createMediaElementSource(c.v);c.source.connect(c.g);c.g.connect(BUS.clip.in);c.g.gain.value=S.clipVol*(c.vol??1)}
 function connSong(){if(!AC||S.songG)return;S.songG=AC.createGain();S.songSource=AC.createMediaElementSource(songEl);S.songSource.connect(S.songG);S.songG.connect(BUS.song.in);S.songG.gain.value=S.songVol}
 function initAudio(){if(AC){if(AC.state==='suspended')AC.resume().catch(e=>errOnce('Audio',e));return}const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)throw new Error('This browser does not support the Web Audio API.');AC=new Ctx();master=AC.createGain();mon=AC.createGain();expDest=AC.createMediaStreamDestination();master.connect(expDest);master.connect(mon);mon.connect(AC.destination);BUS={song:mkBus(),clip:mkBus()};applyFx();S.clips.forEach(connClip);if(S.song)connSong()}
-function vols(){S.clips.forEach(c=>c.g&&(c.g.gain.value=S.clipVol));if(S.songG)S.songG.gain.value=S.songVol}
+function vols(){S.clips.forEach(c=>c.g&&(c.g.gain.value=S.clipVol*(c.vol??1)));if(S.songG)S.songG.gain.value=S.songVol}
 /* ---------- Beat / Timeline (Engine v2) ---------- */
 function bsc(){return S.ba.src==='clip'?S.speed:(S.songSpeed||1)}
 function genBeats(endHint){
@@ -484,13 +487,13 @@ function beat(t){const b=S.beats;if(!b.length)return{hit:0,n:0,i:-1,ph:0};let lo
  return{hit:Math.pow(Math.max(0,1-ph/dec),2),n:r+S.barOff,i:r,ph}}
 /* ---------- Timeline ---------- */
 function build(){try{autoFmt()}catch(e){}const cl=S.clips,sp=S.speed,segs=[];
- genBeats(cl.reduce((a,c)=>a+Math.max(.1,c.out-c.in)/sp,0));
+ genBeats(cl.reduce((a,c)=>a+Math.max(.1,c.out-c.in)/(sp*(c.spd||1)),0));
  if(cl.length){let cursor=0;const bc=S.cutBeats;
-  cl.forEach(c=>{const L=Math.max(.1,c.out-c.in)/sp;
+  cl.forEach(c=>{const L=Math.max(.1,c.out-c.in)/(sp*(c.spd||1));
    if(S.autoCut&&S.beats.length>2){
     /* Cute exakt auf Beats / Taktanfänge */
     const cuts=[];for(let i=0;i<S.beats.length;i++){const bt=S.beats[i];if(bt<=cursor+.12)continue;if(bt>=cursor+L-.12)break;if((i+S.barOff)%bcAt(bt,bc)===0)cuts.push(bt)}
-    let a=cursor,src=c.in;[...cuts,cursor+L].forEach(e=>{const len=e-a;if(len>.02){segs.push({c,src,len,start:a});src+=len*sp;a=e}});cursor+=L
+    let a=cursor,src=c.in;[...cuts,cursor+L].forEach(e=>{const len=e-a;if(len>.02){segs.push({c,src,len,start:a});src+=len*sp*(c.spd||1);a=e}});cursor+=L
    }else{segs.push({c,src:c.in,len:L,start:cursor});cursor+=L}})
  }
  S.segs=segs;const l=segs[segs.length-1];S.total=l?l.start+l.len:0;S.seg=-1;if(S.T>S.total)S.T=0;drawTimeline();bpmUI();rKf();$('empty').style.display=S.clips.length?'none':'grid'}
@@ -501,9 +504,9 @@ function drawTimeline(){const d=S.total||S.song?.dur||1;let h='';
  if(S.dropT>0&&S.dropT<d)h+=`<i class="drop" style="left:${S.dropT/d*100}%"></i>`;
  S.segs.forEach(g=>h+=`<i class=cut style="left:${g.start/d*100}%"></i>`);$('timeline').innerHTML=h}
 const segAt=t=>{for(let i=S.segs.length-1;i>=0;i--)if(t>=S.segs[i].start)return i;return 0};
-const tgt=(g,L)=>{const c=g.c,sp=c.out-c.in;if(has('reverse')||revSeg(g))L=g.len-L;else if(has('rewind')){const hf=120/S.bpm,u=L%(2*hf);L=u<hf?u:2*hf-u}let x=g.src+Math.max(0,L)*S.speed;if(x>c.out-.05)x=c.in+((x-c.in)%Math.max(.1,sp));return x};
+const tgt=(g,L)=>{const c=g.c,sp=c.out-c.in;if(has('reverse')||revSeg(g))L=g.len-L;else if(has('rewind')){const hf=120/S.bpm,u=L%(2*hf);L=u<hf?u:2*hf-u}let x=g.src+Math.max(0,L)*S.speed*(c.spd||1);if(x>c.out-.05)x=c.in+((x-c.in)%Math.max(.1,sp));return x};
 function activate(i){PV.globalAlpha=1;PV.drawImage(fc,0,0);S.useTr=S.playing&&S.seg>=0&&i===S.seg+1;const pool=TR.filter(x=>x[0]!=='cut'&&x[0]!=='random');S.curTr=S.trans==='random'?pool[Math.random()*pool.length|0][0]:S.trans;S.curTd=0;{const et=(S.ev||[]).find(e=>e.type==='trans'&&Math.abs(e.t-S.segs[i].start)<.06);if(et){S.curTr=et.id;S.curTd=et.dur||0}}S.seg=i;const g=S.segs[i];S.clips.forEach(c=>{if(c.v!==g.c.v)c.v.pause()});g.c.v.currentTime=tgt(g,S.T-g.start)}
-function syncVid(g,t,hit){const v=g.c.v,ramp=has('ramp'),tg=tgt(g,t-g.start),rv=has('reverse')||has('rewind')||revSeg(g),th=rv?.03:S.playing?(ramp?1.3:.35):.04;if(!v.seeking&&Math.abs(v.currentTime-tg)>th)v.currentTime=tg;v.playbackRate=Math.min(16,Math.max(.1,S.speed*(ramp?.4+1.2*(1-hit):1)));v.preservesPitch=!S.pitchF;if(S.playing&&v.paused&&!rv)v.play().catch(()=>{});if((!S.playing||rv)&&!v.paused)v.pause();
+function syncVid(g,t,hit){const v=g.c.v,ramp=has('ramp'),tg=tgt(g,t-g.start),rv=has('reverse')||has('rewind')||revSeg(g),th=rv?.03:S.playing?(ramp?1.3:.35):.04;if(!v.seeking&&Math.abs(v.currentTime-tg)>th)v.currentTime=tg;v.playbackRate=Math.min(16,Math.max(.1,S.speed*(g.c.spd||1)*(ramp?.4+1.2*(1-hit):1)));v.preservesPitch=!S.pitchF;if(S.playing&&v.paused&&!rv)v.play().catch(()=>{});if((!S.playing||rv)&&!v.paused)v.pause();
  if(S.song){if(S.playing){const sp=S.songSpeed||1;songEl.playbackRate=sp;if(songEl.paused&&t*sp<songEl.duration)songEl.play().catch(()=>{});if(!songEl.seeking&&Math.abs(songEl.currentTime-t*sp)>.3*sp)songEl.currentTime=t*sp}else if(!songEl.paused)songEl.pause()}}
 function paintBackground(ctx){const L=S.background;if(!L?.img||!L.img.complete)return;const iw=L.img.naturalWidth||L.img.width,ih=L.img.naturalHeight||L.img.height;if(!iw||!ih)return;const z=Math.max(W/iw,H/ih);ctx.save();ctx.globalAlpha=L.opacity??1;ctx.drawImage(L.img,(W-iw*z)/2,(H-ih*z)/2,iw*z,ih*z);ctx.restore()}
 function drawFrame(v){if(v.readyState<2||v.seeking)return;const iw=v.videoWidth,ih=v.videoHeight;if(!iw)return;const s=Math.max(W/iw,H/ih);if(S.fill==='fill'){F.globalAlpha=1;F.clearRect(0,0,W,H);if(S.background)paintBackground(F);blitSrc(F,v,(W-iw*s)/2,(H-ih*s)/2,iw*s,ih*s)}else{if(S.background)paintBackground(F);else{F.fillStyle='#05070d';F.fillRect(0,0,W,H)}const q=Math.max(sm.width/iw,sm.height/ih);SM.drawImage(v.img||v,(sm.width-iw*q)/2,(sm.height-ih*q)/2,iw*q,ih*q);F.drawImage(sm,0,0,W,H);F.fillStyle='rgba(0,0,0,.20)';F.fillRect(0,0,W,H);const f=Math.min(W/iw,H/ih);blitSrc(F,v,(W-iw*f)/2,(H-ih*f)/2,iw*f,ih*f)}}
@@ -907,7 +910,7 @@ $('audiofile').onchange=e=>{const f=e.target.files[0];if(!f)return;songEl.remove
 const TABS=[['clips','Media'],['music','Audio'],['ki','AI Assistant'],['vibe','Quick Edit'],['fx','Effects'],['trans','Transitions'],['text','Text'],['kf','Keyframes']];
 $('tabs').innerHTML=TABS.map(t=>`<button type=button data-a=tab data-v=${t[0]} aria-label="${t[1]}">${t[1]}</button>`).join('');
 function setTab(v){S.tab=v;document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id==='t-'+v));$('body').scrollTop=0;$('body').scrollTop=0;const panel=$('body');if(panel)panel.scrollTop=0;const content=$('body').parentElement?.querySelector('#body');if(content)content.scrollTop=0}
-function rClips(){$('cliplist').innerHTML=S.clips.map((c,i)=>`<div class=clip><b>${i+1}</b><div class=cn><div class=nm>${esc(c.name)}</div><div class=tin>Start <input type=number step=.1 min=0 max=${(c.photo?60:c.dur).toFixed(1)} value=${c.in.toFixed(1)} data-trim=${i} data-k=in> Ende <input type=number step=.1 min=0 max=${(c.photo?60:c.dur).toFixed(1)} value=${c.out.toFixed(1)} data-trim=${i} data-k=out> / ${c.photo?'Foto':c.dur.toFixed(1)+'s'}</div></div><button class=mini data-a=split data-v=${i} title="Am Playhead teilen">Split</button><button class=mini data-a=dup data-v=${i} title="Duplizieren">Copy</button><button class=mini data-a=mv data-v="${i},-1">Prev</button><button class=mini data-a=mv data-v="${i},1">Play</button><button class=mini data-a=rm data-v=${i}>X</button></div>`).join('')||'<div class=small style="margin:8px 2px">No clips yet - choose "+ Clips / Photos". You can add several files at once and more later.</div>'}
+function rClips(){$('cliplist').innerHTML=S.clips.map((c,i)=>`<div class=clip><b>${i+1}</b><div class=cn><div class=nm data-a=jump data-v=${i} title="Tap: jump to clip" style="cursor:pointer">${esc(c.name)}</div><div class=tin>Start <input type=number step=.1 min=0 max=${(c.photo?60:c.dur).toFixed(1)} value=${c.in.toFixed(1)} data-trim=${i} data-k=in> Ende <input type=number step=.1 min=0 max=${(c.photo?60:c.dur).toFixed(1)} value=${c.out.toFixed(1)} data-trim=${i} data-k=out> / ${c.photo?'Foto':c.dur.toFixed(1)+'s'}</div>${c.photo?'':`<div class=tin>Speed <input type=number step=.05 min=.1 max=8 value=${c.spd||1} data-cp=${i} data-k=spd> Vol <input type=number step=.05 min=0 max=2 value=${c.vol??1} data-cp=${i} data-k=vol> <label><input type=checkbox data-cp=${i} data-k=rev ${c.rev?'checked':''}> Reverse</label></div>`}</div><button class=mini data-a=split data-v=${i} title="Am Playhead teilen">Split</button><button class=mini data-a=dup data-v=${i} title="Duplizieren">Copy</button><button class=mini data-a=mv data-v="${i},-1" title="Move earlier">◀</button><button class=mini data-a=mv data-v="${i},1" title="Move later">▶</button><button class=mini data-a=rm data-v=${i}>X</button></div>`).join('')||'<div class=small style="margin:8px 2px">No clips yet - choose "+ Clips / Photos". You can add several files at once and more later.</div>'}
 function rFill(){$('fillseg').innerHTML=[['fill','Fill'],['fit','Einpassen']].map(([k,l])=>`<button data-a=fill data-v=${k} class="${S.fill===k?'on':''}">${l}</button>`).join('')}
 function rPresets(){$('presets').innerHTML=Object.entries(P).map(([k,p])=>`<button class="pre${S.vibe===k?' on':''}" style="--c:${p.c}" data-a=preset data-v=${k}><b>${p.i} ${p.n}</b><small>${p.d}</small></button>`).join('')}
 function rFx0(){$('fxlist').innerHTML=FX.map(([g,l])=>`<div class=grp>${g}</div><div class=chips>${l.map(([k,i,n])=>`<button class="chip${has(k)?' on':''}" data-a=fx data-v=${k}><i>${i}</i>${n}</button>`).join('')}</div>`).join('')}
@@ -1033,7 +1036,8 @@ const kiAdd=(w,t)=>{const d=document.createElement('div');d.className='mb '+w;co
 $('kiclear').onclick=()=>{$('kilog').replaceChildren();KI.h=[]};
 /* v29: keine Begrüßung mehr */
 const snap=()=>({clips:S.clips.map((c,i)=>({i,n:c.name,in:c.in,out:c.out,dur:c.dur,photo:!!c.photo,w:(c.v&&c.v.videoWidth)||0,h:(c.v&&c.v.videoHeight)||0,rig:rigSig(c.v&&c.v.rig)})),song:S.song&&{n:S.song.name,dur:S.song.dur},fx:[...S.fx],fxi:S.fxi,fxp:S.fxp,kfs:S.kfs,vibe:S.vibe,str:S.str,trans:S.trans,tdur:S.tdur,autoCut:S.autoCut,cutBeats:S.cutBeats,speed:S.speed,look:{bright:S.bright,contrast:S.contrast,sat:S.sat,hue:S.hue},bpm:S.bpm,drop:S.dropT,beat:{mode:S.ba.mode,conf:S.ba.conf,nudge:S.nudge,bo:S.ba.bo},total:S.total,T:S.T,texts:S.texts,images:S.images.map((L,i)=>({i,name:L.name,x:L.x,y:L.y,w:L.w,h:L.h,opacity:L.opacity,blend:L.blend,s:L.s,e:L.e,rot:L.rot,rig:rigSig(L.rig)})),background:S.background?.name||null,fill:S.fill,canvas:[W,H],format:S.fmt,beatLen:S.bpm?+(60/S.bpm).toFixed(3):null,nextBeats:S.beats.filter(b=>b>=S.T).slice(0,8).map(b=>+b.toFixed(2)),segs:S.segs.slice(0,80).map(g=>({clip:S.clips.indexOf(g.c),start:+g.start.toFixed(2),len:+g.len.toFixed(2)})),vol:{clip:S.clipVol,song:S.songVol},afx:S.afx,songSpeed:S.songSpeed||1,playing:S.playing,selText:S.sel,ev:S.ev,cutMap:S.cutMap,custom:Object.values(CUSTOM).map(f=>({id:f.id,name:f.name,len:f.code.length,off:!!f.off}))});
-const SYS=()=>`You are Shoxy AI, an expert mobile video-editing assistant built into this editor. Be concise, practical, and technically accurate. Your first message in a conversation is always in English; after that you follow the user's language (see LANGUAGE).
+const TEAMSYS='IHR SEID EINE KI. Bauer (Gemini), Prüfer (OpenAI) und Detail-Kritiker sind drei Modelle, aber ein Kopf mit einem Ziel: der beste Edit für den Nutzer. Denkweise: 1) Verstehen, was der Nutzer wirklich will, auch das Unausgesprochene. 2) Zustand aus STATE und Bildern lesen, mit echten Zahlen rechnen statt zu schätzen. 3) Die kleinste Änderung planen, die das Ziel trifft, Alternativen kurz abwägen. 4) Ausführen. 5) Ergebnis selbst kritisch prüfen und nachbessern, bevor du fertig sagst. 6) Ehrlich berichten: was du getan hast, was gut ist, was nicht oder nur unsicher. Kein Ja-Sager und kein Sklave: Widersprich dem Nutzer und dem Team mit Begründung, wenn etwas schlechter wird oder ein besserer Weg existiert; sag klar, wenn etwas nicht geht oder du dir nicht sicher bist; erfinde nichts, auch keine Ergebnisse, die du nicht gesehen hast. Führe aber nur aus, was der Nutzer verlangt, und nenne Besseres als Vorschlag. Kann die App etwas nicht direkt, baue es: eigene Effekte per Code, Kombinationen, Keyframes, Clip-Tempo/Lautstärke/Reverse oder cloud_render, statt abzulehnen. Aktion cloud_render {urls:[https-URLs]} rendert per JSON2Video in der Cloud. Nutze sie NUR, wenn der Nutzer ausdrücklich Cloud-Render will UND öffentliche https-Video-URLs nennt; lokale Clips gehen damit nicht. WICHTIG: Jede Antwort enthält ein konkretes say (was, wie, welcher Wert, ob du dir sicher bist). Nie stumm bleiben.\n';
+const SYS=()=>TEAMSYS+`You are Shoxy AI, an expert mobile video-editing assistant built into this editor. Be concise, practical, and technically accurate. Your first message in a conversation is always in English; after that you follow the user's language (see LANGUAGE).
 BÜRO (intern, erwähne es dem Nutzer gegenüber nie): Du hast ein eigenes Büro mit Notizbuch, das auch nach Verbindungsabbruch oder Neuladen erhalten bleibt. Aktueller Inhalt: ${KI.notes||'(noch leer)'}\nSchreibe bei mehrstufigen oder längeren Aufgaben im JSON-Feld "notes" fortlaufend den kompletten neuen Notizstand (Ziel, Plan, erledigte und offene Schritte, Entscheidungen, Vorlieben des Nutzers, max. 1500 Zeichen). Nach einem Abbruch machst du anhand der Notizen und STATE genau dort weiter, ohne von vorn zu beginnen.
 PERSONALITY: Act like an experienced professional editor and creative director: friendly, direct, confident, honest. Never use emojis. Never claim an edit succeeded unless the editor confirms it.
 
@@ -1180,6 +1184,7 @@ AKTIONEN:
 - text(v={t,font,size,style,anim,x,y(0-1),color,c2,s,e}), edit(v={i,p:{...}}), del(v=index), lyrics(v=[{t,s,e}])
 - nudge(v=ms -250..250), analyse, play, pause, export, seek(v=sek), kf(v={t,z,x,y,r,a,b,c,s,p}), kf_clear, song(v=Suchtext)
 - clip_trim(v={i,in,out}): Start/Ende von Clip i (0-basiert) in Sekunden des ORIGINALS setzen. Nur in oder nur out ist erlaubt.
+- clip_speed(v={i,v}): Tempo von Clip i (0.1 bis 8, 1 = normal). clip_volume(v={i,v}): Lautstärke von Clip i (0 bis 2). clip_reverse(v={i,on}): Clip i rückwärts (on true/false). Alles nur für diesen einen Clip.
 - clip_split(v={i,t,timeline}): teilt Clip i in zwei Clips. t = Sekunde im Original, bei timeline:true ist t die Projektzeit (Playhead = STATE.T). Für mehrere Cute in einer Antwort von hinten nach vorn teilen, weil sich die Indizes danach verschieben.
 - clip_dup(v=i), clip_del(v=i), clip_move(v={i,to})
 - cutout(v={i,tol}): schneidet den Charakter eines Clips oder Fotos frei (einfarbiger Hintergrund wird transparent) und legt ihn als Bildebene deckungsgleich über den Clip. i weglassen = aktueller Clip. tol 10..120, Standard 40, bei mehrfarbigem Hintergrund höher. Das Ergebnis ist ein Standbild der aktuellen Stelle. Danach kannst du auf der Ebene Effekte bauen (siehe PROFI-WISSEN).
@@ -1761,7 +1766,7 @@ async function callGemini(model,body){
  const key=($('kikey').value||KI.key||'').replace(/\s+/g,'');if(key){KI.key=key}
  if(!KI.key)throw new Error('Kein API-Key eingetragen');
  const post=async b2=>{
-  if(KI.busy&&KI.stop)throw new Error('__stop');const controller=new AbortController();KI.ctl=controller;const tid=setTimeout(()=>controller.abort(),90000);
+  if(KI.busy&&KI.stop)throw new Error('__stop');const controller=new AbortController();KI.ctl=controller;const tid=setTimeout(()=>controller.abort(),240000);
   try{
    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':KI.key},body:JSON.stringify(b2),signal:controller.signal});
    let j={};try{j=await r.json()}catch(e){}
@@ -1778,7 +1783,7 @@ async function callGemini(model,body){
  catch(e){
   /* 400 durch nicht unterstützte Parameter: einmal mit schlanker Konfiguration wiederholen */
   if(/HTTP 400|invalid argument|unsupported|not supported|thinking|temperature/i.test(e.message)&&!/API key|API_KEY/i.test(e.message)){
-   const b2={...body,generationConfig:{responseMimeType:'application/json',maxOutputTokens:8192}};
+   const b2={...body,generationConfig:{responseMimeType:'application/json',maxOutputTokens:32768}};
    return await post(b2);
   }
   throw e;
@@ -1804,6 +1809,46 @@ function parseAI(txt){
  const t=txt.trim().replace(/^```(?:json)?\s*/i,'').replace(/```\s*$/,'').trim();
  try{return JSON.parse(t)}catch(e){const a=t.indexOf('{'),b=t.lastIndexOf('}');if(a>=0&&b>a)return JSON.parse(t.slice(a,b+1));throw new Error('KI-Antwort war kein gültiges JSON')}
 }
+/* ---------- Team-KI: Gemini plant+baut, OpenAI prüft, Detail-Kritiker feilt (alle ohne Ego, gleiches Ziel) ---------- */
+KI.k2='';KI.m2='gpt-4o';KI.team=true;
+try{KI.k2=localStorage.ki_k2||'';KI.m2=localStorage.ki_m2||'gpt-4o';KI.team=localStorage.ki_team!=='0'}catch(e){}
+$('kikey2').value=KI.k2;$('kimodel2').value=KI.m2;$('kiteam').checked=KI.team;
+const _sv=(k,v)=>{try{localStorage[k]=v}catch(e){}};
+$('kikey2').oninput=e=>{KI.k2=e.target.value.replace(/\s+/g,'');_sv('ki_k2',KI.k2)};
+$('kimodel2').onchange=e=>{KI.m2=e.target.value.trim()||'gpt-4o';_sv('ki_m2',KI.m2)};
+$('kiteam').onchange=e=>{KI.team=e.target.checked;_sv('ki_team',KI.team?'1':'0')};
+const TEAM='IHR SEID EINE KI. Bauer (Gemini), Prüfer (OpenAI) und Detail-Kritiker sind drei Modelle, aber ein Kopf mit einem Ziel: der beste Edit für den Nutzer. Denkweise: 1) Verstehen, was der Nutzer wirklich will, auch das Unausgesprochene. 2) Zustand aus STATE und Bildern lesen, mit echten Zahlen rechnen statt zu schätzen. 3) Die kleinste Änderung planen, die das Ziel trifft, Alternativen kurz abwägen. 4) Ausführen. 5) Ergebnis selbst kritisch prüfen und nachbessern, bevor du fertig sagst. 6) Ehrlich berichten: was du getan hast, was gut ist, was nicht oder nur unsicher. Kein Ja-Sager und kein Sklave: Widersprich dem Nutzer und dem Team mit Begründung, wenn etwas schlechter wird oder ein besserer Weg existiert; sag klar, wenn etwas nicht geht oder du dir nicht sicher bist; erfinde nichts, auch keine Ergebnisse, die du nicht gesehen hast. Führe aber nur aus, was der Nutzer verlangt, und nenne Besseres als Vorschlag. Kann die App etwas nicht direkt, baue es: eigene Effekte per Code, Kombinationen, Keyframes, Clip-Tempo/Lautstärke/Reverse oder cloud_render, statt abzulehnen. Du bist gerade in der Rolle des Prüfens: sei ehrlich, konkret (Zeit, Wert, Ort), nenne auch, was passt, und erfinde keine Probleme, nur was du im Bild/Zustand wirklich siehst. ';
+async function callOpenAI(sys,text,imgs){
+ const content=[{type:'text',text}];
+ imgs.slice(0,8).forEach(p=>{if(p.inlineData)content.push({type:'image_url',image_url:{url:'data:'+p.inlineData.mimeType+';base64,'+p.inlineData.data,detail:'low'}});else if(p.text)content[0].text+='\n'+p.text});
+ const c=new AbortController(),t=setTimeout(()=>c.abort(),60000);
+ try{
+  const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+KI.k2},body:JSON.stringify({model:KI.m2,messages:[{role:'system',content:sys},{role:'user',content}],response_format:{type:'json_object'},max_tokens:2000}),signal:c.signal});
+  const j=await r.json();if(!r.ok)throw new Error((j.error&&j.error.message)||'HTTP '+r.status);
+  return parseAI(j.choices[0].message.content);
+ }finally{clearTimeout(t)}
+}
+async function teamReview(q,summary,imgs){
+ const base='WUNSCH DES NUTZERS: '+q+'\nBAUER SAGT/TAT: '+summary+'\nDie Bilder zeigen das aktuelle Ergebnis. Antworte NUR als JSON: {"verdict":"ok"|"problem","issues":["Problem + konkreter Fix (Aktion, Zeit, Wert)"],"praise":"was passt, kurz"}';
+ const jobs=[];
+ if(KI.k2)jobs.push(callOpenAI(TEAM+'Rolle: PRÜFER. Erfüllt das Bild den Wunsch wirklich (richtiger Ort, Zeitraum, Stärke, nichts Ungewolltes)?',base,imgs).then(r=>({who:'Prüfer (OpenAI)',...r})));
+ jobs.push(callAny({systemInstruction:{parts:[{text:TEAM+'Rolle: DETAIL-KRITIKER. Nur Feinheiten: Timing, Beat-Sync, Text-Lesbarkeit, Übergänge, Kanten, Farben.'}]},contents:[{role:'user',parts:[{text:base},...imgs]}],generationConfig:{responseMimeType:'application/json',temperature:.2,maxOutputTokens:2000}}).then(j=>({who:'Detail-Kritiker',...parseAI((j.candidates?.[0]?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join(''))})));
+ return (await Promise.allSettled(jobs)).map(x=>x.status==='fulfilled'?x.value:{who:'Teammitglied',verdict:'ok',issues:[],err:(x.reason&&x.reason.message)||'Fehler'});
+}
+/* Private Standard-Keys (nur für dich, App nicht veröffentlichen!) */
+const DEF_G='AQ.Ab8RN6ICGwRMa6DxODTUG98w99i2bDLtpQniUiS_ta1Tph29Ng',DEF_O='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',J2V_KEY='MUDtoiHb2M8FVFFHxAAnwOZxWqq58a6uUYxTfJJl';
+KI.key=DEF_G;$('kikey').value=DEF_G;_sv('ki_key',DEF_G);
+KI.k2=DEF_O;$('kikey2').value=DEF_O;_sv('ki_k2',DEF_O);KI.team=true;
+/* JSON2Video: unsichtbar, nur als KI-Aktion cloud_render (braucht öffentliche https-Video-URLs) */
+async function j2vRender(urls){
+ const r=await fetch('https://api.json2video.com/v2/movies',{method:'POST',headers:{'x-api-key':J2V_KEY,'Content-Type':'application/json'},body:JSON.stringify({resolution:'custom',width:W,height:H,scenes:urls.map(u=>({elements:[{type:'video',src:u}]}))})}),j=await r.json();
+ if(!r.ok||!j.project)throw new Error(j.message||'JSON2Video HTTP '+r.status);
+ for(let i=0;i<120;i++){if(KI.stop)throw new Error('__stop');await kiSleep(3000);
+  const m=((await(await fetch('https://api.json2video.com/v2/movies?project='+j.project,{headers:{'x-api-key':J2V_KEY}})).json()).movie)||{};
+  if(m.status==='done')return m.url;if(m.status==='error')throw new Error(m.message||'Render-Fehler')}
+ throw new Error('Cloud-Render Zeitüberschreitung');
+}
+Object.assign(DO,{cloud_render:async o=>{const urls=((o&&o.urls)||[]).filter(u=>/^https:\/\//.test(u));if(!urls.length)throw new Error('cloud_render braucht öffentliche https-Video-URLs (lokale Clips gehen nicht). Sag dem Nutzer ehrlich, dass das so nicht geht.');const u=await j2vRender(urls);kiAdd('ai','Cloud-Render fertig: '+u);return u}});
 async function kiSend(){
  const q=$('kiin').value.trim();if(!q)return;$('kiin').value='';kiAdd('me',q);try{pushHistory()}catch(e){}
  // Instant local greeting: no model round-trip for ordinary greetings.
@@ -1813,8 +1858,8 @@ async function kiSend(){
  }
  // Lightweight knowledge questions use one short Flash response, without project screenshots,
  // long planning, or the multi-round edit verification loop.
- if(/^(what is|what does|explain|define|how do i|how does|what'?s the difference|why does)\\b/i.test(q) &&
-    !/\\b(add|apply|make|create|edit|change|remove|delete|turn on|turn off|set|put|cut|trim|export)\\b/i.test(q)){
+ if(/^(what is|what does|explain|define|how do i|how does|what'?s the difference|why does)\b/i.test(q) &&
+    !/\b(add|apply|make|create|edit|change|remove|delete|turn on|turn off|set|put|cut|trim|export)\b/i.test(q)){
   kiBusy(true);
   try{
    const j=await callAny({systemInstruction:{parts:[{text:'You are Shoxy AI, an expert video-editing tutor. Answer in English only, clearly and briefly. No emojis. Do not modify the project. Give a direct answer in at most 3 short sentences.'}]},
@@ -1871,17 +1916,17 @@ async function kiSend(){
   if(!KI.key)return;
  }
  if(!KI.key){$('cmd').value=q;cmd();return kiAdd('ai',$('cmdout').textContent+'\n(Für die echte KI oben den Gemini-Key eintragen)')}
- kiBusy(true);let failed=false;
+ kiBusy(true);let failed=false,said=false,totalActsGlobal=0;
  const planFirst=q.length>140||((q.match(/\b(und|dann|außerdem|zusätzlich|danach|plus)\b|,/gi)||[]).length>=4)||/\b(alles|komplett|ganze[ns]?|pro[- ]?edit|krass)\b/i.test(q);
  let userText=q+localNote+(planFirst?'\n[SYSTEM, nicht vom Nutzer] Das ist ein größerer Auftrag. RUNDE 1 = nur PLANEN, noch nichts ändern: schreib in think die nummerierte Auftragsliste, deine Annahmen, Risiken und die Reihenfolge, trag den Plan in notes ein, gib do:[] aus. Stell nur dann eine Rückfrage, wenn eine falsche Annahme etwas zerstören würde. Danach führst du den Plan aus.':''),imgParts=[];
  try{
   imgParts=kiImages(false);
-  let reviews=0,fixes=0,totalActs=0,finalDone=false;const fails={};for(let round=0;round<8;round++){
+  let reviews=0,fixes=0,totalActs=0,finalDone=false,teamRounds=0;const fails={},startSnap=JSON.parse(JSON.stringify(snap()));for(let round=0;round<10;round++){
    if(KI.stop)throw new Error('__stop');kiThink();
    const before=stateSig(),beforeSnap=JSON.parse(JSON.stringify(snap()));
    const hist=KI.h.slice(-24);while(hist.length&&hist[0].role!=='user')hist.shift();
    const contents=[...hist,{role:'user',parts:[{text:userText+'\n\nSTATE:'+JSON.stringify(snap())},...imgParts]}];
-   const j=await callAny({systemInstruction:{parts:[{text:SYS()}]},contents,generationConfig:{responseMimeType:'application/json',temperature:.4,topP:.95,maxOutputTokens:8192,thinkingConfig:{thinkingLevel:planFirst?'high':'medium'}}});
+   const j=await callAny({systemInstruction:{parts:[{text:SYS()}]},contents,generationConfig:{responseMimeType:'application/json',temperature:.4,topP:.95,maxOutputTokens:32768,thinkingConfig:{thinkingLevel:planFirst?'high':'medium'}}});
    const cand=j.candidates?.[0],rawTxt=(cand?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join('');
    if(!rawTxt){if(round<3){userText='[SYSTEM-RÜCKMELDUNG, nicht vom Nutzer] Leere Antwort ('+(cand?.finishReason||j.promptFeedback?.blockReason||'unbekannt')+'). Antworte erneut NUR mit kurzem JSON.';imgParts=kiImages(true);continue}throw new Error('Leere KI-Antwort ('+(cand?.finishReason||j.promptFeedback?.blockReason||'unbekannt')+')')}
    let o;try{o=parseAI(rawTxt)}catch(pe){
@@ -1902,7 +1947,7 @@ async function kiSend(){
    if(KI.stop)throw new Error('__stop');kiLive('checkt sein Ergebnis');syncUI();rText();renderRigList();
    {const ho={...o,do:acts.map(a=>({a:a.a,v:String(typeof a.v==='string'?a.v:JSON.stringify(a.v)).slice(0,300)})),results:res.map(r=>(r.ok?'':'')+r.a+(r.m?': '+String(r.m).slice(0,150):''))};KI.h.push({role:'user',parts:[{text:userText.slice(0,2000)}]},{role:'model',parts:[{text:JSON.stringify(ho).slice(0,4000)}]})}
    const quiet=acts.length&&acts.every(a=>['detect','seek','play','pause','analyse','export','look'].includes(a.a)),changed=quiet||stateSig()!==before;
-   {const bad=res.filter(r=>!r.ok),sy=String(o.say||'').trim();if(sy||bad.length)kiAdd('ai',sy+(bad.length?(sy?'\n':'')+''+bad.map(r=>r.a+(r.m?': '+String(r.m).slice(0,120):'')).join(' · '):''))}
+   {const bad=res.filter(r=>!r.ok),sy=String(o.say||'').trim();if(sy)said=true;if(sy||bad.length)kiAdd('ai',sy+(bad.length?(sy?'\n':'')+''+bad.map(r=>r.a+(r.m?': '+String(r.m).slice(0,120):'')).join(' · '):''))}
    const failed=res.filter(r=>!r.ok);let fb='';
    if(failed.length)fb='FEHLER bei: '+failed.map(r=>r.a+' '+r.m).join(' | ')+'. Repariere es und gib die korrigierten Aktionen aus.';
    else if(acts.length&&acts.every(a=>a.a==='look'||a.a==='detect')&&reviews<4){reviews++;fb='Die angeforderten Bilder/Daten hängen an. Werte sie jetzt aus und handle per do, oder antworte mit noop:true.'}
@@ -1911,17 +1956,26 @@ async function kiSend(){
    else if(acts.length&&changed&&!o.noop&&reviews<4){reviews++;const aS=snap(),dk=Object.keys(aS).filter(k=>JSON.stringify(aS[k])!==JSON.stringify(beforeSnap[k]));
     fb='SELBSTCHECK (nicht vom Nutzer): Du hast '+acts.length+' Aktion(en) ausgeführt. Verändert wurde laut Editor: '+(dk.join(', ')||'nur interner Zustand/eigener Code')+'. Ergebnisse: '+JSON.stringify(res)+'. Du siehst jetzt das NEUE Vorschaubild. Prüfe ehrlich und kritisch: Siehst du den Effekt/die Änderung WIRKLICH im Bild? Passt sie genau zum Wunsch des Nutzers (richtiger Timeraum, Stärke, Ort)? Hat sich etwas verändert, das nicht verlangt war? Antworte mit "verdict":"ok" oder "verdict":"problem", sag im "say" konkret was du siehst und was du geändert hast (Was, Wie, Wert) und ob du dir sicher bist. Die Bilder zeigen mehrere Timepunkte (Filmstreifen), nicht nur den Playhead. Bei "problem" korrigiere sofort per do. Hat dein Plan (siehe notes) noch offene Schritte, führe den nächsten jetzt aus und setze more:true. Nur wenn alles fertig UND geprüft ist: verdict ok, do:[] und noop:true.'}
    if(!fb&&o.verdict==='problem'&&!acts.length&&fixes<2){fixes++;fb='Du hast verdict problem gemeldet, aber keine korrigierende Aktion ausgegeben. Korrigiere jetzt per do oder erkläre ehrlich, warum es nicht geht (noop:true).'}
-   if(acts.length&&changed&&!failed.length)totalActs+=acts.length;
+   if(acts.length&&changed&&!failed.length){totalActs+=acts.length;totalActsGlobal=totalActs}
    res.forEach((r,ix)=>{if(!r.ok){const k=r.a+'|'+JSON.stringify(acts[ix]&&acts[ix].v).slice(0,200);fails[k]=(fails[k]||0)+1;if(fails[k]>=2&&fb)fb+=' ACHTUNG: "'+r.a+'" ist mit denselben Parametern schon '+fails[k]+'x gescheitert. Wiederhole es NICHT. Such die Ursache (was sagt STATE/Bild/Errortext?), dann anderer Ansatz oder ehrliche Einschränkung.'}});
    if(!fb&&round===0&&planFirst&&!acts.length&&!o.noop&&!/\?\s*$/.test(String(o.say||'').trim()))fb='Plan steht. Führe ihn jetzt aus: alle voneinander unabhängigen Schritte in EINER Antwort, Timeen per beat_times/timeline/calc statt geschätzt, danach prüfst du.';
    if(!fb&&!finalDone&&(planFirst||totalActs>=4)&&totalActs>0&&round<7){finalDone=true;fb='ABSCHLUSS-CHECK (nicht vom Nutzer): Lies den ursprünglichen Wunsch noch einmal und gehe jeden Teilwunsch einzeln durch: erledigt und im Bild/Zustand belegt, nur angenähert, oder fehlt? Fehlt etwas Machbares, hol es jetzt per do nach (more:true). Sonst: do:[], noop:true und im say ein ehrlicher Abschlussbericht: was genau (Effekt, Time, Wert), was angenähert ist, was nicht ging, und was du als Nächstes vorschlägst.'}
+   if(!fb&&KI.team&&totalActs>0&&teamRounds<2&&!KI.stop){teamRounds++;kiLive('Team prüft das Ergebnis …');
+    try{const im=kiImages(true);try{im.push(...(await filmstrip(autoTimes())))}catch(e){}
+     const sn=snap(),dk=Object.keys(sn).filter(k=>JSON.stringify(sn[k])!==JSON.stringify(startSnap[k])).join(', ');
+     const tr=await teamReview(q,String(o.say||'').slice(0,400)+' | Aktionen: '+totalActs+' | geändert: '+(dk||'nichts'),im);
+     tr.forEach(x=>{kiAdd('ai','Team · '+x.who+': '+(x.verdict==='ok'?'passt. ':'')+(x.issues||[]).slice(0,3).join(' | ')+(x.err?' (nicht erreichbar: '+x.err+')':'')).classList.add('think')});
+     const bad=tr.filter(x=>x.verdict==='problem'&&(x.issues||[]).length);
+     if(bad.length)fb='TEAM-FEEDBACK (nicht vom Nutzer): Deine Teamkollegen haben dein Ergebnis angeschaut: '+bad.map(x=>x.who+': '+x.issues.join('; ')).join(' || ')+'. Ihr seid ein Team ohne Ego: übernimm berechtigte Punkte per do, widersprich nur mit Begründung im say, wenn ein Punkt nicht stimmt. Danach verdict ok, do:[] und noop:true mit ehrlichem say.';
+    }catch(e){kiAdd('ai','Team-Prüfung übersprungen: '+e.message)}}
    if(!fb)break;
-   if(round===7){kiAdd('ai','Nach 6 Durchgängen noch nicht sauber gelöst. Beschreib mir genauer, was du siehst, dann korrigiere ich gezielt.');break}
+   if(round===9){kiAdd('ai','Nach 6 Durchgängen noch nicht sauber gelöst. Beschreib mir genauer, was du siehst, dann korrigiere ich gezielt.');break}
    userText='[SYSTEM-RÜCKMELDUNG, nicht vom Nutzer] '+fb;
    await new Promise(r=>setTimeout(r,350));
    imgParts=kiImages(true);try{imgParts.push(...(await filmstrip(KI.look&&KI.look.length?KI.look:autoTimes())));KI.look=null}catch(e){}
   }
  }catch(e){failed=true;if(!kiFail(e,q))kiAdd('ai','X '+e.message+(/API key|API_KEY|PERMISSION|403|Kein API-Key/i.test(e.message)?'\nPrüf deinen Gemini-Key oben im KI-Tab (aistudio.google.com/apikey).':/quota|exhaust|429/i.test(e.message)?'\nKontingent erreicht – kurz warten oder oben ein anderes Modell wählen.':''))}
+ if(!failed&&!said&&!KI.stop)kiAdd('ai',totalActsGlobal?'Erledigt ('+totalActsGlobal+' Aktionen). Sag mir, was ich noch ändern soll.':'Ich habe nichts geändert. Beschreib kurz genauer, was du willst, dann mach ich es gezielt.');
  kiBusy(false);if(!failed)KI.pending=null;officeSave();
 }
 $('kigo').onclick=kiSend;$('kiin').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!$('kigo').disabled)kiSend()}};
@@ -1998,7 +2052,7 @@ function kiImg(c,cap){const d=document.createElement('div');d.className='mb ai';
 const clipAt=i=>{const c=S.clips[i];if(!c)throw new Error('Clip '+i+' existiert nicht (gültig 0..'+(S.clips.length-1)+')');return c};
 function trimClip(i,a,b){const c=clipAt(+i),mx=c.photo?60:c.dur,x=a===undefined?c.in:Math.max(0,+a),y=b===undefined?c.out:Math.min(mx,+b);if(!isFinite(x)||!isFinite(y)||y-x<.1)throw new Error('Ungültiger Bereich: Ende muss mindestens 0.1 s nach dem Start liegen (Clip '+i+' hat '+mx.toFixed(1)+' s)');c.in=x;c.out=y;build();rClips();return 'Clip '+(+i+1)+' läuft jetzt '+x.toFixed(2)+'–'+y.toFixed(2)+' s'}
 function dupClipObj(c){const n={...c,g:null,source:null};if(c.photo){n.v={...c.v};n.v.rig=c.v.rig?JSON.parse(JSON.stringify(c.v.rig)):undefined}else{const v=document.createElement('video');v.setAttribute('playsinline','');v.preload='auto';v.src=c.url;if(c.v.rig)v.rig=JSON.parse(JSON.stringify(c.v.rig));n.v=v}return n}
-function splitClip(i,t,tl){const c=clipAt(+i);let x=+t;if(tl){const g=S.segs.find(s=>s.c===c&&x>=s.start&&x<s.start+s.len);if(!g)throw new Error('Die Projektzeit '+x.toFixed(2)+' s liegt nicht in Clip '+(+i+1));x=g.src+(x-g.start)*S.speed}
+function splitClip(i,t,tl){const c=clipAt(+i);let x=+t;if(tl){const g=S.segs.find(s=>s.c===c&&x>=s.start&&x<s.start+s.len);if(!g)throw new Error('Die Projektzeit '+x.toFixed(2)+' s liegt nicht in Clip '+(+i+1));x=g.src+(x-g.start)*S.speed*(c.spd||1)}
  if(!isFinite(x)||x<=c.in+.1||x>=c.out-.1)throw new Error('Cutpunkt muss zwischen '+c.in.toFixed(2)+' und '+c.out.toFixed(2)+' s (Sekunden im Original) liegen');
  const n=dupClipObj(c);n.in=x;c.out=x;S.clips.splice(+i+1,0,n);if(AC&&!n.photo)try{connClip(n)}catch(e){}build();rClips();return 'Clip '+(+i+1)+' bei '+x.toFixed(2)+' s geteilt jetzt '+S.clips.length+' Clips'}
 function dupClip(i){const c=clipAt(+i),n=dupClipObj(c);S.clips.splice(+i+1,0,n);if(AC&&!n.photo)try{connClip(n)}catch(e){}build();rClips();return 'Clip '+(+i+1)+' dupliziert'}
@@ -2130,7 +2184,7 @@ addEventListener('resize',vh);addEventListener('orientationchange',()=>setTimeou
 
 /* ---------- v23: Themes ---------- */
 (function(){
- const TH=[['plasma','','Plasma','#010611'],['celestial','','Celestial','#0b0301'],['mono','','Black & White','#000000']];
+ const TH=[['plasma','◉','Plasma','#010611'],['celestial','✦','Celestial','#0b0301'],['mono','◐','Black & White','#000000']];
  const meta=document.querySelector('meta[name=theme-color]');
  const b=document.createElement('button');b.id='themeBtn';b.type='button';b.className='mini';
  const set=n=>{const t=TH.find(x=>x[0]===n)||TH[0];document.documentElement.dataset.theme=t[0];b.textContent=t[1];b.title='Theme: '+t[2]+' (tippen zum Wechseln)';b.setAttribute('aria-label','Theme wechseln, aktuell '+t[2]);if(meta)meta.content=t[3];try{localStorage.shoxy_theme=t[0]}catch(e){}return t};
@@ -2194,7 +2248,7 @@ Object.assign(DO,{
 /* ---------- v25: Timeleisten-Ereignisse, Cut-Karte, Rechenwerkzeuge ---------- */
 S.ev=S.ev||[];S.cutMap=S.cutMap||[];
 function bcAt(bt,bc){const m=(S.cutMap||[]).find(o=>bt>=o.s&&bt<o.e);return m?m.beats:bc}
-function revSeg(g){const E=S.ev;if(!E||!E.length)return false;for(const e of E)if(e.type==='reverse'&&g.start>=e.t-.05&&g.start<e.t+(e.dur||.01)-.05)return true;return false}
+function revSeg(g){if(g.c&&g.c.rev)return true;const E=S.ev;if(!E||!E.length)return false;for(const e of E)if(e.type==='reverse'&&g.start>=e.t-.05&&g.start<e.t+(e.dur||.01)-.05)return true;return false}
 function evDraw(t){const E=S.ev;if(!E||!E.length)return;let z=1;
  for(const e of E){if(e.type!=='zoom')continue;const d=Math.max(.04,e.dur||.3),u=(t-e.t)/d;if(u<0||u>1)continue;z*=1+(e.amt??.25)*Math.pow(1-u,2)}
  if(z>1.002){T1.clearRect(0,0,W,H);T1.drawImage(cv,0,0);X.save();X.clearRect(0,0,W,H);X.translate(W/2,H/2);X.scale(z,z);X.drawImage(tm,-W/2,-H/2);X.restore()}
@@ -2261,6 +2315,29 @@ Object.assign(ED,{setFormat:(w,h)=>{setFormat(w,h);S.fmt={mode:'custom',w:W,h:H}
 (function(){})();
 /* ---------- v29: KI-Tab Feinschliff ---------- */
 (function(){const cfg=$('kicfg'),kbn=$('kikeyBtn');kbn.onclick=()=>{cfg.style.display=cfg.style.display==='none'?'block':'none'};if(!$('kikey').value)cfg.style.display='block';$('kiin').setAttribute('enterkeyhint','send');$('kiin').setAttribute('autocomplete','off')})();
+
+/* v30: manual editing + hidden auto features (AI keeps full access) */
+(function(){
+const css=document.createElement('style');css.textContent='#tabs button[data-v=vibe]{display:none!important}#t-clips .card:has(.qgrid){display:none!important}';document.head.appendChild(css);
+Object.assign(ACT,{
+ jump:v=>{const c=S.clips[+v],g=S.segs.find(g=>g.c===c);if(!g)return;S.T=g.start;S.seg=-1;try{scrubTo?.(S.T)}catch(e){}st('Clip '+(+v+1)+' at '+g.start.toFixed(2)+'s')},
+ splitHere:()=>{const g=S.segs.find(g=>S.T>=g.start&&S.T<g.start+g.len-.05);if(!g)return st('Move the playhead over a clip first');const i=S.clips.indexOf(g.c);try{st('Split '+splitClip(i,S.T,true))}catch(e){st(''+e.message)}}
+});
+const sw=$('autocut'),row=sw&&sw.closest('label'),sel=$('cutb'),lab=sel&&sel.previousElementSibling;
+const sync=()=>{const on=!!S.autoCut;[row,sel,lab].forEach(e=>{if(e)e.style.display=on?'':'none'})};sync();setInterval(sync,500);
+})();
+
+/* v31: per-clip speed / volume / reverse (manual + AI) */
+(function(){
+document.addEventListener('change',e=>{const t=e.target;if(!t.dataset||t.dataset.cp===undefined)return;const c=S.clips[+t.dataset.cp];if(!c)return;const k=t.dataset.k;try{pushHistory()}catch(_){}
+ if(k==='rev'){c.rev=t.checked;build();st('Clip '+(+t.dataset.cp+1)+(c.rev?' reversed':' normal direction'))}
+ else{const v=+t.value;if(!isFinite(v))return;if(k==='spd'){c.spd=Math.max(.1,Math.min(8,v));build();st('Clip '+(+t.dataset.cp+1)+' speed '+c.spd+'x')}else{c.vol=Math.max(0,Math.min(2,v));vols();st('Clip '+(+t.dataset.cp+1)+' volume '+Math.round(c.vol*100)+'%')}}});
+Object.assign(DO,{
+ clip_speed:o=>{const c=clipAt(+o.i),v=+o.v;if(!isFinite(v)||v<.1||v>8)throw new Error('clip_speed v muss 0.1 bis 8 sein');c.spd=v;build();rClips();return 'Clip '+(+o.i+1)+' Tempo '+v+'x'},
+ clip_volume:o=>{const c=clipAt(+o.i),v=+o.v;if(!isFinite(v)||v<0||v>2)throw new Error('clip_volume v muss 0 bis 2 sein');c.vol=v;vols();rClips();return 'Clip '+(+o.i+1)+' Lautstärke '+Math.round(v*100)+'%'},
+ clip_reverse:o=>{const c=clipAt(+o.i);c.rev=o.on!==false;build();rClips();return 'Clip '+(+o.i+1)+(c.rev?' rückwärts':' normal')}
+});
+})();
 </script>
 
 
