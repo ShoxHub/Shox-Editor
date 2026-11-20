@@ -199,7 +199,7 @@ a{color:var(--ac)}.auto{background:var(--acg);color:var(--on)}
 #body:has(#t-ki.on){overflow:hidden;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
 .kihead{display:flex;align-items:center;gap:6px;flex:0 0 auto}.kihead b{font-size:13px;letter-spacing:.5px}.kihead .sp{flex:1}#kiacts{display:flex;gap:6px}
 .kihead .mini,#kiacts .mini{min-height:34px;padding:4px 10px;font-size:14px}
-#t-ki .kl{flex:1 1 0;height:auto;min-height:88px;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;gap:6px;padding:2px 0}
+#t-ki .kl{flex:1;height:auto;min-height:0;gap:6px;padding:2px 0;overscroll-behavior:contain}
 #t-ki .kl:empty:before{content:'Tell me what kind of edit you want ';margin:auto;color:var(--mut);font-size:13px;text-align:center}
 .mb{max-width:84%;padding:8px 12px!important;border-radius:18px;font-size:14px;line-height:1.35;white-space:pre-wrap;word-break:break-word}
 .mb.me{border-bottom-right-radius:5px}.mb.ai{border-bottom-left-radius:5px}
@@ -214,15 +214,6 @@ a{color:var(--ac)}.auto{background:var(--acg);color:var(--on)}
 .kistep b{display:block;color:#fff;font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;margin-bottom:2px}
 .kistep.on{border-color:#fff;box-shadow:0 0 14px #ffffff44}
 .mb.think{display:block!important}
-#t-ki > #kicfg{
- flex:0 1 auto;min-height:0;max-height:min(52vh,340px);
- overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;
- overscroll-behavior:contain;touch-action:pan-y
-}
-#kicfg.open{display:block!important}
-#body:has(#kicfg.open){overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
-#t-ki.on:has(#kicfg.open){height:auto;min-height:100%;overflow:visible}
-#t-ki.on:has(#kicfg.open) .kl{flex:none;height:min(48vh,420px);min-height:120px}
 </style>
 </head><body>
 <div id="app">
@@ -330,9 +321,10 @@ a{color:var(--ac)}.auto{background:var(--acg);color:var(--on)}
 </div>
 
 <div class="tab" id="t-ki">
-<div class="kihead"><b>Shoxy KI</b><span id="teamBadge" title="Grok baut, Gemini prüft, Claude feilt" style="font:800 9px Orbitron,sans-serif;letter-spacing:.6px;border:1px solid #444;border-radius:999px;padding:3px 7px">TEAM</span><span class="sp"></span><button class="mini" id="kikeyBtn" type="button" title="Modell & Team">⚙</button><span id="kiacts"><button class="mini" id="kiclear" type="button" title="Chat leeren">Delete</button></span></div>
+<div class="kihead"><b>Shoxy KI</b><span id="teamBadge" title="Grok baut, Gemini prüft, Claude feilt" style="font:800 9px Orbitron,sans-serif;letter-spacing:.6px;border:1px solid #444;border-radius:999px;padding:3px 7px">TEAM</span><span class="sp"></span><button class="mini" id="kikeyBtn" type="button" title="API-Key & Modell">⚙</button><span id="kiacts"><button class="mini" id="kiclear" type="button" title="Chat leeren">Delete</button></span></div>
  <div class="card" id="kicfg" style="display:none">
-  <h3>Team</h3>
+  <h3>OpenRouter Team</h3>
+  <input id="kikey" class="field" type="password" placeholder="OpenRouter Key (sk-or-v1-...)" autocomplete="off">
   <label class="l">Bauer</label>
   <select id="kimodel">
     <option value="x-ai/grok-4.6">Grok 4.6</option>
@@ -343,7 +335,7 @@ a{color:var(--ac)}.auto{background:var(--acg);color:var(--on)}
   <input id="kikey2" type="hidden" value="">
   <input id="kimodel2" type="hidden" value="google/gemini-3.7-flash">
   <label class="sw" style="margin:8px 0"><input type="checkbox" id="kiteam" checked><i></i>Team an: Grok baut, Gemini prüft, Claude feilt</label>
-  <p class="small">Ein Server, drei Modelle, eine KI. Der Bauer führt aus. Die anderen beiden schauen das Bild an und korrigieren, bevor etwas als fertig gilt. Keys liegen nur auf dem Server.</p>
+  <p class="small">Ein OpenRouter-Key, drei Modelle, eine KI. Der Bauer führt aus. Die anderen beiden schauen das Bild an und korrigieren, bevor etwas als fertig gilt.</p>
  </div>
 <div class="kl" id="kilog"></div>
  <div class="row" style="margin-top:6px"><input id="kiin" class="field" placeholder="Schreib einfach, was du willst …"><button class="btn hot" id="kigo" style="flex:0 0 auto;min-width:48px;font-size:18px">➤</button></div>
@@ -1033,17 +1025,21 @@ try{const saved=localStorage.getItem(HIST_KEY);if(saved){const d=JSON.parse(save
 lastHist=snapString();updateHistoryButtons();rClips();rText();rLayers();setTab('clips');syncUI();volUI();build();fit();loadFont('Anton');
 nudgeUI();build();requestAnimationFrame(tick);
 
-/* ---------- KI-Chat (über /api/ai, Keys nur serverseitig) ---------- */
+/* ---------- KI-Chat (Gemini 3.8 Flash + kompatible Fallbacks) ---------- */
+const OR_KEY='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';
 const BUILDER='x-ai/grok-4.6',CHECKER='google/gemini-3.7-flash',CRITIC='anthropic/claude-sonnet-5',LITE='google/gemini-3.5-flash-lite';
 const VALID_MODELS=[BUILDER,CHECKER,CRITIC,LITE];
-const KI={h:[],key:'server',model:BUILDER,focus:'',team:true};
+const KI={h:[],key:OR_KEY,model:BUILDER,focus:'',team:true};
 try{
- try{localStorage.removeItem('ki_key')}catch(x){}
+ const saved=localStorage.ki_key||'';
+ if(/^sk-or-/.test(saved))KI.key=saved;
  KI.h=[];try{localStorage.removeItem('ki_h')}catch(x){}
  const savedModel=localStorage.ki_model||'';
  KI.model=VALID_MODELS.includes(savedModel)?savedModel:BUILDER;
 }catch(e){}
+$('kikey').value=KI.key;
 $('kimodel').value=KI.model;
+$('kikey').oninput=$('kikey').onchange=e=>{KI.key=e.target.value.replace(/\s+/g,'');try{localStorage.ki_key=KI.key}catch(x){}};
 $('kimodel').onchange=e=>{KI.model=e.target.value;try{localStorage.ki_model=KI.model}catch(x){}};
 const kiAdd=(w,t)=>{const d=document.createElement('div');d.className='mb '+w;const msg=document.createElement('span');msg.textContent=t;const del=document.createElement('button');del.className='mbdel';del.type='button';del.title='Nachricht löschen';del.textContent='×';del.onclick=()=>d.remove();d.append(msg,del);$('kilog').append(d);$('kilog').scrollTop=$('kilog').scrollHeight;return d};
 function kiStep(title,detail){
@@ -1085,7 +1081,7 @@ function kiTrailFreeze(){
 $('kiclear').onclick=()=>{$('kilog').replaceChildren();KI.h=[]};
 /* v29: keine Begrüßung mehr */
 const snap=()=>({clips:S.clips.map((c,i)=>({i,n:c.name,in:c.in,out:c.out,dur:c.dur,photo:!!c.photo,w:(c.v&&c.v.videoWidth)||0,h:(c.v&&c.v.videoHeight)||0,rig:rigSig(c.v&&c.v.rig)})),song:S.song&&{n:S.song.name,dur:S.song.dur},fx:[...S.fx],fxi:S.fxi,fxp:S.fxp,kfs:S.kfs,vibe:S.vibe,str:S.str,trans:S.trans,tdur:S.tdur,autoCut:S.autoCut,cutBeats:S.cutBeats,speed:S.speed,look:{bright:S.bright,contrast:S.contrast,sat:S.sat,hue:S.hue},bpm:S.bpm,drop:S.dropT,beat:{mode:S.ba.mode,conf:S.ba.conf,nudge:S.nudge,bo:S.ba.bo},total:S.total,T:S.T,texts:S.texts,images:S.images.map((L,i)=>({i,name:L.name,x:L.x,y:L.y,w:L.w,h:L.h,opacity:L.opacity,blend:L.blend,s:L.s,e:L.e,rot:L.rot,rig:rigSig(L.rig)})),background:S.background?.name||null,fill:S.fill,canvas:[W,H],format:S.fmt,beatLen:S.bpm?+(60/S.bpm).toFixed(3):null,nextBeats:S.beats.filter(b=>b>=S.T).slice(0,8).map(b=>+b.toFixed(2)),segs:S.segs.slice(0,80).map(g=>({clip:S.clips.indexOf(g.c),start:+g.start.toFixed(2),len:+g.len.toFixed(2)})),vol:{clip:S.clipVol,song:S.songVol},afx:S.afx,songSpeed:S.songSpeed||1,playing:S.playing,selText:S.sel,ev:S.ev,cutMap:S.cutMap,custom:Object.values(CUSTOM).map(f=>({id:f.id,name:f.name,len:f.code.length,off:!!f.off}))});
-const TEAMSYS='IHR SEID EINE KI. Bauer (Grok), Prüfer (Gemini) und Detail-Kritiker (Claude) sind drei Modelle, aber ein Kopf mit einem Ziel: der beste Edit für den Nutzer. Denkweise: 1) Verstehen, was der Nutzer wirklich will, auch das Unausgesprochene. 2) Zustand aus STATE und Bildern lesen, mit echten Zahlen rechnen statt zu schätzen. 3) Die kleinste Änderung planen, die das Ziel trifft, Alternativen kurz abwägen. 4) Ausführen. 5) Ergebnis selbst kritisch prüfen und nachbessern, bevor du fertig sagst. 6) Ehrlich berichten: was du getan hast, was gut ist, was nicht oder nur unsicher. Kein Ja-Sager und kein Sklave: Widersprich dem Nutzer und dem Team mit Begründung, wenn etwas schlechter wird oder ein besserer Weg existiert; sag klar, wenn etwas nicht geht oder du dir nicht sicher bist; erfinde nichts, auch keine Ergebnisse, die du nicht gesehen hast. Führe aber nur aus, was der Nutzer verlangt, und nenne Besseres als Vorschlag. Kann die App etwas nicht direkt, baue es: eigene Effekte per Code, Kombinationen, Keyframes, Clip-Tempo/Lautstärke/Reverse oder cloud_render, statt abzulehnen. Aktion cloud_render {urls:[https-URLs]} rendert per JSON2Video in der Cloud. Nutze sie NUR, wenn der Nutzer ausdrücklich Cloud-Render will UND öffentliche https-Video-URLs nennt; lokale Clips gehen damit nicht. WICHTIG: Jede Antwort enthält ein konkretes say (was, wie, welcher Wert, ob du dir sicher bist). Nie stumm bleiben. Das Wort erledigt ohne die konkrete Änderung ist verboten. think sind echte Arbeitsschritte: was du siehst, was du vorhast, was schiefgehen kann. say ist die eine Nachricht an den Nutzer danach. TEAM-PFLICHT: Bauer, Prüfer und Abnahme schauen das echte Bild an mehreren Zeitpunkten an, bevor irgendetwas als fertig gilt. Jeder sagt ehrlich ok oder problem, mit Ort, Zeit und Wert. Niemand nickt ab, was er nicht gesehen hat. Uneinigkeit wird gelöst, nicht übergangen: berechtigte Punkte werden eingebaut, falsche mit dem widersprochen, was im Bild steht, danach schauen alle noch einmal. Abgegeben wird nur das Ergebnis, das die erreichbaren Kollegen gemeinsam tragen. Wer nicht prüfen konnte, wird dem Nutzer genannt, nicht als Erfolg verkauft.\n';
+const TEAMSYS='IHR SEID EINE KI. Bauer (Grok), Prüfer (Gemini) und Detail-Kritiker (Claude) sind drei Modelle, aber ein Kopf mit einem Ziel: der beste Edit für den Nutzer. Denkweise: 1) Verstehen, was der Nutzer wirklich will, auch das Unausgesprochene. 2) Zustand aus STATE und Bildern lesen, mit echten Zahlen rechnen statt zu schätzen. 3) Die kleinste Änderung planen, die das Ziel trifft, Alternativen kurz abwägen. 4) Ausführen. 5) Ergebnis selbst kritisch prüfen und nachbessern, bevor du fertig sagst. 6) Ehrlich berichten: was du getan hast, was gut ist, was nicht oder nur unsicher. Kein Ja-Sager und kein Sklave: Widersprich dem Nutzer und dem Team mit Begründung, wenn etwas schlechter wird oder ein besserer Weg existiert; sag klar, wenn etwas nicht geht oder du dir nicht sicher bist; erfinde nichts, auch keine Ergebnisse, die du nicht gesehen hast. Führe aber nur aus, was der Nutzer verlangt, und nenne Besseres als Vorschlag. Kann die App etwas nicht direkt, baue es: eigene Effekte per Code, Kombinationen, Keyframes, Clip-Tempo/Lautstärke/Reverse oder cloud_render, statt abzulehnen. Aktion cloud_render {urls:[https-URLs]} rendert per JSON2Video in der Cloud. Nutze sie NUR, wenn der Nutzer ausdrücklich Cloud-Render will UND öffentliche https-Video-URLs nennt; lokale Clips gehen damit nicht. WICHTIG: Jede Antwort enthält ein konkretes say (was, wie, welcher Wert, ob du dir sicher bist). Nie stumm bleiben. Das Wort erledigt ohne die konkrete Änderung ist verboten. think sind echte Arbeitsschritte: was du siehst, was du vorhast, was schiefgehen kann. say ist die eine Nachricht an den Nutzer danach.\n';
 const SYS=()=>TEAMSYS+`You are Shoxy AI, an expert mobile video-editing assistant built into this editor. Be concise, practical, and technically accurate. Your first message in a conversation is always in English; after that you follow the user's language (see LANGUAGE).
 BÜRO (intern, erwähne es dem Nutzer gegenüber nie): Du hast ein eigenes Büro mit Notizbuch, das auch nach Verbindungsabbruch oder Neuladen erhalten bleibt. Aktueller Inhalt: ${KI.notes||'(noch leer)'}\nSchreibe bei mehrstufigen oder längeren Aufgaben im JSON-Feld "notes" fortlaufend den kompletten neuen Notizstand (Ziel, Plan, erledigte und offene Schritte, Entscheidungen, Vorlieben des Nutzers, max. 1500 Zeichen). Nach einem Abbruch machst du anhand der Notizen und STATE genau dort weiter, ohne von vorn zu beginnen.
 PERSONALITY: Act like an experienced professional editor and creative director: friendly, direct, confident, honest. Never use emojis. Never claim an edit succeeded unless the editor confirms it.
@@ -1811,6 +1807,9 @@ function stateSig(){
 }
 
 async function callGemini(model,body){
+ const key=($('kikey').value||KI.key||OR_KEY).replace(/\s+/g,'');
+ if(key)KI.key=key;
+ if(!/^sk-or-/.test(KI.key||''))throw new Error('Kein OpenRouter-Key');
  const sys=(body.systemInstruction&&body.systemInstruction.parts||[]).map(p=>p.text||'').filter(Boolean).join('\n');
  const messages=[];
  if(sys)messages.push({role:'system',content:sys});
@@ -1821,22 +1820,21 @@ async function callGemini(model,body){
    if(p.text)texts.push({type:'text',text:String(p.text).slice(0,24000)});
    else if(p.inlineData&&p.inlineData.data)imgs.push({type:'image_url',image_url:{url:'data:'+(p.inlineData.mimeType||'image/jpeg')+';base64,'+p.inlineData.data}});
   }
-  const content=texts.concat(imgs.slice(0,8));
+  const content=texts.concat(imgs.slice(0,4));
   if(!content.length)continue;
   if(content.length===1&&content[0].type==='text')messages.push({role,content:content[0].text});
   else messages.push({role,content});
  }
  const orModel=model&&String(model).indexOf('/')>=0?model:BUILDER;
  const gen=body.generationConfig||{};
- const payload={model:orModel,messages,temperature:(gen.temperature==null?0.4:gen.temperature),max_tokens:Math.min(gen.maxOutputTokens||8000, gen.thinkingConfig?24000:16000)};
+ const payload={model:orModel,messages,temperature:(gen.temperature==null?0.4:gen.temperature),max_tokens:Math.min(gen.maxOutputTokens||6000,12000)};
  if(gen.responseMimeType==='application/json')payload.response_format={type:'json_object'};
- if(gen.thinkingConfig){const lvl=String(gen.thinkingConfig.thinkingLevel||'high');payload.reasoning={effort:lvl==='low'?'low':lvl==='medium'?'medium':'high'}}
  const post=async pl=>{
   if(KI.busy&&KI.stop)throw new Error('__stop');
   const controller=new AbortController();KI.ctl=controller;
   const tid=setTimeout(()=>controller.abort(),120000);
   try{
-   const r=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(pl),signal:controller.signal});
+   const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+KI.key,'HTTP-Referer':'https://shoxy.editor','X-Title':'Shoxy Editor'},body:JSON.stringify(pl),signal:controller.signal});
    let j={};try{j=await r.json()}catch(e){}
    if(!r.ok){const msg=(j.error&&(j.error.message||j.error))||('HTTP '+r.status);throw new Error(typeof msg==='string'?msg:JSON.stringify(msg))}
    const m=j.choices&&j.choices[0]&&j.choices[0].message||{};
@@ -1847,7 +1845,7 @@ async function callGemini(model,body){
    const finish=j.choices&&j.choices[0]&&j.choices[0].finish_reason||'stop';
    return {candidates:[{content:{parts:text?[{text}]:[]},finishReason:finish}],model:j.model||orModel};
   }catch(err){
-   if(err.name==='AbortError')throw new Error(KI.busy&&KI.stop?'__stop':'Zeitüberschreitung (/api/ai antwortet nicht)');
+   if(err.name==='AbortError')throw new Error(KI.busy&&KI.stop?'__stop':'Zeitüberschreitung (OpenRouter antwortet nicht)');
    if(err instanceof TypeError)throw new Error('Netzwerkfehler (kein Internet, Adblock oder VPN)');
    throw err;
   }finally{clearTimeout(tid)}
@@ -1888,8 +1886,8 @@ function parseAI(txt){
  const t=txt.trim().replace(/^```(?:json)?\s*/i,'').replace(/```\s*$/,'').trim();
  try{return JSON.parse(t)}catch(e){const a=t.indexOf('{'),b=t.lastIndexOf('}');if(a>=0&&b>a)return JSON.parse(t.slice(a,b+1));throw new Error('KI-Antwort war kein gültiges JSON')}
 }
-/* ---------- Team: 3 Modelle, 1 KI, ein Server ---------- */
-KI.k2='';KI.m2=CHECKER;KI.team=true;
+/* ---------- Team: 3 Modelle, 1 KI, ein OpenRouter-Key ---------- */
+KI.k2=OR_KEY;KI.m2=CHECKER;KI.team=true;
 try{KI.team=localStorage.ki_team!=='0'}catch(e){}
 if($('kikey2'))$('kikey2').value='';
 if($('kimodel2'))$('kimodel2').value=CHECKER;
@@ -1898,21 +1896,19 @@ const _sv=(k,v)=>{try{localStorage[k]=v}catch(e){}};
 if($('kikey2'))$('kikey2').oninput=()=>{};
 if($('kimodel2'))$('kimodel2').onchange=()=>{};
 if($('kiteam'))$('kiteam').onchange=e=>{KI.team=e.target.checked;_sv('ki_team',KI.team?'1':'0')};
-const TEAM='IHR SEID EINE KI. Bauer (Grok), Prüfer (Gemini) und Detail-Kritiker (Claude) sind drei Modelle, aber ein Kopf mit einem Ziel: der beste Edit für den Nutzer. Denkweise: 1) Verstehen, was der Nutzer wirklich will, auch das Unausgesprochene. 2) Zustand aus STATE und Bildern lesen, mit echten Zahlen rechnen statt zu schätzen. 3) Die kleinste Änderung planen, die das Ziel trifft, Alternativen kurz abwägen. 4) Ausführen. 5) Ergebnis selbst kritisch prüfen und nachbessern, bevor du fertig sagst. 6) Ehrlich berichten: was du getan hast, was gut ist, was nicht oder nur unsicher. Kein Ja-Sager und kein Sklave: Widersprich dem Nutzer und dem Team mit Begründung, wenn etwas schlechter wird oder ein besserer Weg existiert; sag klar, wenn etwas nicht geht oder du dir nicht sicher bist; erfinde nichts, auch keine Ergebnisse, die du nicht gesehen hast. Führe aber nur aus, was der Nutzer verlangt, und nenne Besseres als Vorschlag. Kann die App etwas nicht direkt, baue es: eigene Effekte per Code, Kombinationen, Keyframes, Clip-Tempo/Lautstärke/Reverse oder cloud_render, statt abzulehnen. Du bist gerade in der Rolle des Prüfens: sei ehrlich, konkret (Zeit, Wert, Ort), nenne auch, was passt, und erfinde keine Probleme, nur was du im Bild oder Zustand wirklich siehst. Ein ok ohne gesehenes Bild ist verboten. Wenn etwas fehlt, falsch liegt oder zu stark ist, verdict problem und ein konkreter Fix. Wenn es sitzt, verdict ok und kurz warum. Ihr gebt erst ab, wenn ihr dasselbe seht. ';
+const TEAM='IHR SEID EINE KI. Bauer (Grok), Prüfer (Gemini) und Detail-Kritiker (Claude) sind drei Modelle, aber ein Kopf mit einem Ziel: der beste Edit für den Nutzer. Denkweise: 1) Verstehen, was der Nutzer wirklich will, auch das Unausgesprochene. 2) Zustand aus STATE und Bildern lesen, mit echten Zahlen rechnen statt zu schätzen. 3) Die kleinste Änderung planen, die das Ziel trifft, Alternativen kurz abwägen. 4) Ausführen. 5) Ergebnis selbst kritisch prüfen und nachbessern, bevor du fertig sagst. 6) Ehrlich berichten: was du getan hast, was gut ist, was nicht oder nur unsicher. Kein Ja-Sager und kein Sklave: Widersprich dem Nutzer und dem Team mit Begründung, wenn etwas schlechter wird oder ein besserer Weg existiert; sag klar, wenn etwas nicht geht oder du dir nicht sicher bist; erfinde nichts, auch keine Ergebnisse, die du nicht gesehen hast. Führe aber nur aus, was der Nutzer verlangt, und nenne Besseres als Vorschlag. Kann die App etwas nicht direkt, baue es: eigene Effekte per Code, Kombinationen, Keyframes, Clip-Tempo/Lautstärke/Reverse oder cloud_render, statt abzulehnen. Du bist gerade in der Rolle des Prüfens: sei ehrlich, konkret (Zeit, Wert, Ort), nenne auch, was passt, und erfinde keine Probleme, nur was du im Bild oder Zustand wirklich siehst. ';
 async function teamReview(q,summary,imgs){
- const base='WUNSCH DES NUTZERS: '+q+'\nBAUER SAGT/TAT: '+summary+'\nDie Bilder sind das echte Ergebnis, mehrere Zeitpunkte. Antworte NUR als JSON: {"verdict":"ok"|"problem","issues":["Problem + konkreter Fix (Aktion, Zeit, Wert)"],"praise":"was im Bild wirklich passt"}. Sag nie ok, wenn der Wunsch im Bild nicht zu sehen ist.';
+ const base='WUNSCH DES NUTZERS: '+q+'\nBAUER SAGT/TAT: '+summary+'\nDie Bilder zeigen das aktuelle Ergebnis. Antworte NUR als JSON: {"verdict":"ok"|"problem","issues":["Problem + konkreter Fix (Aktion, Zeit, Wert)"],"praise":"was passt, kurz"}';
+ const pool=[CHECKER,CRITIC,LITE].filter(m=>m!==KI.model);
  const roles=[
-  [CHECKER,'Rolle: PRÜFER. Erfüllt das Bild den Wunsch wirklich (richtiger Ort, Zeitraum, Stärke, nichts Ungewolltes)? Wenn nein, verdict problem.','Prüfer · Gemini'],
-  [CRITIC,'Rolle: DETAIL-KRITIKER. Nur echte Feinheiten: Timing, Beat-Sync, Text-Lesbarkeit, Übergänge, Kanten, Farben. Keine erfundenen Mängel.','Kritiker · Claude'],
-  [LITE,'Rolle: ABNAHME. Dritter Blick. Nur ok, wenn Wunsch und Bild zusammenpassen und nichts Unverlangtes dazugekommen ist. Sonst verdict problem mit Fix.','Abnahme']
+  [pool[0]||CHECKER,'Rolle: PRÜFER. Erfüllt das Bild den Wunsch wirklich (richtiger Ort, Zeitraum, Stärke, nichts Ungewolltes)?','Prüfer · Gemini'],
+  [pool[1]||CRITIC,'Rolle: DETAIL-KRITIKER. Nur Feinheiten: Timing, Beat-Sync, Text-Lesbarkeit, Übergänge, Kanten, Farben.','Kritiker · Claude']
  ];
- const ask=async(model,role,who)=>{
-  const once=()=>callGemini(model,{systemInstruction:{parts:[{text:TEAM+role}]},contents:[{role:'user',parts:[{text:base},...(imgs||[]).slice(0,8)]}],generationConfig:{responseMimeType:'application/json',temperature:.2,maxOutputTokens:2200,thinkingConfig:{thinkingLevel:'medium'}}}).then(j=>({who,model,...parseAI((j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts||[]).map(p=>p.text||'').join(''))}));
-  try{return await once()}catch(e1){try{return await once()}catch(e2){return {who,verdict:'unseen',issues:[],err:(e2&&e2.message)||(e1&&e1.message)||'nicht erreichbar'}}}
- };
- return Promise.all(roles.map(([m,role,who])=>ask(m,role,who)));
+ const ask=(model,role,who)=>callGemini(model,{systemInstruction:{parts:[{text:TEAM+role}]},contents:[{role:'user',parts:[{text:base},...(imgs||[]).slice(0,4)]}],generationConfig:{responseMimeType:'application/json',temperature:.2,maxOutputTokens:1800}}).then(j=>({who,...parseAI((j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts||[]).map(p=>p.text||'').join(''))}));
+ const jobs=roles.map(([m,role,who])=>ask(m,role,who));
+ return (await Promise.allSettled(jobs)).map(x=>x.status==='fulfilled'?x.value:{who:'Team',verdict:'ok',issues:[],err:(x.reason&&x.reason.message)||'Fehler'});
 }
-try{localStorage.removeItem('ki_key')}catch(e){}_sv('ki_team','1');
+_sv('ki_key',KI.key);_sv('ki_team','1');
 /* JSON2Video: unsichtbar, nur als KI-Aktion cloud_render (braucht öffentliche https-Video-URLs) */
 async function j2vRender(urls){
  const r=await fetch('https://api.json2video.com/v2/movies',{method:'POST',headers:{'x-api-key':J2V_KEY,'Content-Type':'application/json'},body:JSON.stringify({resolution:'custom',width:W,height:H,scenes:urls.map(u=>({elements:[{type:'video',src:u}]}))})}),j=await r.json();
@@ -1990,7 +1986,7 @@ async function kiSend(){
   if(!KI.key)return;
  }
  if(!KI.key){$('cmd').value=q;cmd();return kiAdd('ai',$('cmdout').textContent+'\n(OpenRouter-Key fehlt)')}
- kiBusy(true);kiStep('Team startet','Grok baut, Gemini prüft, Claude feilt');let failed=false,said=false,totalActsGlobal=0,teamNote='';const roundSays=[],allRes=[];
+ kiBusy(true);kiStep('Team startet','Grok baut, Gemini prüft, Claude feilt');let failed=false,said=false,totalActsGlobal=0;const roundSays=[],allRes=[];
  const planFirst=q.length>140||((q.match(/\b(und|dann|außerdem|zusätzlich|danach|plus)\b|,/gi)||[]).length>=4)||/\b(alles|komplett|ganze[ns]?|pro[- ]?edit|krass)\b/i.test(q);
  let userText=q+localNote+(planFirst?'\n[SYSTEM, nicht vom Nutzer] Das ist ein größerer Auftrag. RUNDE 1 = nur PLANEN, noch nichts ändern: schreib in think die nummerierte Auftragsliste, deine Annahmen, Risiken und die Reihenfolge, trag den Plan in notes ein, gib do:[] aus. Stell nur dann eine Rückfrage, wenn eine falsche Annahme etwas zerstören würde. Danach führst du den Plan aus.':''),imgParts=[];
  try{
@@ -2000,7 +1996,7 @@ async function kiSend(){
    const before=stateSig(),beforeSnap=JSON.parse(JSON.stringify(snap()));
    const hist=KI.h.slice(-24);while(hist.length&&hist[0].role!=='user')hist.shift();
    const contents=[...hist,{role:'user',parts:[{text:userText+'\n\nSTATE:'+JSON.stringify(snap())},...imgParts]}];
-   const j=await callAny({systemInstruction:{parts:[{text:SYS()}]},contents,generationConfig:{responseMimeType:'application/json',temperature:.4,topP:.95,maxOutputTokens:32768,thinkingConfig:{thinkingLevel:'high'}}});
+   const j=await callAny({systemInstruction:{parts:[{text:SYS()}]},contents,generationConfig:{responseMimeType:'application/json',temperature:.4,topP:.95,maxOutputTokens:32768,thinkingConfig:{thinkingLevel:planFirst?'high':'medium'}}});
    const cand=j.candidates?.[0],rawTxt=(cand?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join('');
    if(!rawTxt){if(round<3){userText='[SYSTEM-RÜCKMELDUNG, nicht vom Nutzer] Leere Antwort ('+(cand?.finishReason||j.promptFeedback?.blockReason||'unbekannt')+'). Antworte erneut NUR mit kurzem JSON.';imgParts=kiImages(true);continue}throw new Error('Leere KI-Antwort ('+(cand?.finishReason||j.promptFeedback?.blockReason||'unbekannt')+')')}
    let o;try{o=parseAI(rawTxt)}catch(pe){
@@ -2030,37 +2026,35 @@ async function kiSend(){
    else if(acts.length&&!changed)fb='Die Aktionen liefen ohne Error, aber der Projektzustand hat sich NICHT verändert, dein Ergebnis ist wirkungslos. Finde die Ursache und mache es richtig. Ergebnisse: '+JSON.stringify(res);
    else if(!acts.length&&!o.noop&&/^(ich habe|erledigt|fertig|done|ok\b|okay|gemacht)/i.test((o.say||'').trim()))fb='Du hast keine Aktion ausgegeben, behauptest aber Erledigung. Gib die nötigen Aktionen aus oder erkläre ehrlich, was fehlt.';
    else if(acts.length&&changed&&!o.noop&&reviews<4){reviews++;const aS=snap(),dk=Object.keys(aS).filter(k=>JSON.stringify(aS[k])!==JSON.stringify(beforeSnap[k]));
-    fb='SELBSTCHECK (nicht vom Nutzer): Ein ok ist verboten, solange du die Änderung nicht wirklich im Bild siehst. Du hast '+acts.length+' Aktion(en) ausgeführt. Verändert wurde laut Editor: '+(dk.join(', ')||'nur interner Zustand/eigener Code')+'. Ergebnisse: '+JSON.stringify(res)+'. Du siehst jetzt das NEUE Vorschaubild. Prüfe ehrlich und kritisch: Siehst du den Effekt/die Änderung WIRKLICH im Bild? Passt sie genau zum Wunsch des Nutzers (richtiger Timeraum, Stärke, Ort)? Hat sich etwas verändert, das nicht verlangt war? Antworte mit "verdict":"ok" oder "verdict":"problem", sag im "say" konkret was du siehst und was du geändert hast (Was, Wie, Wert) und ob du dir sicher bist. Die Bilder zeigen mehrere Timepunkte (Filmstreifen), nicht nur den Playhead. Bei "problem" korrigiere sofort per do. Hat dein Plan (siehe notes) noch offene Schritte, führe den nächsten jetzt aus und setze more:true. Nur wenn alles fertig UND geprüft ist: verdict ok, do:[] und noop:true.'}
+    fb='SELBSTCHECK (nicht vom Nutzer): Du hast '+acts.length+' Aktion(en) ausgeführt. Verändert wurde laut Editor: '+(dk.join(', ')||'nur interner Zustand/eigener Code')+'. Ergebnisse: '+JSON.stringify(res)+'. Du siehst jetzt das NEUE Vorschaubild. Prüfe ehrlich und kritisch: Siehst du den Effekt/die Änderung WIRKLICH im Bild? Passt sie genau zum Wunsch des Nutzers (richtiger Timeraum, Stärke, Ort)? Hat sich etwas verändert, das nicht verlangt war? Antworte mit "verdict":"ok" oder "verdict":"problem", sag im "say" konkret was du siehst und was du geändert hast (Was, Wie, Wert) und ob du dir sicher bist. Die Bilder zeigen mehrere Timepunkte (Filmstreifen), nicht nur den Playhead. Bei "problem" korrigiere sofort per do. Hat dein Plan (siehe notes) noch offene Schritte, führe den nächsten jetzt aus und setze more:true. Nur wenn alles fertig UND geprüft ist: verdict ok, do:[] und noop:true.'}
    if(!fb&&o.verdict==='problem'&&!acts.length&&fixes<2){fixes++;fb='Du hast verdict problem gemeldet, aber keine korrigierende Aktion ausgegeben. Korrigiere jetzt per do oder erkläre ehrlich, warum es nicht geht (noop:true).'}
    if(acts.length&&changed&&!failed.length){totalActs+=acts.length;totalActsGlobal=totalActs}
    res.forEach((r,ix)=>{if(!r.ok){const k=r.a+'|'+JSON.stringify(acts[ix]&&acts[ix].v).slice(0,200);fails[k]=(fails[k]||0)+1;if(fails[k]>=2&&fb)fb+=' ACHTUNG: "'+r.a+'" ist mit denselben Parametern schon '+fails[k]+'x gescheitert. Wiederhole es NICHT. Such die Ursache (was sagt STATE/Bild/Errortext?), dann anderer Ansatz oder ehrliche Einschränkung.'}});
    if(!fb&&round===0&&planFirst&&!acts.length&&!o.noop&&!/\?\s*$/.test(String(o.say||'').trim()))fb='Plan steht. Führe ihn jetzt aus: alle voneinander unabhängigen Schritte in EINER Antwort, Timeen per beat_times/timeline/calc statt geschätzt, danach prüfst du.';
    if(!fb&&!finalDone&&(planFirst||totalActs>=4)&&totalActs>0&&round<7){finalDone=true;fb='ABSCHLUSS-CHECK (nicht vom Nutzer): Lies den ursprünglichen Wunsch noch einmal und gehe jeden Teilwunsch einzeln durch: erledigt und im Bild/Zustand belegt, nur angenähert, oder fehlt? Fehlt etwas Machbares, hol es jetzt per do nach (more:true). Sonst: do:[], noop:true und im say ein ehrlicher Abschlussbericht: was genau (Effekt, Time, Wert), was angenähert ist, was nicht ging, und was du als Nächstes vorschlägst.'}
-   if(!fb&&KI.team&&totalActs>0&&teamRounds<3&&!KI.stop){teamRounds++;kiLive('Team schaut gemeinsam auf das Ergebnis …');
+   if(!fb&&KI.team&&totalActs>0&&teamRounds<2&&!KI.stop){teamRounds++;kiLive('Team prüft das Ergebnis …');
     try{const im=kiImages(true);try{im.push(...(await filmstrip(autoTimes())))}catch(e){}
      const sn=snap(),dk=Object.keys(sn).filter(k=>JSON.stringify(sn[k])!==JSON.stringify(startSnap[k])).join(', ');
      const tr=await teamReview(q,String(o.say||'').slice(0,400)+' | Aktionen: '+totalActs+' | geändert: '+(dk||'nichts'),im);
-     tr.forEach(x=>{kiStep(x.who||'Team', (x.verdict==='ok'?'passt. ':(x.verdict==='unseen'?'nicht geprüft. ':'problem. '))+(x.issues||[]).slice(0,3).join(' | ')+(x.err?' '+x.err:''))});
-     const bad=tr.filter(x=>x.verdict==='problem'),unseen=tr.filter(x=>x.verdict==='unseen'||x.err),oks=tr.filter(x=>x.verdict==='ok'&&!x.err);
-     if(bad.length&&teamRounds<3)fb='TEAM IST SICH NICHT EINIG (nicht vom Nutzer): '+bad.map(x=>x.who+': '+((x.issues&&x.issues.length)?x.issues.join('; '):'sieht ein Problem. Schau genau dort hin.')).join(' || ')+'. Übernimm jeden berechtigten Punkt per do. Widersprich nur im say, wenn das Bild das Gegenteil zeigt. Danach prüft das Team noch einmal. verdict erst ok, wenn ihr dasselbe seht.';
-     else if(!bad.length&&unseen.length===tr.length&&teamRounds<2)fb='Niemand aus dem Team konnte das Bild prüfen ('+unseen.map(x=>x.who+': '+(x.err||'keine Antwort')).join('; ')+'). Prüfe selbst noch einmal hart an den Bildern. Gib nichts als fertig aus, was du nicht siehst.';
-     else teamNote=(bad.length?'Team nicht ganz einig: '+bad.map(x=>x.who+': '+((x.issues||[]).slice(0,2).join('; ')||'Problem')).join(' | ')+'. ':'Team einig. ')+(oks.length?oks.map(x=>x.who).join(', ')+' haben das Bild geprüft. ':'')+(unseen.length?'Nicht geprüft: '+unseen.map(x=>x.who).join(', ')+'. ':'');
-    }catch(e){teamNote='Team-Prüfung nicht möglich: '+e.message}}
+     tr.forEach(x=>{kiStep(x.who||'Team', (x.verdict==='ok'?'passt. ':'')+(x.issues||[]).slice(0,3).join(' | ')+(x.err?' nicht erreichbar: '+x.err:''))});
+     const bad=tr.filter(x=>x.verdict==='problem'&&(x.issues||[]).length);
+     if(bad.length)fb='TEAM-FEEDBACK (nicht vom Nutzer): Deine Teamkollegen haben dein Ergebnis angeschaut: '+bad.map(x=>x.who+': '+x.issues.join('; ')).join(' || ')+'. Ihr seid ein Team ohne Ego: übernimm berechtigte Punkte per do, widersprich nur mit Begründung im say, wenn ein Punkt nicht stimmt. Danach verdict ok, do:[] und noop:true mit ehrlichem say.';
+    }catch(e){kiAdd('ai','Team-Prüfung übersprungen: '+e.message)}}
    if(!fb)break;
    if(round===9){kiAdd('ai','Nach 6 Durchgängen noch nicht sauber gelöst. Beschreib mir genauer, was du siehst, dann korrigiere ich gezielt.');break}
    userText='[SYSTEM-RÜCKMELDUNG, nicht vom Nutzer] '+fb;
    await new Promise(r=>setTimeout(r,350));
    imgParts=kiImages(true);try{imgParts.push(...(await filmstrip(KI.look&&KI.look.length?KI.look:autoTimes())));KI.look=null}catch(e){}
   }
- }catch(e){failed=true;if(!kiFail(e,q))kiAdd('ai',e.message+(/unauthorized|401|API key|API_KEY|Kein OpenRouter/i.test(e.message)?'\nServer-Key fehlt oder wird abgelehnt. OPENROUTER_API_KEY / GEMINI_API_KEY auf dem Server prüfen.':/quota|credits|402|429/i.test(e.message)?'\nKontingent oder Limit beim Anbieter. Kurz warten.':''))}
+ }catch(e){failed=true;if(!kiFail(e,q))kiAdd('ai',e.message+(/unauthorized|401|API key|API_KEY|Kein OpenRouter/i.test(e.message)?'\nOpenRouter-Key wird abgelehnt. Oben aufs Zahnrad und den Key prüfen.':/quota|credits|402|429/i.test(e.message)?'\nOpenRouter-Guthaben oder Limit. Kurz warten oder Key prüfen.':''))}
  kiTrailFreeze();
  if(!failed&&!KI.stop){
   const thin=s=>/^(erledigt|fertig|done|ok|okay|gemacht|passt|alles klar|ich hab(?:e)?(?: es)? (?:gemacht|erledigt)|i(?:'ve| have) done it)[.! ]*$/i.test(String(s||'').trim());
   const finalSay=roundSays.map(s=>String(s||'').trim()).filter(s=>s&&!thin(s)).pop()||'';
   const ok=allRes.filter(r=>r&&r.ok&&r.a&&!['look','seek','detect','pause','play'].includes(r.a));
   const sum=ok.slice(-8).map(r=>{const m=r.m?String(r.m).replace(/\s+/g,' ').slice(0,180):'';return m?String(r.a).replace(/_/g,' ')+' — '+m:String(r.a).replace(/_/g,' ')}).join(String.fromCharCode(10));
-  if(finalSay)kiAdd('ai',finalSay+(teamNote?'\n'+teamNote:''));
-  else if(sum)kiAdd('ai','Konkret geändert:'+String.fromCharCode(10)+sum+(teamNote?'\n'+teamNote:''));
+  if(finalSay)kiAdd('ai',finalSay);
+  else if(sum)kiAdd('ai','Konkret geändert:'+String.fromCharCode(10)+sum);
   else kiAdd('ai','Nichts geändert. Sag in einem Satz, was du sehen willst.');
  }
  kiBusy(false);if(!failed)KI.pending=null;officeSave();
@@ -2070,7 +2064,7 @@ $('kigo').onclick=kiSend;$('kiin').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey
 /* ---------- Music / Intensität & Manuelles Effekt-Tuning ---------- */
 function pk(k){return S.str*(S.fxi[k]??1)}
 const AU='https://api.audius.co/v1/',AP='app_name=EDITBOT';
-async function msearch(q){const l=$('mslist');l.innerHTML='<div class=small>Loading ...</div>';try{const r=await fetch(q?AU+'tracks/search?query='+encodeURIComponent(q)+'&limit=20&'+AP:AU+'tracks/trending?limit=20&'+AP),j=await r.json();l.innerHTML=(j.data||[]).filter(t=>t.is_streamable!==false&&t.access?.stream!==false).map(t=>`<div class="clip"><div class=cn><div class=nm>${esc(t.title)}</div><div class=tin>${esc(t.user.name)} · ${fm(t.duration)}</div></div><button class=mini data-a=prev data-v=${t.id}>Hör</button><button class=mini data-a=pick data-v="${t.id}|${esc(t.title).replace(/\|/g,' ')}">Nehmen</button></div>`).join('')||'<div class=small>Nix gefunden</div>'}catch(e){l.innerHTML='<div class=small>X Laden fehlgeschlagen (Internet?): '+esc(e.message)+'</div>'}}
+async function msearch(q){const l=$('mslist');l.innerHTML='<div class=small>Loading ...</div>';try{const r=await fetch(q?AU+'tracks/search?query='+encodeURIComponent(q)+'&limit=20&'+AP:AU+'tracks/trending?limit=20&'+AP),j=await r.json();l.innerHTML=(j.data||[]).filter(t=>t.is_streamable!==false&&t.access?.stream!==false).map(t=>`<div class="clip"><div class=cn><div class=nm>${esc(t.title)}</div><div class=tin>${esc(t.user.name)} · ${fm(t.duration)}</div></div><button class=mini data-a=prev data-v=${t.id}></button><button class=mini data-a=pick data-v="${t.id}|${esc(t.title).replace(/\|/g,' ')}">Play Nutzen</button></div>`).join('')||'<div class=small>Nix gefunden</div>'}catch(e){l.innerHTML='<div class=small>X Laden fehlgeschlagen (Internet?): '+esc(e.message)+'</div>'}}
 const pEl=new Audio();let pId='';
 async function hosts(){let h=['https://api.audius.co'];try{const j=await(await fetch('https://api.audius.co')).json();(j.data||[]).slice(0,4).forEach(x=>h.push(x))}catch(e){}return h}
 function tryHost(h,id){return new Promise((ok,no)=>{const to=setTimeout(()=>no('Timeüberschreitung'),9000);songEl.onloadedmetadata=()=>{clearTimeout(to);ok()};songEl.onerror=()=>{clearTimeout(to);no('Stream-Error')};songEl.crossOrigin='anonymous';songEl.src=h+'/v1/tracks/'+id+'/stream?'+AP})}
@@ -2401,7 +2395,7 @@ Object.assign(ED,{setFormat:(w,h)=>{setFormat(w,h);S.fmt={mode:'custom',w:W,h:H}
 /* ---------- v28: KI-Schnellbefehle ---------- */
 (function(){})();
 /* ---------- v29: KI-Tab Feinschliff ---------- */
-(function(){const cfg=$('kicfg'),kbn=$('kikeyBtn');kbn.onclick=()=>{const on=!cfg.classList.contains('open');cfg.classList.toggle('open',on);cfg.style.display=on?'block':'none';if(on){cfg.scrollTop=0;const sc=$('body');if(sc){sc.scrollTop=0;requestAnimationFrame(()=>cfg.scrollIntoView({block:'nearest'}))}}};$('kiin').setAttribute('enterkeyhint','send');$('kiin').setAttribute('autocomplete','off')})();
+(function(){const cfg=$('kicfg'),kbn=$('kikeyBtn');kbn.onclick=()=>{cfg.style.display=cfg.style.display==='none'?'block':'none'};if(!$('kikey').value)cfg.style.display='block';$('kiin').setAttribute('enterkeyhint','send');$('kiin').setAttribute('autocomplete','off')})();
 
 /* v30: manual editing + hidden auto features (AI keeps full access) */
 (function(){
