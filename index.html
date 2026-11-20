@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ShoxyEditor v28 · Final</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ShoxyEditor v28 · Final</title>
 <style>
 :root{color-scheme:dark;--pink:#3b82ff;--vio:#22d3ee;--cy:#62e6ff;--line:#2a2a47;--mut:#9a9cbc;--grad:linear-gradient(100deg,#3b82ff,#22d3ee)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -70,7 +70,8 @@ input[type=range]{-webkit-appearance:none;appearance:none;height:6px;border-radi
 html,body{position:fixed;inset:0;width:100%;overflow:hidden;overscroll-behavior:none}
 #app{position:fixed;left:0;right:0;top:0;height:var(--vh,100dvh);max-width:560px;margin:0 auto;background:#05070d}
 main{grid-template-rows:minmax(0,40%) minmax(0,1fr)!important}
-#tabs{padding:8px 10px;gap:7px;-webkit-overflow-scrolling:touch}#tabs button{min-width:64px}
+#tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:8px 10px;overflow:visible}
+#tabs button{min-width:0;width:100%;min-height:38px;justify-content:center;padding:7px 4px;font-size:10px;white-space:normal;letter-spacing:.25px}
 .row>*{min-width:0}.btn,.mini,.chip2,.seg button{min-height:40px}
 .chips{grid-template-columns:repeat(3,1fr)!important}.pres{grid-template-columns:repeat(2,1fr)!important}
 .mrow{display:flex;gap:8px;align-items:center;background:#0e1830;border:1px solid #22345a;border-radius:14px;padding:10px;margin:7px 0}.mrow .cn{flex:1;min-width:0}.mrow .nm{font-size:13px}
@@ -901,8 +902,8 @@ $('videos').onchange=e=>{addClips(e.target.files);e.target.value=''};
 function songReady(name,file,url){const sp=S.songSpeed||1;S.song={name,dur:songEl.duration/sp,file,url};if(AC)connSong();vols();$('songinfo').textContent='🎵 '+name+' ('+fm(songEl.duration)+')';build();volUI();st('Song geladen – Musik bleibt unverändert, bis du sie selbst änderst');if($('autoan')&&$('autoan').checked)analyse()}
 $('audiofile').onchange=e=>{const f=e.target.files[0];if(!f)return;songEl.removeAttribute('crossorigin');const old=S.song&&S.song.blobUrl;const u=URL.createObjectURL(f);songEl.onloadedmetadata=()=>{songEl.onloadedmetadata=null;songReady(f.name,f,null);S.song.blobUrl=u;old&&URL.revokeObjectURL(old)};songEl.src=u;e.target.value=''};
 /* ---------- UI ---------- */
-const TABS=[['music','🎧','Musik'],['ki','🤖','KI'],['clips','🎬','Clips'],['vibe','🔥','Vibe'],['fx','🎛','Effekte'],['kf','⏱','Keyframes'],['trans','🔀','Übergänge'],['text','🔤','Text']];
-$('tabs').innerHTML=TABS.map(t=>`<button type=button data-a=tab data-v=${t[0]} aria-label="${t[2]}">${t[1]} ${t[2]}</button>`).join('');
+const TABS=[['clips','Media'],['music','Audio'],['ki','AI Assistant'],['vibe','Quick Edit'],['fx','Effects'],['trans','Transitions'],['text','Text'],['kf','Keyframes']];
+$('tabs').innerHTML=TABS.map(t=>`<button type=button data-a=tab data-v=${t[0]} aria-label="${t[1]}">${t[1]}</button>`).join('');
 function setTab(v){S.tab=v;document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id==='t-'+v));$('body').scrollTop=0;$('body').scrollTop=0;const panel=$('body');if(panel)panel.scrollTop=0;const content=$('body').parentElement?.querySelector('#body');if(content)content.scrollTop=0}
 function rClips(){$('cliplist').innerHTML=S.clips.map((c,i)=>`<div class=clip><b>${i+1}</b><div class=cn><div class=nm>${esc(c.name)}</div><div class=tin>Start <input type=number step=.1 min=0 max=${(c.photo?60:c.dur).toFixed(1)} value=${c.in.toFixed(1)} data-trim=${i} data-k=in> Ende <input type=number step=.1 min=0 max=${(c.photo?60:c.dur).toFixed(1)} value=${c.out.toFixed(1)} data-trim=${i} data-k=out> / ${c.photo?'Foto':c.dur.toFixed(1)+'s'}</div></div><button class=mini data-a=split data-v=${i} title="Am Playhead teilen">✂</button><button class=mini data-a=dup data-v=${i} title="Duplizieren">⧉</button><button class=mini data-a=mv data-v="${i},-1">◀</button><button class=mini data-a=mv data-v="${i},1">▶</button><button class=mini data-a=rm data-v=${i}>✕</button></div>`).join('')||'<div class=small style="margin:8px 2px">Noch keine Clips – wähle „➕ Clips/Fotos“. Du kannst mehrere Dateien auf einmal und später weitere hinzufügen.</div>'}
 function rFill(){$('fillseg').innerHTML=[['fill','Füllen'],['fit','Einpassen']].map(([k,l])=>`<button data-a=fill data-v=${k} class="${S.fill===k?'on':''}">${l}</button>`).join('')}
@@ -1030,13 +1031,32 @@ const kiAdd=(w,t)=>{const d=document.createElement('div');d.className='mb '+w;co
 $('kiclear').onclick=()=>{$('kilog').replaceChildren();KI.h=[]};
 /* v29: keine Begrüßung mehr */
 const snap=()=>({clips:S.clips.map((c,i)=>({i,n:c.name,in:c.in,out:c.out,dur:c.dur,photo:!!c.photo,w:(c.v&&c.v.videoWidth)||0,h:(c.v&&c.v.videoHeight)||0,rig:rigSig(c.v&&c.v.rig)})),song:S.song&&{n:S.song.name,dur:S.song.dur},fx:[...S.fx],fxi:S.fxi,fxp:S.fxp,kfs:S.kfs,vibe:S.vibe,str:S.str,trans:S.trans,tdur:S.tdur,autoCut:S.autoCut,cutBeats:S.cutBeats,speed:S.speed,look:{bright:S.bright,contrast:S.contrast,sat:S.sat,hue:S.hue},bpm:S.bpm,drop:S.dropT,beat:{mode:S.ba.mode,conf:S.ba.conf,nudge:S.nudge,bo:S.ba.bo},total:S.total,T:S.T,texts:S.texts,images:S.images.map((L,i)=>({i,name:L.name,x:L.x,y:L.y,w:L.w,h:L.h,opacity:L.opacity,blend:L.blend,s:L.s,e:L.e,rot:L.rot,rig:rigSig(L.rig)})),background:S.background?.name||null,fill:S.fill,canvas:[W,H],format:S.fmt,beatLen:S.bpm?+(60/S.bpm).toFixed(3):null,nextBeats:S.beats.filter(b=>b>=S.T).slice(0,8).map(b=>+b.toFixed(2)),segs:S.segs.slice(0,80).map(g=>({clip:S.clips.indexOf(g.c),start:+g.start.toFixed(2),len:+g.len.toFixed(2)})),vol:{clip:S.clipVol,song:S.songVol},afx:S.afx,songSpeed:S.songSpeed||1,playing:S.playing,selText:S.sel,ev:S.ev,cutMap:S.cutMap,custom:Object.values(CUSTOM).map(f=>({id:f.id,name:f.name,len:f.code.length,off:!!f.off}))});
-const SYS=()=>`Du bist ULTRA-BOSS, ein hochintelligenter Schnitt-Assistent für diesen mobilen Videoeditor. Antworte in der Sprache: ${window.LANGNAME?LANGNAME():'Deutsch'}, locker, kurz und klar.
+const SYS=()=>`You are Shoxy AI, an expert mobile video-editing assistant built into this editor. Always respond in clear, natural English. Be concise, practical, and technically accurate.
 BÜRO (intern, erwähne es dem Nutzer gegenüber nie): Du hast ein eigenes Büro mit Notizbuch, das auch nach Verbindungsabbruch oder Neuladen erhalten bleibt. Aktueller Inhalt: ${KI.notes||'(noch leer)'}\nSchreibe bei mehrstufigen oder längeren Aufgaben im JSON-Feld "notes" fortlaufend den kompletten neuen Notizstand (Ziel, Plan, erledigte und offene Schritte, Entscheidungen, Vorlieben des Nutzers, max. 1500 Zeichen). Nach einem Abbruch machst du anhand der Notizen und STATE genau dort weiter, ohne von vorn zu beginnen.
-PERSÖNLICHKEIT: Du bist kein Befehlsempfänger, sondern ein erfahrener TikTok-Editor und bester Kumpel des Nutzers mit eigenem Geschmack. Du denkst mit, hast Meinungen und bringst eigene Ideen. Findest du etwas schwach, sag es kurz und schlag was Besseres vor, mach es aber, wenn der Nutzer darauf besteht. Nie steif, nie unterwürfig, kein "Gerne!", kein "Natürlich!", kein "Ich habe ... ausgeführt".
+PERSONALITY: Act like an experienced professional editor and creative director. Be friendly, direct, confident, and honest. Do not use emojis. Do not imitate slang excessively. Never claim an edit succeeded unless the editor confirms it.
 
-SPRACHE (sehr wichtig): Schreib wie ein Gleichaltriger auf TikTok/Discord. Kurze Sätze, Gen-Z-Slang, Umgangssprache, maximal 1-2 Emojis. Beispiele für Wörter: bro, digga, safe, krass, lowkey, highkey, cooked, goated, sheesh, fr, no cap, mid, cringe, hart, geil, läuft, wild. Nicht übertreiben, ein oder zwei Slang-Wörter pro Antwort reichen, damit es natürlich klingt und nicht cringe. Nie Behördendeutsch, nie nerdig. Nenne im "say" KEINE Effekt-IDs, Aktionsnamen, Variablen oder Zahlen-Listen, sag stattdessen "Shake auf jedem Beat" oder "Zoom beim Drop". Maximal 2-3 kurze Sätze. Passe dich dem Ton des Nutzers an (spricht er Slang, sprichst du Slang).
+LANGUAGE: English only. Keep user-facing messages short and understandable. Explain technical terms only when useful. Do not expose internal action names, IDs, variables, or implementation details.
 
 TIKTOK-WISSEN (du weißt, was gemeint ist, frag NIE nach der Bedeutung): Headbop/Headbob = Kopf oder Figur nickt auf jeden Beat. Shake Edit = Bild wackelt hart im Takt auf den Beats. Phonk Edit = dunkel, Cowbell-Beat, RGB Split, Shake, Zoom, Grain, Vignette, harte Flashes. Velocity Edit = Speed Ramps mit Slow-Mo und Beschleunigung auf dem Beat. Funk/Brazilian Edit = Beat-Zoom, Glow, Headbop. Aura/Sigma Edit = dunkel, Slow-Mo, Vignette, viel Bass, Zoom auf den Drop. Drop = der Moment, wo der Beat einsetzt, dort kommt der größte Effekt. Jump Cut, Freeze Frame, Zoom Punch, Flash auf Beat, Glitch Transition, Whip Pan, Rewind/Neymar-Reverse, Slowed+Reverb, Sped-up/Nightcore. Gute Edits: starker Hook in den ersten 1-2 Sekunden, Schnitte auf dem Beat, Effekte sparsam und nicht alles gleichzeitig, Text kurz und gut lesbar, Ende loopt oder hat einen Knall. Übersetze Slang selbst auf passende Effekte, Zeiten und Werte aus deiner Aktionsliste.
+EDITING KNOWLEDGE (recognize these styles and translate requests into supported editor actions):
+- Hip-hop / rap edits: beat-matched cuts, punch-in zooms, speed ramps, camera shake, flash frames, typography, gritty contrast, grain, and drop accents. Match the rhythm and keep text readable.
+- Phonk / drift phonk: bass-synced cuts, controlled shake, velocity ramps, dark grading, grain, vignette, chromatic aberration/RGB split, flashes, and short impact zooms.
+- Velocity / AMV: speed curves, ramp-in/ramp-out, smooth slow motion, acceleration on beat, motion blur where supported, impact frames, directional transitions, and precise music sync.
+- Anime / AMV: scene selection, beat mapping, impact cuts, glow, selective color, shake, zoom, flashes, typography, and transitions that follow the music rather than obscure the subject.
+- Cinematic: restrained transitions, deliberate pacing, color grading, contrast, highlight control, letterbox-style framing when available, subtle motion, and clean audio.
+- Trap / drill: hard beat cuts, punch zooms, brief shake, monochrome or dark grade, flashes, and bold title treatments.
+- Funk / Brazilian funk: fast rhythmic cuts, beat zooms, speed changes, glow accents, and energetic transitions.
+- R&B / slowed + reverb: slower pacing, soft fades, gentle zooms, warm or muted grading, and spacious audio treatment.
+- TikTok / Reels / Shorts: immediate hook, vertical-safe framing, captions, fast opening, readable titles, beat-aware pacing, and a strong ending or loop.
+- Montage / highlight / sports: select action moments, synchronize impacts, use brief freeze frames, speed ramps, clean cuts, and restrained overlays.
+- Glitch / cyber / RGB: digital distortion, RGB split, scanline/grain treatments, glitch transitions, and controlled flashes.
+- Velocity terminology: distinguish clip playback speed from an effect's animation speed and from music tempo. Never change the wrong one.
+- Hip-hop is a genre/style, not one fixed preset. Ask one short clarifying question only if the requested mood or intensity materially changes the edit.
+
+EFFECT AND TECHNIQUE LITERACY:
+Understand beat sync, BPM, downbeats, drops, bars, phrases, swing, half-time/double-time, jump cuts, match cuts, J-cuts, L-cuts, whip pans, zoom punches, speed ramps, reverse, freeze frames, masking, tracking, keyframes, easing, motion blur, optical-flow slow motion, compositing, overlays, typography, captions, LUTs, color grading, exposure, contrast, saturation, hue, grain, vignette, glow, bloom, chromatic aberration, RGB split, shake, strobe/flash, audio ducking, EQ, compression, reverb, delay, and loudness.
+Do not pretend a feature exists if it is not in the editor. Use the closest real supported technique and clearly label approximations. Never invent unsupported actions or effect IDs.
+
 
 NICHTS UNGEFRAGT ÄNDERN: Du fügst NIE von selbst Effekte, Übergänge, Texte oder Schnitte hinzu, wenn der Nutzer nichts verlangt hat. Bei Fragen, Smalltalk, Ideen oder Feedback bleibt do leer (noop:true). Hast du eine Idee, schlag sie vor ("Soll ich am Drop nen Flash setzen?") und warte auf Ja. Ausnahme: Der Nutzer sagt ausdrücklich "mach einfach", "mach alles" oder "überrasch mich".
 
@@ -1773,6 +1793,25 @@ function parseAI(txt){
 }
 async function kiSend(){
  const q=$('kiin').value.trim();if(!q)return;$('kiin').value='';kiAdd('me',q);try{pushHistory()}catch(e){}
+ // Instant local greeting: no model round-trip for ordinary greetings.
+ if(/^(hi|hello|hey|yo|good morning|good afternoon|good evening|what'?s up)[!.? ]*$/i.test(q)){
+  const reply=/^(good morning)/i.test(q)?'Good morning. What are we editing today?':'Hey! What are we editing today?';
+  kiAdd('ai',reply);KI.h.push({role:'user',parts:[{text:q}]},{role:'model',parts:[{text:reply}]});officeSave?.();return;
+ }
+ // Lightweight knowledge questions use one short Flash response, without project screenshots,
+ // long planning, or the multi-round edit verification loop.
+ if(/^(what is|what does|explain|define|how do i|how does|what'?s the difference|why does)\\b/i.test(q) &&
+    !/\\b(add|apply|make|create|edit|change|remove|delete|turn on|turn off|set|put|cut|trim|export)\\b/i.test(q)){
+  kiBusy(true);
+  try{
+   const j=await callAny({systemInstruction:{parts:[{text:'You are Shoxy AI, an expert video-editing tutor. Answer in English only, clearly and briefly. No emojis. Do not modify the project. Give a direct answer in at most 3 short sentences.'}]},
+    contents:[{role:'user',parts:[{text:q}]}],generationConfig:{temperature:.3,maxOutputTokens:420}});
+   const answer=(j.candidates?.[0]?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join('').trim();
+   kiAdd('ai',answer||'I could not get a clear answer. Please try asking that another way.');
+   KI.h.push({role:'user',parts:[{text:q}]},{role:'model',parts:[{text:answer.slice(0,1500)}]});
+  }catch(e){if(!kiFail(e,q))kiAdd('ai','I could not answer that right now: '+e.message)}
+  kiBusy(false);officeSave();return;
+ }
  // Eindeutige Sofortfälle (lokal, deterministisch)
  const neg=/\b(kein|keine|keinen|keiner|ohne|nicht|entfern\w*|weg|lösch\w*|ausschalten|deaktivier\w*|rückgängig|stopp?|remove|delete|disable|undo|without|no)\b/i.test(q),isQ=/\?|^\s*(was|wie|warum|wieso|weshalb|wozu|kannst|kann|geht|gibt|what|how|why|can|could|is|does)\b/i.test(q),quick=!neg&&!isQ&&q.length<=110;
  const blackholeReq=/\b(blue\s*black\s*hole|black\s*hole|schwarzes?\s+loch|blaues?\s+loch)\b/i.test(q);
@@ -1829,7 +1868,7 @@ async function kiSend(){
    const before=stateSig(),beforeSnap=JSON.parse(JSON.stringify(snap()));
    const hist=KI.h.slice(-24);while(hist.length&&hist[0].role!=='user')hist.shift();
    const contents=[...hist,{role:'user',parts:[{text:userText+'\n\nSTATE:'+JSON.stringify(snap())},...imgParts]}];
-   const j=await callAny({systemInstruction:{parts:[{text:SYS()}]},contents,generationConfig:{responseMimeType:'application/json',temperature:.4,topP:.95,maxOutputTokens:24576,thinkingConfig:{thinkingLevel:'high'}}});
+   const j=await callAny({systemInstruction:{parts:[{text:SYS()}]},contents,generationConfig:{responseMimeType:'application/json',temperature:.4,topP:.95,maxOutputTokens:8192,thinkingConfig:{thinkingLevel:planFirst?'high':'low'}}});
    const cand=j.candidates?.[0],rawTxt=(cand?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join('');
    if(!rawTxt){if(round<3){userText='[SYSTEM-RÜCKMELDUNG, nicht vom Nutzer] Leere Antwort ('+(cand?.finishReason||j.promptFeedback?.blockReason||'unbekannt')+'). Antworte erneut NUR mit kurzem JSON.';imgParts=kiImages(true);continue}throw new Error('Leere KI-Antwort ('+(cand?.finishReason||j.promptFeedback?.blockReason||'unbekannt')+')')}
    let o;try{o=parseAI(rawTxt)}catch(pe){
@@ -2087,60 +2126,8 @@ addEventListener('resize',vh);addEventListener('orientationchange',()=>setTimeou
 })();
 
 /* ---------- v23: Sprachen (KI-Übersetzung der Oberfläche, wird gecacht) ---------- */
-(function(){
- const L=[['de','Deutsch'],['en','English'],['es','Español'],['fr','Français'],['it','Italiano'],['pt','Português'],['nl','Nederlands'],['pl','Polski'],['tr','Türkçe'],['ru','Русский'],['uk','Українська'],['ar','العربية'],['hi','हिन्दी'],['ja','日本語'],['ko','한국어'],['zh','中文'],['id','Bahasa Indonesia'],['vi','Tiếng Việt']];
- let lang='de',name='Deutsch',cache={},q=new Set(),timer=0,busy=false;
- const orig=new WeakMap(),shown=new WeakMap(),AT=['placeholder','title','aria-label'];
- window.LANGNAME=()=>name;
- const ok=t=>/\p{L}/u.test(t)&&t.trim().length>1;
- const tpl=t=>{const n=[];const k=t.replace(/\d+(?:[.,:]\d+)*/g,m=>{n.push(m);return '§'});return{k:k.trim(),n,lead:t.match(/^\s*/)[0],tail:t.match(/\s*$/)[0]}};
- const out=(t,tr)=>{let i=0;return t.lead+tr.replace(/§/g,()=>t.n[i++]??'')+t.tail};
- const skip=n=>{const e=n.nodeType===3?n.parentElement:n;return !e||e.closest('script,style,canvas,#kilog,#cmdout,textarea,[data-notr]')||(e.id==='langSel')};
- function apply(node,isAttr,attr){
-  const cur=isAttr?node.getAttribute(attr):node.data,key=isAttr?attr:'';
-  let o=orig.get(node)||{};if(o[key]===undefined||(shown.get(node)||{})[key]!==cur){o[key]=cur;orig.set(node,o)}
-  const src=o[key];if(!ok(src))return;
-  if(lang==='de'){if(cur!==src){(shown.get(node)||{})[key]=src;isAttr?node.setAttribute(attr,src):node.data=src}return}
-  const t=tpl(src),tr=cache[t.k];
-  if(tr){const v=out(t,tr);if(v!==cur){const sh=shown.get(node)||{};sh[key]=v;shown.set(node,sh);isAttr?node.setAttribute(attr,v):node.data=v}}
-  else{q.add(t.k);sched()}
- }
- function walk(root){
-  if(root.nodeType===3){if(!skip(root))apply(root);return}
-  if(root.nodeType!==1||skip(root))return;
-  AT.forEach(a=>root.hasAttribute&&root.hasAttribute(a)&&apply(root,true,a));
-  root.childNodes.forEach(walk);
- }
- function sched(){if(!timer)timer=setTimeout(()=>{timer=0;flush()},500)}
- async function flush(){
-  if(busy||lang==='de'||!q.size)return;
-  const key=(KI&&KI.key)||'';if(!key){try{st('🌐 Für Übersetzung zuerst den Gemini-Key im KI-Tab eintragen')}catch(e){}q.clear();return}
-  busy=true;const items=[...q].filter(k=>!cache[k]);q.clear();
-  try{
-   for(let i=0;i<items.length;i+=70){
-    const part=items.slice(i,i+70),prompt='Translate these UI strings from German into '+name+'. Keep every § character exactly where it is, keep emojis and symbols, keep it short like a mobile app UI. Return ONLY a JSON array of strings with exactly '+part.length+' items in the same order.\n'+JSON.stringify(part);
-    const j=await callAny({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{responseMimeType:'application/json',temperature:.1,maxOutputTokens:16384}});
-    const txt=(j.candidates?.[0]?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join('');
-    const arr=JSON.parse(txt.replace(/^```(?:json)?\s*|```\s*$/g,'').trim());
-    if(Array.isArray(arr))part.forEach((k,n)=>{if(typeof arr[n]==='string'&&arr[n])cache[k]=arr[n]});
-   }
-   try{localStorage.setItem('shoxy_i18n_'+lang,JSON.stringify(cache))}catch(e){}
-   walk(document.body);try{st('🌐 '+name)}catch(e){}
-  }catch(e){try{st('⚠ Übersetzung: '+e.message)}catch(x){}}
-  busy=false;if(q.size)sched();
- }
- const mo=new MutationObserver(ms=>{if(lang==='de'&&!ms.some(()=>true))return;for(const m of ms){if(m.type==='characterData')walk(m.target);else m.addedNodes.forEach(walk);if(m.type==='attributes')AT.includes(m.attributeName)&&apply(m.target,true,m.attributeName)}});
- function setLang(c,n){lang=c;name=n;try{localStorage.shoxy_lang=c+'|'+n}catch(e){}document.documentElement.lang=c;document.documentElement.dir=['ar','he','fa','ur'].includes(c)?'rtl':'ltr';try{cache=JSON.parse(localStorage.getItem('shoxy_i18n_'+c)||'{}')}catch(e){cache={}}walk(document.body);if(c!=='de')try{st('🌐 '+n+' …')}catch(e){}}
- const card=document.createElement('div');card.className='card';card.setAttribute('data-notr','');
- card.innerHTML='<h3>🌐 Sprache / Language</h3><select id="langSel"></select><div class="row" style="margin-top:8px;gap:6px"><input id="langOther" class="field" placeholder="Andere Sprache, z.B. Swahili / Thai …" data-notr><button class="btn" id="langGo" type="button" style="flex:0 0 auto">OK</button></div><p class="small" data-notr>Die Oberfläche wird per KI übersetzt (Gemini-Key im KI-Tab nötig) und gemerkt. Die KI antwortet dann auch in dieser Sprache.</p>';
- $('t-clips').prepend(card);const sel=$('langSel');sel.innerHTML=L.map(x=>'<option value="'+x[0]+'">'+x[1]+'</option>').join('');
- sel.onchange=()=>setLang(sel.value,L.find(x=>x[0]===sel.value)[1]);
- $('langGo').onclick=()=>{const v=$('langOther').value.trim();if(v){const c='x-'+v.toLowerCase().replace(/[^a-z0-9]+/g,'');setLang(c,v);$('langOther').value=''}};
- mo.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:AT});
- let sv='';try{sv=localStorage.shoxy_lang||''}catch(e){}
- if(sv){const[c,n]=sv.split('|');if(L.some(x=>x[0]===c))sel.value=c;if(c&&n&&c!=='de')setLang(c,n)}
-})();
-
+/* Language selection and runtime translation removed: the editor is English-only. */
+document.documentElement.lang='en';try{localStorage.removeItem('shoxy_lang')}catch(e){}
 /* ---------- v23: KI-Büro, Stopp, Live-Status ---------- */
 const OFF_KEY='shoxy_ki_office';KI.notes='';KI.pending=null;KI.stop=false;KI.busy=false;KI.ctl=null;
 const kiSleep=ms=>new Promise(r=>setTimeout(r,ms));let liveT=[];
@@ -2261,4 +2248,74 @@ Object.assign(ED,{setFormat:(w,h)=>{setFormat(w,h);S.fmt={mode:'custom',w:W,h:H}
 (function(){})();
 /* ---------- v29: KI-Tab Feinschliff ---------- */
 (function(){const cfg=$('kicfg'),kbn=$('kikeyBtn');kbn.onclick=()=>{cfg.style.display=cfg.style.display==='none'?'block':'none'};if(!$('kikey').value)cfg.style.display='block';$('kiin').setAttribute('enterkeyhint','send');$('kiin').setAttribute('autocomplete','off')})();
-</script></body></html>
+</script>
+<script>
+(function(){
+ const dict = new Map([
+  ['Musik','Audio'],['Clips','Media'],['Vibe','Quick Edit'],['Effekte','Effects'],['Übergänge','Transitions'],['Keyframes','Keyframes'],
+  ['Schnell bearbeiten','Quick edits'],['Sag was du willst','Describe your edit'],['Sag mir, was für n Edit das wird','Describe the edit you want'],
+  ['Text hinzufügen','Add text'],['Text bearbeiten','Edit text'],['Bild-Overlays & Hintergründe','Image overlays & backgrounds'],
+  ['Fonts','Fonts'],['Schnitt','Cutting'],['Auto-Cut auf den Beat','Auto-cut to the beat'],['Clip einpassen','Clip fit'],
+  ['Füllen','Fill'],['Einpassen','Fit'],['Helligkeit','Brightness'],['Kontrast','Contrast'],['Sättigung','Saturation'],['Farbton','Hue'],
+  ['Effekt-Stärke (Global)','Global effect strength'],['Effekt-Stärke','Effect strength'],['Dauer','Duration'],['Auflösung','Resolution'],
+  ['Format','Format'],['Bitrate','Bitrate'],['Song & Lautstärke','Music & volume'],['Clip-Ton','Clip audio'],['Song','Music'],
+  ['Beat-Analyse','Beat analysis'],['Beats analysieren','Analyze beats'],['BPM manuell','Manual BPM'],['Tap-Tempo','Tap tempo'],
+  ['Beat-Timing Offset','Beat timing offset'],['Metronom-Klick (nur Vorschau – zum Prüfen)','Metronome click (preview only)'],
+  ['Text löschen','Delete text'],['Diesen Keyframe löschen','Delete this keyframe'],['Alle','All'],['Start','Start'],['Ende','End'],
+  ['Größe','Size'],['Farbe','Color'],['Akzent','Accent'],['Animation','Animation'],['Style','Style'],
+  ['Keine','None'],['Rückgängig','Undo'],['Wiederholen','Redo'],['Bereit. Lade deine Clips','Ready. Load your clips'],
+  ['Lade …','Loading…'],['Nix gefunden','No results found'],['Noch kein Text – wähle oben eine Vorlage.','No text yet — choose a template above.'],
+  ['Noch keine Clips – wähle „➕ Clips/Fotos“. Du kannst mehrere Dateien auf einmal und später weitere hinzufügen.','No clips yet. Choose Add clips/photos. You can add multiple files now or later.'],
+  ['Sag was du willst','Describe your edit'],['Zufalls-Remix','Random remix'],['Gratis Musik','Free music'],
+  ['Tempo','Speed'],['Musik-Speed','Music speed'],['Clip-Ton / Video-Speed','Clip audio / video speed'],
+  ['Audio-Effekte','Audio effects'],['Übergang testen','Preview transition'],['Keyframes aktiv','Enable keyframes'],
+  ['Manuelle Keyframes (Zoom · Position · Rotation · Look)','Manual keyframes (zoom · position · rotation · look)'],
+  ['Text hinzufügen','Add text'],['Titel','Title'],['Caption','Caption'],['Watermark','Watermark'],['Lower Third','Lower third'],
+  ['Beat-Text','Beat text'],['Kapitel','Chapter'],['Outro','Outro'],['POV','POV'],
+  ['Kein Song geladen – der Ton der Clips wird genutzt.','No music loaded — clip audio will be used.'],
+  ['SICHERHEIT','CONFIDENCE'],['MODUS','MODE'],['Takt-Start hier','Set bar start here'],['Beat 1 = Playhead','Set beat 1 to playhead'],
+  ['Automatisch','Automatic'],['Hoch','High'],['Sehr hoch','Very high'],['Normal','Normal']
+ ,
+  ['TIPPEN & CLIPS LADEN','TAP TO LOAD MEDIA'],['Clips rein · selbst bearbeiten','Add clips · edit them yourself'],
+  ['Ein Tipp wendet die Änderung direkt an. Du kannst danach alles weiter anpassen oder rückgängig machen, indem du einen anderen Look wählst.','One tap applies the change. You can fine-tune it afterward or undo it by choosing another look.'],
+  ['Schnitt alle','Cut every'],['1 Beat (hektisch)','1 beat (very fast)'],['2 Beats','2 beats'],['4 Beats (1 Takt)','4 beats (1 bar)'],['8 Beats','8 beats'],
+  ['MP4 (wenn unterstützt)','MP4 (if supported)'],['Die Auflösung gilt für die kürzere Seite deines Projektformats (z. B. 1080p = 1080×1920 bei 9:16 oder 1920×1080 bei 16:9). HQ nutzt hochwertiges Canvas-Resampling – kein echtes KI-Upscaling. MP4 hängt von Browser und Gerät ab; bei fehlender Unterstützung wird WebM verwendet. Deine Looks, Texte und Keyframes werden lokal automatisch gespeichert. Videodateien selbst bleiben aus Datenschutz- und Speichergründen nur in der aktuellen Sitzung geladen.','Resolution applies to the shorter side of your project (for example, 1080p = 1080×1920 in 9:16 or 1920×1080 in 16:9). HQ uses high-quality canvas resampling, not AI upscaling. MP4 support depends on your browser and device; WebM is used if MP4 is unavailable. Looks, text, and keyframes are saved locally. Video files remain loaded only for the current session.'],
+  ['Keywords-Steuerung (keine echte generative KI): Vibe-/Effekt-Namen, „ohne blur“, „auto“, „übergang whip“, „text Hallo“.','Keyword controls (not generative AI): style/effect names, “without blur”, “auto”, “whip transition”, “text Hello”.'],
+  ['Jeder aktive Effekt lässt sich unten einzeln mit Intensität, Beat-Reaktion und Zeitfenster (Start/Ende) steuern.','Each active effect can be adjusted below with its own intensity, beat response, and time window (start/end).'],
+  ['Übergänge greifen bei jedem Schnitt: zwischen mehreren Clips oder bei Auto-Cut auf den Beat.','Transitions apply at every cut, between clips or with beat-based auto-cut.'],
+  ['tippe/zieh auf die Vorschau zum Platzieren','tap or drag on the preview to position'],['Start (s)','Start (s)'],['Ende (s, 0 = bis Schluss)','End (s, 0 = until the end)'],
+  ['Importierte Bilder liegen als eigene Ebenen über deinem Video. PNG-Transparenz bleibt erhalten. Der Blue-Black-Hole-Look wird direkt mit transparentem Canvas-Hintergrund erzeugt.','Imported images appear as separate layers above your video. PNG transparency is preserved. The Blue Black Hole look is generated on a transparent canvas.'],
+  ['Google Fonts (Open Source), werden online geladen.','Google Fonts (open source) are loaded online.'],
+  ['Kein Song geladen – der Ton der Clips wird genutzt.','No music loaded — clip audio will be used.'],['Auto-Analyse beim Song-Laden','Analyze automatically when music is loaded'],
+  ['Helle Linien = Taktanfang, dicke Linie = Drop. Klingt der Klick neben der Musik, den Offset schieben (wird gemerkt). Tap-Tempo: 4+ mal im Takt tippen, der letzte Tap ist Takt 1.','Bright lines mark bar starts; the thick line marks the drop. If the click is out of sync, adjust the offset (it is saved). Tap tempo: tap 4+ times in rhythm; the last tap becomes beat 1.'],
+  ['Nur Musik/Medien nutzen, für die du die Rechte hast.','Only use music and media that you have the rights to use.'],
+  ['Tonhöhe folgt Speed (Slowed / Nightcore)','Pitch follows speed (slowed / nightcore)'],
+  ['Bibliothek: Audius – wird nur gestreamt, nichts wird heruntergeladen. Spotify und YouTube Music lassen sich technisch und rechtlich nicht in einen Editor einbauen.','Library: Audius is streamed only; nothing is downloaded. Spotify and YouTube Music cannot be integrated into this editor for technical and legal reasons.'],
+  ['Höhen','Treble'],['SICHERHEIT','CONFIDENCE'],['Takt-Start hier','Set bar start here'],['Takt 1 Beat','Bar 1 beat'],
+  ['Farbton','Hue'],['Deckkraft','Opacity'],['Rückgängig','Undo'],['Wiederholen','Redo'],['Bereit. Lade deine Clips','Ready. Load your clips']
+ ]);
+ const emoji=/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\uFE0F\u200D]/gu;
+ function cleanText(node){
+  if(node.nodeType===3){
+   let v=node.nodeValue;
+   for(const [a,b] of dict)v=v.split(a).join(b);
+   v=v.replace(emoji,'').replace(/\s{2,}/g,' ');
+   if(v!==node.nodeValue)node.nodeValue=v;
+  }else if(node.nodeType===1){
+   for(const a of ['placeholder','title','aria-label','alt']){
+    if(node.hasAttribute(a)){
+     let v=node.getAttribute(a);for(const [x,y] of dict)v=v.split(x).join(y);
+     v=v.replace(emoji,'').replace(/\s{2,}/g,' ').trim();node.setAttribute(a,v);
+    }
+   }
+  }
+ }
+ function walk(n){if(n.nodeType===3){cleanText(n);return}if(n.nodeType!==1||/^(SCRIPT|STYLE|TEXTAREA)$/i.test(n.tagName))return;cleanText(n);for(const c of n.childNodes)walk(c)}
+ function run(){document.documentElement.lang='en';walk(document.body)}
+ run();
+ const mo=new MutationObserver(ms=>{for(const m of ms){if(m.type==='characterData')cleanText(m.target);else for(const n of m.addedNodes)walk(n);if(m.type==='attributes')cleanText(m.target)}});
+ mo.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['placeholder','title','aria-label','alt']});
+})();
+</script>
+
+</body></html>
