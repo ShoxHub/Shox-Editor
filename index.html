@@ -321,10 +321,9 @@ a{color:var(--ac)}.auto{background:var(--acg);color:var(--on)}
 </div>
 
 <div class="tab" id="t-ki">
-<div class="kihead"><b>Shoxy KI</b><span id="teamBadge" title="Grok baut, Gemini prüft, Claude feilt" style="font:800 9px Orbitron,sans-serif;letter-spacing:.6px;border:1px solid #444;border-radius:999px;padding:3px 7px">TEAM</span><span class="sp"></span><button class="mini" id="kikeyBtn" type="button" title="API-Key & Modell">⚙</button><span id="kiacts"><button class="mini" id="kiclear" type="button" title="Chat leeren">Delete</button></span></div>
+<div class="kihead"><b>Shoxy KI</b><span id="teamBadge" title="Grok baut, Gemini prüft, Claude feilt" style="font:800 9px Orbitron,sans-serif;letter-spacing:.6px;border:1px solid #444;border-radius:999px;padding:3px 7px">TEAM</span><span class="sp"></span><button class="mini" id="kikeyBtn" type="button" title="Modell & Team">⚙</button><span id="kiacts"><button class="mini" id="kiclear" type="button" title="Chat leeren">Delete</button></span></div>
  <div class="card" id="kicfg" style="display:none">
-  <h3>OpenRouter Team</h3>
-  <input id="kikey" class="field" type="password" placeholder="OpenRouter Key (sk-or-v1-...)" autocomplete="off">
+  <h3>Team</h3>
   <label class="l">Bauer</label>
   <select id="kimodel">
     <option value="x-ai/grok-4.6">Grok 4.6</option>
@@ -335,7 +334,7 @@ a{color:var(--ac)}.auto{background:var(--acg);color:var(--on)}
   <input id="kikey2" type="hidden" value="">
   <input id="kimodel2" type="hidden" value="google/gemini-3.7-flash">
   <label class="sw" style="margin:8px 0"><input type="checkbox" id="kiteam" checked><i></i>Team an: Grok baut, Gemini prüft, Claude feilt</label>
-  <p class="small">Ein OpenRouter-Key, drei Modelle, eine KI. Der Bauer führt aus. Die anderen beiden schauen das Bild an und korrigieren, bevor etwas als fertig gilt.</p>
+  <p class="small">Ein Server, drei Modelle, eine KI. Der Bauer führt aus. Die anderen beiden schauen das Bild an und korrigieren, bevor etwas als fertig gilt. Keys liegen nur auf dem Server.</p>
  </div>
 <div class="kl" id="kilog"></div>
  <div class="row" style="margin-top:6px"><input id="kiin" class="field" placeholder="Schreib einfach, was du willst …"><button class="btn hot" id="kigo" style="flex:0 0 auto;min-width:48px;font-size:18px">➤</button></div>
@@ -1025,21 +1024,17 @@ try{const saved=localStorage.getItem(HIST_KEY);if(saved){const d=JSON.parse(save
 lastHist=snapString();updateHistoryButtons();rClips();rText();rLayers();setTab('clips');syncUI();volUI();build();fit();loadFont('Anton');
 nudgeUI();build();requestAnimationFrame(tick);
 
-/* ---------- KI-Chat (Gemini 3.8 Flash + kompatible Fallbacks) ---------- */
-const OR_KEY='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';
+/* ---------- KI-Chat (über /api/ai, Keys nur serverseitig) ---------- */
 const BUILDER='x-ai/grok-4.6',CHECKER='google/gemini-3.7-flash',CRITIC='anthropic/claude-sonnet-5',LITE='google/gemini-3.5-flash-lite';
 const VALID_MODELS=[BUILDER,CHECKER,CRITIC,LITE];
-const KI={h:[],key:OR_KEY,model:BUILDER,focus:'',team:true};
+const KI={h:[],key:'server',model:BUILDER,focus:'',team:true};
 try{
- const saved=localStorage.ki_key||'';
- if(/^sk-or-/.test(saved))KI.key=saved;
+ try{localStorage.removeItem('ki_key')}catch(x){}
  KI.h=[];try{localStorage.removeItem('ki_h')}catch(x){}
  const savedModel=localStorage.ki_model||'';
  KI.model=VALID_MODELS.includes(savedModel)?savedModel:BUILDER;
 }catch(e){}
-$('kikey').value=KI.key;
 $('kimodel').value=KI.model;
-$('kikey').oninput=$('kikey').onchange=e=>{KI.key=e.target.value.replace(/\s+/g,'');try{localStorage.ki_key=KI.key}catch(x){}};
 $('kimodel').onchange=e=>{KI.model=e.target.value;try{localStorage.ki_model=KI.model}catch(x){}};
 const kiAdd=(w,t)=>{const d=document.createElement('div');d.className='mb '+w;const msg=document.createElement('span');msg.textContent=t;const del=document.createElement('button');del.className='mbdel';del.type='button';del.title='Nachricht löschen';del.textContent='×';del.onclick=()=>d.remove();d.append(msg,del);$('kilog').append(d);$('kilog').scrollTop=$('kilog').scrollHeight;return d};
 function kiStep(title,detail){
@@ -1807,9 +1802,6 @@ function stateSig(){
 }
 
 async function callGemini(model,body){
- const key=($('kikey').value||KI.key||OR_KEY).replace(/\s+/g,'');
- if(key)KI.key=key;
- if(!/^sk-or-/.test(KI.key||''))throw new Error('Kein OpenRouter-Key');
  const sys=(body.systemInstruction&&body.systemInstruction.parts||[]).map(p=>p.text||'').filter(Boolean).join('\n');
  const messages=[];
  if(sys)messages.push({role:'system',content:sys});
@@ -1834,7 +1826,7 @@ async function callGemini(model,body){
   const controller=new AbortController();KI.ctl=controller;
   const tid=setTimeout(()=>controller.abort(),120000);
   try{
-   const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+KI.key,'HTTP-Referer':'https://shoxy.editor','X-Title':'Shoxy Editor'},body:JSON.stringify(pl),signal:controller.signal});
+   const r=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(pl),signal:controller.signal});
    let j={};try{j=await r.json()}catch(e){}
    if(!r.ok){const msg=(j.error&&(j.error.message||j.error))||('HTTP '+r.status);throw new Error(typeof msg==='string'?msg:JSON.stringify(msg))}
    const m=j.choices&&j.choices[0]&&j.choices[0].message||{};
@@ -1845,7 +1837,7 @@ async function callGemini(model,body){
    const finish=j.choices&&j.choices[0]&&j.choices[0].finish_reason||'stop';
    return {candidates:[{content:{parts:text?[{text}]:[]},finishReason:finish}],model:j.model||orModel};
   }catch(err){
-   if(err.name==='AbortError')throw new Error(KI.busy&&KI.stop?'__stop':'Zeitüberschreitung (OpenRouter antwortet nicht)');
+   if(err.name==='AbortError')throw new Error(KI.busy&&KI.stop?'__stop':'Zeitüberschreitung (/api/ai antwortet nicht)');
    if(err instanceof TypeError)throw new Error('Netzwerkfehler (kein Internet, Adblock oder VPN)');
    throw err;
   }finally{clearTimeout(tid)}
@@ -1886,8 +1878,8 @@ function parseAI(txt){
  const t=txt.trim().replace(/^```(?:json)?\s*/i,'').replace(/```\s*$/,'').trim();
  try{return JSON.parse(t)}catch(e){const a=t.indexOf('{'),b=t.lastIndexOf('}');if(a>=0&&b>a)return JSON.parse(t.slice(a,b+1));throw new Error('KI-Antwort war kein gültiges JSON')}
 }
-/* ---------- Team: 3 Modelle, 1 KI, ein OpenRouter-Key ---------- */
-KI.k2=OR_KEY;KI.m2=CHECKER;KI.team=true;
+/* ---------- Team: 3 Modelle, 1 KI, ein Server ---------- */
+KI.k2='';KI.m2=CHECKER;KI.team=true;
 try{KI.team=localStorage.ki_team!=='0'}catch(e){}
 if($('kikey2'))$('kikey2').value='';
 if($('kimodel2'))$('kimodel2').value=CHECKER;
@@ -1908,7 +1900,7 @@ async function teamReview(q,summary,imgs){
  const jobs=roles.map(([m,role,who])=>ask(m,role,who));
  return (await Promise.allSettled(jobs)).map(x=>x.status==='fulfilled'?x.value:{who:'Team',verdict:'ok',issues:[],err:(x.reason&&x.reason.message)||'Fehler'});
 }
-_sv('ki_key',KI.key);_sv('ki_team','1');
+try{localStorage.removeItem('ki_key')}catch(e){}_sv('ki_team','1');
 /* JSON2Video: unsichtbar, nur als KI-Aktion cloud_render (braucht öffentliche https-Video-URLs) */
 async function j2vRender(urls){
  const r=await fetch('https://api.json2video.com/v2/movies',{method:'POST',headers:{'x-api-key':J2V_KEY,'Content-Type':'application/json'},body:JSON.stringify({resolution:'custom',width:W,height:H,scenes:urls.map(u=>({elements:[{type:'video',src:u}]}))})}),j=await r.json();
@@ -2046,7 +2038,7 @@ async function kiSend(){
    await new Promise(r=>setTimeout(r,350));
    imgParts=kiImages(true);try{imgParts.push(...(await filmstrip(KI.look&&KI.look.length?KI.look:autoTimes())));KI.look=null}catch(e){}
   }
- }catch(e){failed=true;if(!kiFail(e,q))kiAdd('ai',e.message+(/unauthorized|401|API key|API_KEY|Kein OpenRouter/i.test(e.message)?'\nOpenRouter-Key wird abgelehnt. Oben aufs Zahnrad und den Key prüfen.':/quota|credits|402|429/i.test(e.message)?'\nOpenRouter-Guthaben oder Limit. Kurz warten oder Key prüfen.':''))}
+ }catch(e){failed=true;if(!kiFail(e,q))kiAdd('ai',e.message+(/unauthorized|401|API key|API_KEY|Kein OpenRouter/i.test(e.message)?'\nServer-Key fehlt oder wird abgelehnt. OPENROUTER_API_KEY / GEMINI_API_KEY auf dem Server prüfen.':/quota|credits|402|429/i.test(e.message)?'\nKontingent oder Limit beim Anbieter. Kurz warten.':''))}
  kiTrailFreeze();
  if(!failed&&!KI.stop){
   const thin=s=>/^(erledigt|fertig|done|ok|okay|gemacht|passt|alles klar|ich hab(?:e)?(?: es)? (?:gemacht|erledigt)|i(?:'ve| have) done it)[.! ]*$/i.test(String(s||'').trim());
@@ -2395,7 +2387,7 @@ Object.assign(ED,{setFormat:(w,h)=>{setFormat(w,h);S.fmt={mode:'custom',w:W,h:H}
 /* ---------- v28: KI-Schnellbefehle ---------- */
 (function(){})();
 /* ---------- v29: KI-Tab Feinschliff ---------- */
-(function(){const cfg=$('kicfg'),kbn=$('kikeyBtn');kbn.onclick=()=>{cfg.style.display=cfg.style.display==='none'?'block':'none'};if(!$('kikey').value)cfg.style.display='block';$('kiin').setAttribute('enterkeyhint','send');$('kiin').setAttribute('autocomplete','off')})();
+(function(){const cfg=$('kicfg'),kbn=$('kikeyBtn');kbn.onclick=()=>{cfg.style.display=cfg.style.display==='none'?'block':'none'};$('kiin').setAttribute('enterkeyhint','send');$('kiin').setAttribute('autocomplete','off')})();
 
 /* v30: manual editing + hidden auto features (AI keeps full access) */
 (function(){
