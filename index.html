@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ShoxyEditor</title>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ShoxyEditor</title>
 <style>
 :root{color-scheme:dark;--pink:#3b82ff;--vio:#22d3ee;--cy:#62e6ff;--line:#2a2a47;--mut:#9a9cbc;--grad:linear-gradient(100deg,#3b82ff,#22d3ee)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -196,6 +196,7 @@ a{color:var(--ac)}.auto{background:var(--acg);color:var(--on)}
 <script>try{document.documentElement.dataset.theme=localStorage.shoxy_theme||'plasma'}catch(e){document.documentElement.dataset.theme='plasma'}</script>
 <style id="v29">
 #t-ki.on{display:flex;flex-direction:column;height:100%;min-height:0;gap:8px}
+#t-ki>.card{flex:0 1 auto;max-height:62%;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;margin:0}
 #body:has(#t-ki.on){overflow:hidden;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
 .kihead{display:flex;align-items:center;gap:6px;flex:0 0 auto}.kihead b{font-size:13px;letter-spacing:.5px}.kihead .sp{flex:1}#kiacts{display:flex;gap:6px}
 .kihead .mini,#kiacts .mini{min-height:34px;padding:4px 10px;font-size:14px}
@@ -217,7 +218,7 @@ a{color:var(--ac)}.auto{background:var(--acg);color:var(--on)}
 </style>
 </head><body>
 <div id="app">
-<header><div class="logo">Shoxy<b>Editor</b></div><div style="display:flex;align-items:center;gap:5px"><button class="mini" id="undoBtn" title="Undo (Ctrl+Z)" aria-label="Undo">Undo</button><button class="mini" id="redoBtn" title="Redo (Ctrl+Y)" aria-label="Redo">Redo</button><button class="btn hot" id="exp">Down Export</button></div></header>
+<header><div class="logo">Shoxy<b>Editor</b></div><div style="display:flex;align-items:center;gap:5px"><button class="mini" id="undoBtn" title="Undo (Ctrl+Z)" aria-label="Undo">Undo</button><button class="mini" id="redoBtn" title="Redo (Ctrl+Y)" aria-label="Redo">Redo</button><button class="btn hot" id="exp">Export</button></div></header>
 <main>
 <section id="stage"><div id="wrap"><div id="pv"><canvas id="cv" width="720" height="1280"></canvas><div id="empty"><div>TAP TO LOAD CLIPS<small>1 Add clips · 2 Edit<br>3 Preview · 4 Export</small></div></div></div></div>
 <div id="transport"><button class="btn hot" id="play" style="padding:8px 14px">Play</button><input type="range" id="scrub" min="0" max="1000" value="0"><span id="time">0:00 / 0:00</span></div><div id="status">Ready. Load your clips </div></section>
@@ -321,21 +322,20 @@ a{color:var(--ac)}.auto{background:var(--acg);color:var(--on)}
 </div>
 
 <div class="tab" id="t-ki">
-<div class="kihead"><b>Shoxy KI</b><span id="teamBadge" title="Grok baut, Gemini prüft, Claude feilt" style="font:800 9px Orbitron,sans-serif;letter-spacing:.6px;border:1px solid #444;border-radius:999px;padding:3px 7px">TEAM</span><span class="sp"></span><button class="mini" id="kikeyBtn" type="button" title="API-Key & Modell">⚙</button><span id="kiacts"><button class="mini" id="kiclear" type="button" title="Chat leeren">Delete</button></span></div>
+<div class="kihead"><b>Shoxy KI</b><span id="teamBadge" title="Mehrere Modelle bauen, prüfen und einigen sich" style="font:800 9px Orbitron,sans-serif;letter-spacing:.6px;border:1px solid #444;border-radius:999px;padding:3px 7px">TEAM</span><span class="sp"></span><button class="mini" id="kikeyBtn" type="button" title="API-Key & Modell">⚙</button><span id="kiacts"><button class="mini" id="kiclear" type="button" title="Chat leeren">Delete</button></span></div>
  <div class="card" id="kicfg" style="display:none">
   <h3>OpenRouter Team</h3>
   <input id="kikey" class="field" type="password" placeholder="OpenRouter Key (sk-or-v1-...)" autocomplete="off">
-  <label class="l">Bauer</label>
-  <select id="kimodel">
-    <option value="x-ai/grok-4.6">Grok 4.6</option>
-    <option value="google/gemini-3.7-flash">Gemini 3.7 Flash</option>
-    <option value="anthropic/claude-sonnet-5">Claude Sonnet 5</option>
-    <option value="google/gemini-3.5-flash-lite">Gemini 3.5 Flash Lite</option>
-  </select>
+  <div class="row" style="margin-top:6px;gap:6px"><button class="btn" id="kikeytest" type="button">Key testen</button><a class="small" href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" style="flex:0 0 auto">Key erstellen</a></div>
+  <p class="small" id="kikeystat" style="min-height:16px"></p>
+  <label class="l">Bauer (führt aus)</label>
+  <select id="kimodel"></select>
+  <label class="l">Teamgröße</label>
+  <select id="kisize"><option value="full">Voll: bis zu 4 Prüfer</option><option value="duo">Duo: 2 Prüfer</option></select>
+  <label class="sw" style="margin:8px 0"><input type="checkbox" id="kiteam" checked><i></i>Team an: Bauer baut, Prüfer schauen mit und einigen sich</label>
   <input id="kikey2" type="hidden" value="">
-  <input id="kimodel2" type="hidden" value="google/gemini-3.7-flash">
-  <label class="sw" style="margin:8px 0"><input type="checkbox" id="kiteam" checked><i></i>Team an: Grok baut, Gemini prüft, Claude feilt</label>
-  <p class="small">Ein OpenRouter-Key, drei Modelle, eine KI. Der Bauer führt aus. Die anderen beiden schauen das Bild an und korrigieren, bevor etwas als fertig gilt.</p>
+  <input id="kimodel2" type="hidden" value="">
+  <p class="small">Ein OpenRouter-Key, mehrere Modelle (Grok, Gemini, Claude, DeepSeek, Kimi). Der Bauer führt aus. Die Prüfer sehen das Ergebnis, stimmen ab und was mehrere melden, wird behoben. Dein Key bleibt nur in diesem Browser.</p>
  </div>
 <div class="kl" id="kilog"></div>
  <div class="row" style="margin-top:6px"><input id="kiin" class="field" placeholder="Schreib einfach, was du willst …"><button class="btn hot" id="kigo" style="flex:0 0 auto;min-width:48px;font-size:18px">➤</button></div>
@@ -367,7 +367,15 @@ a{color:var(--ac)}.auto{background:var(--acg);color:var(--on)}
 <label class="sw" style="margin-top:8px"><input type="checkbox" data-af="p8"><i></i>8D-Audio (wandert linksrechts)</label></div><p class="small">Library: Audius - streamed only, nothing is downloaded. Spotify and YouTube Music cannot technically or legally be embedded in an editor.</p></div>
 </div></section></main></div>
 <script>
-let W=720,H=1280;const $=id=>document.getElementById(id),esc=s=>s.replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+let W=720,H=1280;const $=id=>document.getElementById(id),esc=s=>String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+/* Härtung für KI-Code: der Code sieht keinen Key, kein localStorage, kein fetch. Das ist kein echter Sandkasten, aber es stoppt den naheliegenden Datenabfluss. */
+const SEC_BLOCK=['localStorage','sessionStorage','indexedDB','fetch','XMLHttpRequest','WebSocket','EventSource','importScripts','Worker','SharedWorker','caches','cookieStore','navigator','KI','OR_KEY','J2V_KEY'];
+const SEC_WIN=new Proxy(window,{get(t,k){if(SEC_BLOCK.includes(k))return undefined;const v=t[k];return typeof v==='function'&&!/^[A-Z]/.test(String(k))?v.bind(t):v}});
+function guardedFn(args,body,isAsync){
+ const F=isAsync?Object.getPrototypeOf(async function(){}).constructor:Function;
+ const fn=new F(...args,...SEC_BLOCK,'window','globalThis','self','top','parent','frames',String(body));
+ return function(...a){return fn.call(SEC_WIN,...a.slice(0,args.length),...SEC_BLOCK.map(()=>undefined),SEC_WIN,SEC_WIN,SEC_WIN,SEC_WIN,SEC_WIN,SEC_WIN)};
+}
 const mk=(w=W,h=H)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c},g2=c=>c.getContext('2d');
 const cv=$('cv'),X=g2(cv),fc=mk(),pv=mk(),cc=mk(),sc=mk(),tm=mk(),tm2=mk(),sm=mk(96,171),px=mk(8,8);
 let exportCanvas=null,exportCtx=null;
@@ -709,20 +717,24 @@ function tick0(now){beatExtras();const dt=Math.min(.1,(now-S.last)/1000);S.last=
  const d=Math.max(S.total||S.song?.dur||10,1);
  setIf('kfplay','l',Math.min(100,Math.max(0,Math.round(S.T/d*1000)/10))+'%');
  if(S.exporting){const _p=Math.round(S.T/S.total*100);if(_p!==_lp){_lp=_p;st(`Rendering ${_p}% - keep this tab open`)}}else _lp=-1}
-function play(){if(!S.segs.length)return st('Load clips first ');try{initAudio()}catch(e){st('Audio unavailable: '+e.message);return}if(S.T>=S.total-.05)S.T=0;S.playing=true;S.last=performance.now();S.seg=-1;$('play').textContent='Pause'}
+function play(){if(!S.segs.length)return st('Lade zuerst Clips');try{initAudio()}catch(e){st('Audio unavailable: '+e.message);return}if(S.T>=S.total-.05)S.T=0;S.playing=true;S.last=performance.now();S.seg=-1;$('play').textContent='Pause'}
 function pause(){S.playing=false;S.clips.forEach(c=>c.v.pause());songEl.pause();$('play').textContent='Play'}
 $('play').onclick=()=>S.playing?pause():play();
 $('scrub').oninput=e=>{scrub=true;S.T=Math.max(0,Math.min(S.total,(+e.target.value||0)/1000*S.total));S.seg=-1};$('scrub').onchange=()=>scrub=false;['pointerup','touchend','pointercancel'].forEach(ev=>$('scrub').addEventListener(ev,()=>scrub=false));
 /* ---------- Export ---------- */
-function exportVid(){
- if(!S.segs.length)return st('Load clips first ');
+let exportPrev=null;
+function exportRestoreSize(){const p=exportPrev;exportPrev=null;if(p){try{setFormat(p.w,p.h);fmtUI()}catch(e){errOnce('Export',e)}}S.seg=-1}
+async function exportVid(){
+ if(!S.segs.length)return st('Lade zuerst Clips');
  if(!window.MediaRecorder)return st('Export is not supported by this browser. Please use Chrome or Edge.');
  const scale=Math.max(720,Math.min(2160,+$('expres').value||1080)),EK=scale/Math.min(W,H),EW=2*Math.round(W*EK/2),EH=2*Math.round(H*EK/2);
  const fps=Math.max(1,Math.min(60,+$('expfps').value||30));
  const bitrate=Math.max(1000000,Math.min(50000000,+$('expq').value||22000000));
  try{
-  pause();initAudio();if(AC.state==='suspended')throw new Error('Audio is still locked. Press Play once, then export again.');
-  if(exportStream)exportStream.getTracks().forEach(t=>t.stop());
+  pause();initAudio();if(AC.state==='suspended'){try{await Promise.race([AC.resume(),new Promise(r=>setTimeout(r,1200))])}catch(e){}}if(AC.state==='suspended')throw new Error('Audio is still locked. Press Play once, then export again.');
+  /* v-fix: in echter Zielauflösung rendern statt 720p hochzuskalieren (Fallback: Hochskalieren, falls der Browser die Größe nicht schafft) */
+  exportPrev=null;if(EW*EH>W*H*1.05){try{const pw=W,ph=H;setFormat(EW,EH);exportPrev={w:pw,h:ph}}catch(e){exportPrev=null;st('4K-Rendern nicht möglich, es wird hochskaliert: '+e.message)}}
+  if(exportStream)exportStream.getVideoTracks().forEach(t=>t.stop());
   exportCanvas=document.createElement('canvas');exportCanvas.width=EW;exportCanvas.height=EH;exportCtx=exportCanvas.getContext('2d',{alpha:false});
   if(!exportCtx)throw new Error('The browser could not create the export surface.');
   exportCtx.fillStyle='#000';exportCtx.fillRect(0,0,exportCanvas.width,exportCanvas.height);
@@ -739,16 +751,17 @@ function exportVid(){
   rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);
   rec.onstop=()=>{
    const type=rec.mimeType||mime||'video/webm',ext=type.includes('mp4')?'mp4':'webm';
-   if(chunks.length){const u=URL.createObjectURL(new Blob(chunks,{type})),a=document.createElement('a');a.href=u;a.download=`ShoxyEditor-v21-${EW}x${EH}-${S.vibe}.${ext}`;a.click();setTimeout(()=>URL.revokeObjectURL(u),60000);st(`Export fertig ${EW}×${EH} · ${fps} FPS · ${ext.toUpperCase()}`)}else st('Export wurde ohne Videodaten beendet');
-   exportStream?.getTracks().forEach(t=>t.stop());exportStream=null;exportCanvas=null;exportCtx=null;if(mon)mon.gain.value=1;
+   if(chunks.length){const u=URL.createObjectURL(new Blob(chunks,{type})),a=document.createElement('a');a.href=u;a.download=`ShoxyEditor-${EW}x${EH}-${S.vibe}.${ext}`;a.click();setTimeout(()=>URL.revokeObjectURL(u),60000);st(`Export fertig ${EW}×${EH} · ${fps} FPS · ${ext.toUpperCase()}`)}else st('Export wurde ohne Videodaten beendet');
+   exportStream?.getVideoTracks().forEach(t=>t.stop());exportStream=null;exportCanvas=null;exportCtx=null;if(mon)mon.gain.value=1;
+   chunks=[];rec=null;exportRestoreSize();
   };
   rec.onerror=()=>{st('Export error - cancelled');finishExport()};
   rec.start(250);renderFrame(performance.now());if(exportCtx){exportCtx.imageSmoothingEnabled=true;exportCtx.imageSmoothingQuality=$('exphq').checked?'high':'medium';exportCtx.drawImage(cv,0,0,exportCanvas.width,exportCanvas.height)}
   play();if(!S.playing)throw new Error('Playback could not be started.');$('exp').textContent='Stop';
   st(`Exporting: ${EW}×${EH} · ${fps} FPS - keep this tab open`);
- }catch(e){S.exporting=false;pause();if(rec&&rec.state!=='inactive'){try{rec.stop()}catch(x){}}if(mon)mon.gain.value=1;exportStream?.getTracks().forEach(t=>t.stop());exportStream=null;exportCanvas=null;exportCtx=null;$('exp').textContent='Down Export';st('Export could not start: '+e.message)}
+ }catch(e){exportRestoreSize();S.exporting=false;pause();if(rec&&rec.state!=='inactive'){try{rec.stop()}catch(x){}}if(mon)mon.gain.value=1;exportStream?.getVideoTracks().forEach(t=>t.stop());exportStream=null;exportCanvas=null;exportCtx=null;$('exp').textContent='Export';st('Export could not start: '+e.message)}
 }
-function finishExport(){if(!S.exporting)return;S.exporting=false;pause();try{if(rec&&rec.state!=='inactive')rec.stop()}catch(e){errOnce('Export',e)}if(mon)mon.gain.value=1;S.T=0;S.seg=-1;$('exp').textContent='Down Export'}
+function finishExport(){if(!S.exporting)return;S.exporting=false;pause();try{if(rec&&rec.state!=='inactive')rec.stop()}catch(e){errOnce('Export',e)}if(mon)mon.gain.value=1;S.T=0;S.seg=-1;$('exp').textContent='Export'}
 $('exp').onclick=()=>S.exporting?finishExport():exportVid();
 /* ---------- Beat Analysis (Engine v2) ---------- */
 /* ===== BEAT ENGINE v2 : Spektralfluss + Tempogram-ACF + Joint-Fit + DP-Tracking + Attack-Feintiming + Downbeats + Drop ===== */
@@ -1026,21 +1039,79 @@ lastHist=snapString();updateHistoryButtons();rClips();rText();rLayers();setTab('
 nudgeUI();build();requestAnimationFrame(tick);
 
 /* ---------- KI-Chat (Gemini 3.8 Flash + kompatible Fallbacks) ---------- */
-const OR_KEY='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';
-const BUILDER='x-ai/grok-4.6',CHECKER='google/gemini-3.7-flash',CRITIC='anthropic/claude-sonnet-5',LITE='google/gemini-3.5-flash-lite';
-const VALID_MODELS=[BUILDER,CHECKER,CRITIC,LITE];
-const KI={h:[],key:OR_KEY,model:BUILDER,focus:'',team:true};
+const OR_KEY='';
+/* Rollen des Teams. want = Wunsch-IDs (neueste zuerst), safe = bekannte, auf OpenRouter existierende ID als Notanker.
+   Die echte Modellliste holt sich die App live von OpenRouter, ungültige IDs werden nie benutzt. */
+const KI_ROLES=[
+ {id:'builder',who:'Bauer · Grok',vision:true,want:['x-ai/grok-4.7','x-ai/grok-4.6','x-ai/grok-4.20','x-ai/grok-4.1-fast'],safe:'x-ai/grok-4.20',focus:'Umsetzung und Machbarkeit: ist der Weg technisch sauber und wirklich ausführbar?'},
+ {id:'checker',who:'Prüfer · Gemini',vision:true,want:['google/gemini-3.7-flash','google/gemini-3.5-flash','google/gemini-3.1-pro-preview','google/gemini-3-flash-preview'],safe:'google/gemini-3-flash-preview',focus:'Erfüllt das Bild den Wunsch wirklich (richtiger Ort, Zeitraum, Stärke, nichts Ungewolltes)?'},
+ {id:'critic',who:'Kritiker · Claude',vision:true,want:['anthropic/claude-sonnet-5','anthropic/claude-sonnet-4.6','anthropic/claude-opus-4.8','anthropic/claude-haiku-4.5'],safe:'anthropic/claude-sonnet-4.6',focus:'Nur Feinheiten: Timing, Beat-Sync, Text-Lesbarkeit, Übergänge, Kanten, Farben.'},
+ {id:'skeptic',who:'Skeptiker · DeepSeek',vision:false,want:['deepseek/deepseek-v4-pro','deepseek/deepseek-v3.2'],safe:'deepseek/deepseek-v3.2',focus:'Zahlen und Logik im STATE: Zeiten außerhalb der Gesamtdauer, doppelte oder widersprüchliche Effekte, falsche Werte. Du siehst keine Bilder, sag das offen.'},
+ {id:'logic',who:'Logiker · Kimi',vision:false,want:['moonshotai/kimi-k2.6','z-ai/glm-5'],safe:'moonshotai/kimi-k2.6',focus:'Reihenfolge und Vollständigkeit: wurde jeder Teilwunsch erledigt und nichts Unverlangtes geändert? Du siehst keine Bilder, sag das offen.'}
+];
+const KI_CAT={ids:null,vision:{},loading:null};
+const kiModelFor=r=>{const c=KI_CAT.ids;if(c){const hit=r.want.find(m=>c.has(m));if(hit)return hit;if(c.has(r.safe))return r.safe}return r.safe};
+const kiTeamModels=()=>KI_ROLES.map(r=>({...r,model:kiModelFor(r)}));
+const BUILDER_DEFAULT=()=>kiModelFor(KI_ROLES[0]);
+const KI={h:[],key:OR_KEY,model:'',focus:'',team:true,size:'full'};
+KI.model=BUILDER_DEFAULT();
 try{
  const saved=localStorage.ki_key||'';
  if(/^sk-or-/.test(saved))KI.key=saved;
  KI.h=[];try{localStorage.removeItem('ki_h')}catch(x){}
  const savedModel=localStorage.ki_model||'';
- KI.model=VALID_MODELS.includes(savedModel)?savedModel:BUILDER;
+ if(/^[\w.-]+\/[\w.:-]+$/.test(savedModel))KI.model=savedModel;
+ KI.size=localStorage.ki_size==='duo'?'duo':'full';
 }catch(e){}
+function kiFillModels(){
+ const sel=$('kimodel');if(!sel)return;
+ const opts=[];const seen=new Set();
+ kiTeamModels().forEach(r=>{if(!seen.has(r.model)){seen.add(r.model);opts.push([r.model,r.who.split(' · ')[1]+' · '+r.model.split('/').pop()])}});
+ if(KI.model&&!seen.has(KI.model))opts.unshift([KI.model,KI.model.split('/').pop()]);
+ sel.replaceChildren(...opts.map(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;return o}));
+ sel.value=KI.model;
+ const sz=$('kisize');if(sz)sz.value=KI.size;
+}
+async function kiLoadCatalog(force){
+ if(KI_CAT.ids&&!force)return KI_CAT.ids;
+ if(KI_CAT.loading)return KI_CAT.loading;
+ KI_CAT.loading=(async()=>{
+  try{
+   const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),9000);
+   const r=await fetch('https://openrouter.ai/api/v1/models',{signal:ctl.signal});clearTimeout(tm);
+   const j=await r.json(),ids=new Set();
+   (j.data||[]).forEach(m=>{if(m&&m.id){ids.add(m.id);KI_CAT.vision[m.id]=!!(m.architecture&&(m.architecture.input_modalities||[]).includes('image'))}});
+   if(ids.size)KI_CAT.ids=ids;
+  }catch(e){}
+  finally{KI_CAT.loading=null}
+  try{const wasDefault=!localStorage.ki_model;if(wasDefault)KI.model=BUILDER_DEFAULT()}catch(e){}
+  kiFillModels();return KI_CAT.ids;
+ })();
+ return KI_CAT.loading;
+}
+kiFillModels();kiLoadCatalog();
 $('kikey').value=KI.key;
-$('kimodel').value=KI.model;
 $('kikey').oninput=$('kikey').onchange=e=>{KI.key=e.target.value.replace(/\s+/g,'');try{localStorage.ki_key=KI.key}catch(x){}};
 $('kimodel').onchange=e=>{KI.model=e.target.value;try{localStorage.ki_model=KI.model}catch(x){}};
+if($('kisize'))$('kisize').onchange=e=>{KI.size=e.target.value==='duo'?'duo':'full';try{localStorage.ki_size=KI.size}catch(x){}};
+$('kikeytest').onclick=async()=>{
+ const st=$('kikeystat'),k=($('kikey').value||'').replace(/\s+/g,'');KI.key=k;
+ if(!/^sk-or-/.test(k)){st.textContent='Das ist kein OpenRouter-Key. Er beginnt mit sk-or-v1-';return}
+ st.textContent='Prüfe Key …';
+ try{
+  let r=await fetch('https://openrouter.ai/api/v1/key',{headers:{Authorization:'Bearer '+k}});
+  if(r.status===404)r=await fetch('https://openrouter.ai/api/v1/auth/key',{headers:{Authorization:'Bearer '+k}});
+  const j=await r.json().catch(()=>({}));
+  if(r.ok){const d=j.data||{};st.textContent='Key ist gültig'+(d.label?' ('+String(d.label).slice(0,24)+')':'')+(d.limit_remaining!=null?'. Rest-Guthaben: '+Number(d.limit_remaining).toFixed(2)+' USD':'.');try{localStorage.ki_key=k}catch(x){}}
+  else st.textContent=kiAuthText(r.status,(j.error&&j.error.message)||'');
+ }catch(e){st.textContent='Kein Kontakt zu OpenRouter (Internet, Adblock oder VPN?)'}
+};
+function kiAuthText(status,msg){
+ if(/user not found|no auth|no cookie|invalid.*(key|token)|unauthorized|incorrect api key/i.test(msg)||status===401)return 'OpenRouter lehnt den Key ab ('+(msg||'401')+'). Der Key ist ungültig, gelöscht oder widerrufen. Erstelle unter openrouter.ai/keys einen neuen und trage ihn hier ein.';
+ if(status===402||/credit|insufficient/i.test(msg))return 'Kein Guthaben auf dem OpenRouter-Konto. Guthaben aufladen oder ein :free-Modell nutzen.';
+ if(status===403)return 'OpenRouter verweigert den Zugriff (403): '+(msg||'Key gesperrt oder Inhalt blockiert');
+ return 'OpenRouter: '+(msg||('HTTP '+status));
+}
 const kiAdd=(w,t)=>{const d=document.createElement('div');d.className='mb '+w;const msg=document.createElement('span');msg.textContent=t;const del=document.createElement('button');del.className='mbdel';del.type='button';del.title='Nachricht löschen';del.textContent='×';del.onclick=()=>d.remove();d.append(msg,del);$('kilog').append(d);$('kilog').scrollTop=$('kilog').scrollHeight;return d};
 function kiStep(title,detail){
  let box=document.getElementById('kiTrail');
@@ -1081,7 +1152,7 @@ function kiTrailFreeze(){
 $('kiclear').onclick=()=>{$('kilog').replaceChildren();KI.h=[]};
 /* v29: keine Begrüßung mehr */
 const snap=()=>({clips:S.clips.map((c,i)=>({i,n:c.name,in:c.in,out:c.out,dur:c.dur,photo:!!c.photo,w:(c.v&&c.v.videoWidth)||0,h:(c.v&&c.v.videoHeight)||0,rig:rigSig(c.v&&c.v.rig)})),song:S.song&&{n:S.song.name,dur:S.song.dur},fx:[...S.fx],fxi:S.fxi,fxp:S.fxp,kfs:S.kfs,vibe:S.vibe,str:S.str,trans:S.trans,tdur:S.tdur,autoCut:S.autoCut,cutBeats:S.cutBeats,speed:S.speed,look:{bright:S.bright,contrast:S.contrast,sat:S.sat,hue:S.hue},bpm:S.bpm,drop:S.dropT,beat:{mode:S.ba.mode,conf:S.ba.conf,nudge:S.nudge,bo:S.ba.bo},total:S.total,T:S.T,texts:S.texts,images:S.images.map((L,i)=>({i,name:L.name,x:L.x,y:L.y,w:L.w,h:L.h,opacity:L.opacity,blend:L.blend,s:L.s,e:L.e,rot:L.rot,rig:rigSig(L.rig)})),background:S.background?.name||null,fill:S.fill,canvas:[W,H],format:S.fmt,beatLen:S.bpm?+(60/S.bpm).toFixed(3):null,nextBeats:S.beats.filter(b=>b>=S.T).slice(0,8).map(b=>+b.toFixed(2)),segs:S.segs.slice(0,80).map(g=>({clip:S.clips.indexOf(g.c),start:+g.start.toFixed(2),len:+g.len.toFixed(2)})),vol:{clip:S.clipVol,song:S.songVol},afx:S.afx,songSpeed:S.songSpeed||1,playing:S.playing,selText:S.sel,ev:S.ev,cutMap:S.cutMap,custom:Object.values(CUSTOM).map(f=>({id:f.id,name:f.name,len:f.code.length,off:!!f.off}))});
-const TEAMSYS='IHR SEID EINE KI. Bauer (Grok), Prüfer (Gemini) und Detail-Kritiker (Claude) sind drei Modelle, aber ein Kopf mit einem Ziel: der beste Edit für den Nutzer. Denkweise: 1) Verstehen, was der Nutzer wirklich will, auch das Unausgesprochene. 2) Zustand aus STATE und Bildern lesen, mit echten Zahlen rechnen statt zu schätzen. 3) Die kleinste Änderung planen, die das Ziel trifft, Alternativen kurz abwägen. 4) Ausführen. 5) Ergebnis selbst kritisch prüfen und nachbessern, bevor du fertig sagst. 6) Ehrlich berichten: was du getan hast, was gut ist, was nicht oder nur unsicher. Kein Ja-Sager und kein Sklave: Widersprich dem Nutzer und dem Team mit Begründung, wenn etwas schlechter wird oder ein besserer Weg existiert; sag klar, wenn etwas nicht geht oder du dir nicht sicher bist; erfinde nichts, auch keine Ergebnisse, die du nicht gesehen hast. Führe aber nur aus, was der Nutzer verlangt, und nenne Besseres als Vorschlag. Kann die App etwas nicht direkt, baue es: eigene Effekte per Code, Kombinationen, Keyframes, Clip-Tempo/Lautstärke/Reverse oder cloud_render, statt abzulehnen. Aktion cloud_render {urls:[https-URLs]} rendert per JSON2Video in der Cloud. Nutze sie NUR, wenn der Nutzer ausdrücklich Cloud-Render will UND öffentliche https-Video-URLs nennt; lokale Clips gehen damit nicht. WICHTIG: Jede Antwort enthält ein konkretes say (was, wie, welcher Wert, ob du dir sicher bist). Nie stumm bleiben. Das Wort erledigt ohne die konkrete Änderung ist verboten. think sind echte Arbeitsschritte: was du siehst, was du vorhast, was schiefgehen kann. say ist die eine Nachricht an den Nutzer danach.\n';
+const TEAMSYS='IHR SEID EIN TEAM aus mehreren Modellen (Bauer, Prüfer, Kritiker, Skeptiker, Logiker) mit einem gemeinsamen Ziel: der beste Edit für den Nutzer. Denkweise: 1) Verstehen, was der Nutzer wirklich will, auch das Unausgesprochene. 2) Zustand aus STATE und Bildern lesen, mit echten Zahlen rechnen statt zu schätzen. 3) Die kleinste Änderung planen, die das Ziel trifft, Alternativen kurz abwägen. 4) Ausführen. 5) Ergebnis selbst kritisch prüfen und nachbessern, bevor du fertig sagst. 6) Ehrlich berichten: was du getan hast, was gut ist, was nicht oder nur unsicher. Kein Ja-Sager und kein Sklave: Widersprich dem Nutzer und dem Team mit Begründung, wenn etwas schlechter wird oder ein besserer Weg existiert; sag klar, wenn etwas nicht geht oder du dir nicht sicher bist; erfinde nichts, auch keine Ergebnisse, die du nicht gesehen hast. Führe aber nur aus, was der Nutzer verlangt, und nenne Besseres als Vorschlag. Kann die App etwas nicht direkt, baue es: eigene Effekte per Code, Kombinationen, Keyframes, Clip-Tempo/Lautstärke/Reverse oder cloud_render, statt abzulehnen. Aktion cloud_render {urls:[https-URLs]} rendert per JSON2Video in der Cloud. Nutze sie NUR, wenn der Nutzer ausdrücklich Cloud-Render will UND öffentliche https-Video-URLs nennt; lokale Clips gehen damit nicht. WICHTIG: Jede Antwort enthält ein konkretes say (was, wie, welcher Wert, ob du dir sicher bist). Nie stumm bleiben. Das Wort erledigt ohne die konkrete Änderung ist verboten. think sind echte Arbeitsschritte: was du siehst, was du vorhast, was schiefgehen kann. say ist die eine Nachricht an den Nutzer danach.\n';
 const SYS=()=>TEAMSYS+`You are Shoxy AI, an expert mobile video-editing assistant built into this editor. Be concise, practical, and technically accurate. Your first message in a conversation is always in English; after that you follow the user's language (see LANGUAGE).
 BÜRO (intern, erwähne es dem Nutzer gegenüber nie): Du hast ein eigenes Büro mit Notizbuch, das auch nach Verbindungsabbruch oder Neuladen erhalten bleibt. Aktueller Inhalt: ${KI.notes||'(noch leer)'}\nSchreibe bei mehrstufigen oder längeren Aufgaben im JSON-Feld "notes" fortlaufend den kompletten neuen Notizstand (Ziel, Plan, erledigte und offene Schritte, Entscheidungen, Vorlieben des Nutzers, max. 1500 Zeichen). Nach einem Abbruch machst du anhand der Notizen und STATE genau dort weiter, ohne von vorn zu beginnen.
 PERSONALITY: Act like an experienced professional editor and creative director: friendly, direct, confident, honest. Never use emojis. Never claim an edit succeeded unless the editor confirms it.
@@ -1525,7 +1596,7 @@ function rigMotion(p,tt,bt){
   case'spin':r.rot=360*a*dir*(((bt.n%4+4)%4)+cyc)/4;break;
   case'wobble':{const w=Math.sin(tt*9*sp);r.rot=10*a*w*(.4+.6*pulse);r.sx=1+.05*a*Math.sin(tt*9*sp+1)*(.4+.6*pulse);r.sy=1+.05*a*Math.cos(tt*9*sp+1)*(.4+.6*pulse);break}
   case'custom':
-   try{const fn=p._fn||(p._fn=new Function('c',m.code||'return {}'));Object.assign(r,fn({hit,n:bt.n,t:tt,cyc,a,pulse,dir,sp,PI:Math.PI,sin:Math.sin,cos:Math.cos})||{})}
+   try{const fn=p._fn||(p._fn=guardedFn(['c'],m.code||'return {}'));Object.assign(r,fn({hit,n:bt.n,t:tt,cyc,a,pulse,dir,sp,PI:Math.PI,sin:Math.sin,cos:Math.cos})||{})}
    catch(e){if(!p._err){p._err=1;try{kiAdd('ai','Eigener Bewegungscode ('+p.name+'): '+e.message)}catch(x){}}}
    break;
  }
@@ -1633,7 +1704,7 @@ function rigApply(o){
   if(o.motion){if(typeof o.motion==='string')m.type=o.motion;else Object.assign(m,o.motion)}
   if(o.style&&PROSTYLE[o.style]){Object.assign(m,PROSTYLE[o.style]);m.type='pro'}
   for(const k of['amount','speed','beat','dir','sway','tilt','squash','depth','body','blur','spring','accent','plug','lag','bodySpan'])if(o[k]!==undefined)m[k]=+o[k];
-  if(o.code){m.code=String(o.code);m.type='custom';part._fn=null;part._err=0;try{new Function('c',m.code)}catch(e){throw new Error('Bewegungscode Syntaxfehler: '+e.message)}}
+  if(o.code){m.code=String(o.code);m.type='custom';part._fn=null;part._err=0;try{guardedFn(['c'],m.code)}catch(e){throw new Error('Bewegungscode Syntaxfehler: '+e.message)}}
   rig.v++;rig.on=true;if(src)src._rigC=null;
   const am=rigAmp(part),b=part.box;
   out.push(label+' · Teil "'+name+'" ('+origin+', x '+Math.round(b[0]*100)+'–'+Math.round(b[2]*100)+'%, y '+Math.round(b[1]*100)+'–'+Math.round(b[3]*100)+'%) · '+m.type+' · max '+am.rot.toFixed(1)+'° Kippung, '+Math.round(am.mv*100)+'% Verschiebung');
@@ -1690,7 +1761,7 @@ function defineFx(o){
  const id=String(o.id||('kfx'+Date.now())).toLowerCase().replace(/[^a-z0-9_]/g,'');
  if(!id)throw new Error('Effekt-ID fehlt');
  if(FX.some(g=>g[0]!=='KI-Effekte'&&g[1].some(x=>x[0]===id)))throw new Error('ID "'+id+'" gehört zu einem eingebauten Effekt, andere ID wählen');
- let fn;try{fn=new Function('c',String(o.code||''))}catch(e){throw new Error('Effekt-Code Syntaxfehler: '+e.message)}
+ let fn;try{fn=guardedFn(['c'],String(o.code||''))}catch(e){throw new Error('Effekt-Code Syntaxfehler: '+e.message)}
  CUSTOM[id]={id,name:o.name||id,emoji:o.emoji||'',code:String(o.code||''),keywords:o.keywords||id,fn,err:0,off:false};
  let g=FX.find(x=>x[0]==='KI-Effekte');if(!g){g=['KI-Effekte',[]];FX.push(g)}
  const row=[id,CUSTOM[id].emoji,CUSTOM[id].name,String(CUSTOM[id].keywords)],ix=g[1].findIndex(x=>x[0]===id);
@@ -1736,8 +1807,8 @@ Object.assign(DO,{
  fx_new:o=>defineFx(o),
  fx_del:id=>delFx(id),
  js:async code=>{
-  const AF=Object.getPrototypeOf(async function(){}).constructor;let fn;
-  try{fn=new AF('ED','S','X','W','H',String(code))}catch(e){throw new Error('Syntaxfehler: '+e.message)}
+  let fn;
+  try{fn=guardedFn(['ED','S','X','W','H'],String(code),true)}catch(e){throw new Error('Syntaxfehler: '+e.message)}
   const r=await fn(ED,S,X,W,H);
   return r===undefined?'':(typeof r==='string'?r:JSON.stringify(r));
  }
@@ -1809,7 +1880,7 @@ function stateSig(){
 async function callGemini(model,body){
  const key=($('kikey').value||KI.key||OR_KEY).replace(/\s+/g,'');
  if(key)KI.key=key;
- if(!/^sk-or-/.test(KI.key||''))throw new Error('Kein OpenRouter-Key');
+ if(!/^sk-or-/.test(KI.key||'')){const ke=new Error('Kein OpenRouter-Key. Oben aufs Zahnrad tippen und deinen Key eintragen.');ke.fatal=true;throw ke}
  const sys=(body.systemInstruction&&body.systemInstruction.parts||[]).map(p=>p.text||'').filter(Boolean).join('\n');
  const messages=[];
  if(sys)messages.push({role:'system',content:sys});
@@ -1820,12 +1891,12 @@ async function callGemini(model,body){
    if(p.text)texts.push({type:'text',text:String(p.text).slice(0,24000)});
    else if(p.inlineData&&p.inlineData.data)imgs.push({type:'image_url',image_url:{url:'data:'+(p.inlineData.mimeType||'image/jpeg')+';base64,'+p.inlineData.data}});
   }
-  const content=texts.concat(imgs.slice(0,4));
+  const content=texts.concat(KI_CAT.vision[model]===false?[]:imgs.slice(0,4));
   if(!content.length)continue;
   if(content.length===1&&content[0].type==='text')messages.push({role,content:content[0].text});
   else messages.push({role,content});
  }
- const orModel=model&&String(model).indexOf('/')>=0?model:BUILDER;
+ const orModel=model&&String(model).indexOf('/')>=0?model:BUILDER_DEFAULT();
  const gen=body.generationConfig||{};
  const payload={model:orModel,messages,temperature:(gen.temperature==null?0.4:gen.temperature),max_tokens:Math.min(gen.maxOutputTokens||6000,12000)};
  if(gen.responseMimeType==='application/json')payload.response_format={type:'json_object'};
@@ -1836,7 +1907,7 @@ async function callGemini(model,body){
   try{
    const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+KI.key,'HTTP-Referer':'https://shoxy.editor','X-Title':'Shoxy Editor'},body:JSON.stringify(pl),signal:controller.signal});
    let j={};try{j=await r.json()}catch(e){}
-   if(!r.ok){const msg=(j.error&&(j.error.message||j.error))||('HTTP '+r.status);throw new Error(typeof msg==='string'?msg:JSON.stringify(msg))}
+   if(!r.ok){const raw=(j.error&&(j.error.message||j.error))||('HTTP '+r.status),msg=typeof raw==='string'?raw:JSON.stringify(raw);const fatal=r.status===401||r.status===402||(r.status===403&&!/moderation|flagged/i.test(msg));const e=new Error(fatal?kiAuthText(r.status,msg):(/^HTTP/.test(msg)?msg:msg+' (HTTP '+r.status+')'));e.status=r.status;e.fatal=fatal;throw e}
    const m=j.choices&&j.choices[0]&&j.choices[0].message||{};
    let text=m.content;
    if(Array.isArray(text))text=text.map(p=>p.text||p.content||'').join('');
@@ -1850,7 +1921,7 @@ async function callGemini(model,body){
    throw err;
   }finally{clearTimeout(tid)}
  };
- const retry=async fn=>{for(let i=0;;i++){try{return await fn()}catch(e){if(KI.stop||!/Netzwerkfehler|HTTP 5\d\d|overloaded|rate/i.test(e.message)||i>=2)throw e;try{setLive('Verbindung wackelt, Versuch '+(i+2)+'/3')}catch(x){}await kiSleep(900*Math.pow(2,i))}}};
+ const retry=async fn=>{for(let i=0;;i++){try{return await fn()}catch(e){if(KI.stop||e.fatal||!(/Netzwerkfehler|HTTP 5\d\d|overloaded|rate/i.test(e.message)||e.status>=500||e.status===429)||i>=2)throw e;try{setLive('Verbindung wackelt, Versuch '+(i+2)+'/3')}catch(x){}await kiSleep(900*Math.pow(2,i))}}};
  try{return await retry(()=>post(payload))}
  catch(e){
   if(/response_format|json_object|unsupported|not supported|invalid argument|HTTP 400/i.test(e.message||'')&&payload.response_format){
@@ -1860,24 +1931,25 @@ async function callGemini(model,body){
  }
 }
 async function callAny(body){
- const order=[KI.model,...VALID_MODELS].filter((v,i,a)=>a.indexOf(v)===i);
+ const team=kiTeamModels().map(r=>r.model);
+ const order=[KI.model,...team].filter((v,i,a)=>v&&a.indexOf(v)===i).slice(0,5);
  let lastErr=null;
  for(const m of order){
   try{
    let j;
    try{j=await callGemini(m,body)}catch(e1){
-    if(/429|quota|rate|exhaust|overload|high demand|503|unavailable/i.test(e1.message||'')){await new Promise(r=>setTimeout(r,1500));j=await callGemini(m,body)}
+    if(!e1.fatal&&(e1.status===429||/quota|rate limit|exhaust|overload|high demand|unavailable/i.test(e1.message||''))){await new Promise(r=>setTimeout(r,1500));j=await callGemini(m,body)}
     else throw e1;
    }
    const txt=(j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts||[]).map(p=>p.text||'').join('').trim();
    if(!txt)throw new Error('Leere Antwort von '+m);
-   if(m!==KI.model){KI.model=m;try{$('kimodel').value=m;localStorage.ki_model=m}catch(e){}}
    return j;
   }catch(err){
    lastErr=err;
    const msg=String(err&&err.message||err);
-   if(msg==='__stop'||/unauthorized|401|API key|API_KEY|invalid api key|invalid key|credits|402|Kein OpenRouter/i.test(msg))throw err;
-   try{kiStep('Wechsel', m.split('/').pop()+' antwortet nicht, nächstes Modell')}catch(e){}
+   /* Key-, Guthaben- und Stop-Fehler betreffen ALLE Modelle: sofort abbrechen statt alle durchzuprobieren */
+   if(msg==='__stop'||err.fatal||/unauthorized|user not found|no auth|invalid (api )?key|incorrect api key|Kein OpenRouter/i.test(msg)){err.fatal=true;throw err}
+   try{kiStep('Wechsel',m.split('/').pop()+' fällt aus ('+msg.slice(0,90)+'), nächstes Modell')}catch(e){}
   }
  }
  throw lastErr||new Error('Kein Modell hat geantwortet');
@@ -1887,30 +1959,55 @@ function parseAI(txt){
  try{return JSON.parse(t)}catch(e){const a=t.indexOf('{'),b=t.lastIndexOf('}');if(a>=0&&b>a)return JSON.parse(t.slice(a,b+1));throw new Error('KI-Antwort war kein gültiges JSON')}
 }
 /* ---------- Team: 3 Modelle, 1 KI, ein OpenRouter-Key ---------- */
-KI.k2=OR_KEY;KI.m2=CHECKER;KI.team=true;
+KI.team=true;
 try{KI.team=localStorage.ki_team!=='0'}catch(e){}
 if($('kikey2'))$('kikey2').value='';
-if($('kimodel2'))$('kimodel2').value=CHECKER;
 if($('kiteam'))$('kiteam').checked=KI.team!==false;
 const _sv=(k,v)=>{try{localStorage[k]=v}catch(e){}};
 if($('kikey2'))$('kikey2').oninput=()=>{};
 if($('kimodel2'))$('kimodel2').onchange=()=>{};
 if($('kiteam'))$('kiteam').onchange=e=>{KI.team=e.target.checked;_sv('ki_team',KI.team?'1':'0')};
-const TEAM='IHR SEID EINE KI. Bauer (Grok), Prüfer (Gemini) und Detail-Kritiker (Claude) sind drei Modelle, aber ein Kopf mit einem Ziel: der beste Edit für den Nutzer. Denkweise: 1) Verstehen, was der Nutzer wirklich will, auch das Unausgesprochene. 2) Zustand aus STATE und Bildern lesen, mit echten Zahlen rechnen statt zu schätzen. 3) Die kleinste Änderung planen, die das Ziel trifft, Alternativen kurz abwägen. 4) Ausführen. 5) Ergebnis selbst kritisch prüfen und nachbessern, bevor du fertig sagst. 6) Ehrlich berichten: was du getan hast, was gut ist, was nicht oder nur unsicher. Kein Ja-Sager und kein Sklave: Widersprich dem Nutzer und dem Team mit Begründung, wenn etwas schlechter wird oder ein besserer Weg existiert; sag klar, wenn etwas nicht geht oder du dir nicht sicher bist; erfinde nichts, auch keine Ergebnisse, die du nicht gesehen hast. Führe aber nur aus, was der Nutzer verlangt, und nenne Besseres als Vorschlag. Kann die App etwas nicht direkt, baue es: eigene Effekte per Code, Kombinationen, Keyframes, Clip-Tempo/Lautstärke/Reverse oder cloud_render, statt abzulehnen. Du bist gerade in der Rolle des Prüfens: sei ehrlich, konkret (Zeit, Wert, Ort), nenne auch, was passt, und erfinde keine Probleme, nur was du im Bild oder Zustand wirklich siehst. ';
-async function teamReview(q,summary,imgs){
- const base='WUNSCH DES NUTZERS: '+q+'\nBAUER SAGT/TAT: '+summary+'\nDie Bilder zeigen das aktuelle Ergebnis. Antworte NUR als JSON: {"verdict":"ok"|"problem","issues":["Problem + konkreter Fix (Aktion, Zeit, Wert)"],"praise":"was passt, kurz"}';
- const pool=[CHECKER,CRITIC,LITE].filter(m=>m!==KI.model);
- const roles=[
-  [pool[0]||CHECKER,'Rolle: PRÜFER. Erfüllt das Bild den Wunsch wirklich (richtiger Ort, Zeitraum, Stärke, nichts Ungewolltes)?','Prüfer · Gemini'],
-  [pool[1]||CRITIC,'Rolle: DETAIL-KRITIKER. Nur Feinheiten: Timing, Beat-Sync, Text-Lesbarkeit, Übergänge, Kanten, Farben.','Kritiker · Claude']
- ];
- const ask=(model,role,who)=>callGemini(model,{systemInstruction:{parts:[{text:TEAM+role}]},contents:[{role:'user',parts:[{text:base},...(imgs||[]).slice(0,4)]}],generationConfig:{responseMimeType:'application/json',temperature:.2,maxOutputTokens:1800}}).then(j=>({who,...parseAI((j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts||[]).map(p=>p.text||'').join(''))}));
- const jobs=roles.map(([m,role,who])=>ask(m,role,who));
- return (await Promise.allSettled(jobs)).map(x=>x.status==='fulfilled'?x.value:{who:'Team',verdict:'ok',issues:[],err:(x.reason&&x.reason.message)||'Fehler'});
+const TEAM='IHR SEID EIN TEAM aus mehreren Modellen (Bauer, Prüfer, Kritiker, Skeptiker, Logiker) mit einem gemeinsamen Ziel: der beste Edit für den Nutzer. Denkweise: 1) Verstehen, was der Nutzer wirklich will, auch das Unausgesprochene. 2) Zustand aus STATE und Bildern lesen, mit echten Zahlen rechnen statt zu schätzen. 3) Die kleinste Änderung planen, die das Ziel trifft, Alternativen kurz abwägen. 4) Ausführen. 5) Ergebnis selbst kritisch prüfen und nachbessern, bevor du fertig sagst. 6) Ehrlich berichten: was du getan hast, was gut ist, was nicht oder nur unsicher. Kein Ja-Sager und kein Sklave: Widersprich dem Nutzer und dem Team mit Begründung, wenn etwas schlechter wird oder ein besserer Weg existiert; sag klar, wenn etwas nicht geht oder du dir nicht sicher bist; erfinde nichts, auch keine Ergebnisse, die du nicht gesehen hast. Führe aber nur aus, was der Nutzer verlangt, und nenne Besseres als Vorschlag. Kann die App etwas nicht direkt, baue es: eigene Effekte per Code, Kombinationen, Keyframes, Clip-Tempo/Lautstärke/Reverse oder cloud_render, statt abzulehnen. Du bist gerade in der Rolle des Prüfens: sei ehrlich, konkret (Zeit, Wert, Ort), nenne auch, was passt, und erfinde keine Probleme, nur was du im Bild oder Zustand wirklich siehst. ';
+function teamPool(){
+ const all=kiTeamModels(),order=['checker','critic','builder','skeptic','logic'];
+ const seen=new Set();
+ const pool=order.map(id=>all.find(r=>r.id===id)).filter(r=>r&&r.model!==KI.model&&!seen.has(r.model)&&seen.add(r.model));
+ return KI.size==='duo'?pool.slice(0,2):pool.slice(0,4);
 }
-_sv('ki_key',KI.key);_sv('ki_team','1');
+const teamLine=()=>{const p=teamPool(),b=KI.model.split('/').pop();return KI.team&&p.length?b+' baut, '+p.map(r=>r.who.split(' · ')[1]).join(', ')+' prüfen':b+' arbeitet allein'};
+async function teamReview(q,summary,imgs,stateJson){
+ const pool=teamPool();
+ const base='WUNSCH DES NUTZERS: '+q+'\nBAUER SAGT/TAT: '+summary+(stateJson?'\nSTATE: '+stateJson:'')+'\nDie Bilder (falls vorhanden) zeigen das aktuelle Ergebnis. Antworte NUR als JSON: {"verdict":"ok"|"problem","confidence":0-100,"issues":["Problem + konkreter Fix (Aktion, Zeit, Wert)"],"praise":"was passt, kurz"}. Melde nur, was du im Bild sehen oder im STATE belegen kannst. Wenn du etwas nicht beurteilen kannst, sag das, statt zu raten.';
+ const ask=async r=>{
+  const useImgs=r.vision&&KI_CAT.vision[r.model]!==false;
+  const parts=[{text:base},...(useImgs?(imgs||[]).slice(0,4):[])];
+  const j=await callGemini(r.model,{systemInstruction:{parts:[{text:TEAM+'Rolle: '+r.who+'. '+r.focus}]},contents:[{role:'user',parts}],generationConfig:{responseMimeType:'application/json',temperature:.2,maxOutputTokens:1800}});
+  const out=parseAI((j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts||[]).map(p=>p.text||'').join(''));
+  return {who:r.who,model:r.model,verdict:out.verdict==='ok'?'ok':'problem',issues:(Array.isArray(out.issues)?out.issues:[]).map(String).slice(0,4),praise:String(out.praise||'').slice(0,200),conf:Math.max(0,Math.min(100,+out.confidence||50)),blind:!useImgs};
+ };
+ const res=await Promise.allSettled(pool.map(ask));
+ /* Ein ausgefallener Prüfer zählt NIE als "ok": er gilt als nicht erreichbar */
+ return res.map((x,i)=>x.status==='fulfilled'?x.value:{who:pool[i].who,model:pool[i].model,verdict:'error',issues:[],err:(x.reason&&x.reason.message)||'Fehler'});
+}
+/* Einigung: Mehrheit der erreichbaren Prüfer = verbindlich, Einzelmeinung = prüfen oder begründet widersprechen */
+function teamConsensus(tr){
+ const alive=tr.filter(x=>x.verdict==='ok'||x.verdict==='problem');
+ const bad=alive.filter(x=>x.verdict==='problem'&&x.issues.length);
+ const okNames=alive.filter(x=>x.verdict==='ok').map(x=>x.who.split(' · ')[1]);
+ const majority=bad.length>0&&bad.length*2>alive.length;
+ const list=bad.map(x=>x.who+(x.blind?' (ohne Bild)':'')+': '+x.issues.join('; ')).join(' || ');
+ let fb='',line='';
+ if(!alive.length)line='Kein Prüfer erreichbar';
+ else if(!bad.length)line='Einstimmig: alle '+alive.length+' Prüfer sagen ok';
+ else if(majority){line='Mehrheit ('+bad.length+' von '+alive.length+') meldet Probleme';fb='TEAM-KONSENS (nicht vom Nutzer): Die Mehrheit deiner Prüfer ('+bad.length+' von '+alive.length+') meldet übereinstimmend Probleme. Das ist verbindlich, behebe es per do: '+list+'.'+(okNames.length?' Zustimmung kam von: '+okNames.join(', ')+'.':'')+' Danach verdict ok, do:[] und noop:true mit ehrlichem say, das auch die Einigung nennt.'}
+ else{line='Einzelmeinung ('+bad.length+' von '+alive.length+'), Bauer entscheidet';fb='TEAM-EINZELMEINUNG (nicht vom Nutzer): Eine Minderheit deiner Prüfer sieht ein Problem, die Mehrheit nicht: '+list+'. Prüfe es selbst im Bild/STATE. Stimmt es, behebe es per do. Stimmt es nicht, widersprich im say mit Begründung. Danach verdict ok, do:[] und noop:true.'}
+ return {alive,bad,majority,fb,line};
+}
+if(KI.key)_sv('ki_key',KI.key);
 /* JSON2Video: unsichtbar, nur als KI-Aktion cloud_render (braucht öffentliche https-Video-URLs) */
+let J2V_KEY='';try{J2V_KEY=localStorage.j2v_key||''}catch(e){}
 async function j2vRender(urls){
+ if(!J2V_KEY)throw new Error('Cloud-Render ist nicht eingerichtet (kein JSON2Video-Key hinterlegt). Sag dem Nutzer ehrlich, dass das hier nicht geht, und nutze den normalen Export.');
  const r=await fetch('https://api.json2video.com/v2/movies',{method:'POST',headers:{'x-api-key':J2V_KEY,'Content-Type':'application/json'},body:JSON.stringify({resolution:'custom',width:W,height:H,scenes:urls.map(u=>({elements:[{type:'video',src:u}]}))})}),j=await r.json();
  if(!r.ok||!j.project)throw new Error(j.message||'JSON2Video HTTP '+r.status);
  for(let i=0;i<120;i++){if(KI.stop)throw new Error('__stop');await kiSleep(3000);
@@ -1985,8 +2082,8 @@ async function kiSend(){
   }
   if(!KI.key)return;
  }
- if(!KI.key){$('cmd').value=q;cmd();return kiAdd('ai',$('cmdout').textContent+'\n(OpenRouter-Key fehlt)')}
- kiBusy(true);kiStep('Team startet','Grok baut, Gemini prüft, Claude feilt');let failed=false,said=false,totalActsGlobal=0;const roundSays=[],allRes=[];
+ if(!KI.key){$('cmd').value=q;cmd();return kiAdd('ai',$('cmdout').textContent+'\n(Kein OpenRouter-Key: oben aufs Zahnrad tippen und den Key eintragen)')}
+ kiBusy(true);kiStep('Team startet',teamLine());let failed=false,said=false,totalActsGlobal=0;const roundSays=[],allRes=[];
  const planFirst=q.length>140||((q.match(/\b(und|dann|außerdem|zusätzlich|danach|plus)\b|,/gi)||[]).length>=4)||/\b(alles|komplett|ganze[ns]?|pro[- ]?edit|krass)\b/i.test(q);
  let userText=q+localNote+(planFirst?'\n[SYSTEM, nicht vom Nutzer] Das ist ein größerer Auftrag. RUNDE 1 = nur PLANEN, noch nichts ändern: schreib in think die nummerierte Auftragsliste, deine Annahmen, Risiken und die Reihenfolge, trag den Plan in notes ein, gib do:[] aus. Stell nur dann eine Rückfrage, wenn eine falsche Annahme etwas zerstören würde. Danach führst du den Plan aus.':''),imgParts=[];
  try{
@@ -2035,18 +2132,19 @@ async function kiSend(){
    if(!fb&&KI.team&&totalActs>0&&teamRounds<2&&!KI.stop){teamRounds++;kiLive('Team prüft das Ergebnis …');
     try{const im=kiImages(true);try{im.push(...(await filmstrip(autoTimes())))}catch(e){}
      const sn=snap(),dk=Object.keys(sn).filter(k=>JSON.stringify(sn[k])!==JSON.stringify(startSnap[k])).join(', ');
-     const tr=await teamReview(q,String(o.say||'').slice(0,400)+' | Aktionen: '+totalActs+' | geändert: '+(dk||'nichts'),im);
-     tr.forEach(x=>{kiStep(x.who||'Team', (x.verdict==='ok'?'passt. ':'')+(x.issues||[]).slice(0,3).join(' | ')+(x.err?' nicht erreichbar: '+x.err:''))});
-     const bad=tr.filter(x=>x.verdict==='problem'&&(x.issues||[]).length);
-     if(bad.length)fb='TEAM-FEEDBACK (nicht vom Nutzer): Deine Teamkollegen haben dein Ergebnis angeschaut: '+bad.map(x=>x.who+': '+x.issues.join('; ')).join(' || ')+'. Ihr seid ein Team ohne Ego: übernimm berechtigte Punkte per do, widersprich nur mit Begründung im say, wenn ein Punkt nicht stimmt. Danach verdict ok, do:[] und noop:true mit ehrlichem say.';
-    }catch(e){kiAdd('ai','Team-Prüfung übersprungen: '+e.message)}}
+     const tr=await teamReview(q,String(o.say||'').slice(0,400)+' | Aktionen: '+totalActs+' | geändert: '+(dk||'nichts'),im,JSON.stringify(sn).slice(0,14000));
+     tr.forEach(x=>{kiStep(x.who||'Team',x.verdict==='error'?'nicht erreichbar: '+String(x.err).slice(0,120):(x.verdict==='ok'?'passt'+(x.praise?': '+x.praise:''):x.issues.slice(0,3).join(' | ')||'sieht ein Problem')+(x.blind?' (ohne Bild)':''))});
+     const cs=teamConsensus(tr);kiStep('Einigung',cs.line);
+     if(!cs.alive.length)kiAdd('ai','Hinweis: Kein Prüfer war erreichbar. Das Ergebnis wurde nur vom Bauer selbst geprüft.');
+     if(cs.fb)fb=cs.fb;
+    }catch(e){if(e&&e.fatal)throw e;kiAdd('ai','Team-Prüfung übersprungen: '+e.message)}}
    if(!fb)break;
-   if(round===9){kiAdd('ai','Nach 6 Durchgängen noch nicht sauber gelöst. Beschreib mir genauer, was du siehst, dann korrigiere ich gezielt.');break}
+   if(round===9){kiAdd('ai','Nach 10 Durchgängen noch nicht sauber gelöst. Beschreib mir genauer, was du siehst, dann korrigiere ich gezielt.');break}
    userText='[SYSTEM-RÜCKMELDUNG, nicht vom Nutzer] '+fb;
    await new Promise(r=>setTimeout(r,350));
    imgParts=kiImages(true);try{imgParts.push(...(await filmstrip(KI.look&&KI.look.length?KI.look:autoTimes())));KI.look=null}catch(e){}
   }
- }catch(e){failed=true;if(!kiFail(e,q))kiAdd('ai',e.message+(/unauthorized|401|API key|API_KEY|Kein OpenRouter/i.test(e.message)?'\nOpenRouter-Key wird abgelehnt. Oben aufs Zahnrad und den Key prüfen.':/quota|credits|402|429/i.test(e.message)?'\nOpenRouter-Guthaben oder Limit. Kurz warten oder Key prüfen.':''))}
+ }catch(e){failed=true;if(!kiFail(e,q)){kiAdd('ai',e.message+(e.fatal?'':/quota|credits|429/i.test(e.message)?'\nOpenRouter-Guthaben oder Limit. Kurz warten.':''));if(e.fatal){try{$('kicfg').style.display='block'}catch(x){}}}}
  kiTrailFreeze();
  if(!failed&&!KI.stop){
   const thin=s=>/^(erledigt|fertig|done|ok|okay|gemacht|passt|alles klar|ich hab(?:e)?(?: es)? (?:gemacht|erledigt)|i(?:'ve| have) done it)[.! ]*$/i.test(String(s||'').trim());
@@ -2064,12 +2162,12 @@ $('kigo').onclick=kiSend;$('kiin').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey
 /* ---------- Music / Intensität & Manuelles Effekt-Tuning ---------- */
 function pk(k){return S.str*(S.fxi[k]??1)}
 const AU='https://api.audius.co/v1/',AP='app_name=EDITBOT';
-async function msearch(q){const l=$('mslist');l.innerHTML='<div class=small>Loading ...</div>';try{const r=await fetch(q?AU+'tracks/search?query='+encodeURIComponent(q)+'&limit=20&'+AP:AU+'tracks/trending?limit=20&'+AP),j=await r.json();l.innerHTML=(j.data||[]).filter(t=>t.is_streamable!==false&&t.access?.stream!==false).map(t=>`<div class="clip"><div class=cn><div class=nm>${esc(t.title)}</div><div class=tin>${esc(t.user.name)} · ${fm(t.duration)}</div></div><button class=mini data-a=prev data-v=${t.id}></button><button class=mini data-a=pick data-v="${t.id}|${esc(t.title).replace(/\|/g,' ')}">Play Nutzen</button></div>`).join('')||'<div class=small>Nix gefunden</div>'}catch(e){l.innerHTML='<div class=small>X Laden fehlgeschlagen (Internet?): '+esc(e.message)+'</div>'}}
+async function msearch(q){const l=$('mslist');l.innerHTML='<div class=small>Loading ...</div>';try{const r=await fetch(q?AU+'tracks/search?query='+encodeURIComponent(q)+'&limit=20&'+AP:AU+'tracks/trending?limit=20&'+AP),j=await r.json();l.innerHTML=(j.data||[]).filter(t=>t.is_streamable!==false&&t.access?.stream!==false).map(t=>`<div class="clip"><div class=cn><div class=nm>${esc(t.title)}</div><div class=tin>${esc(t.user.name)} · ${fm(t.duration)}</div></div><button class=mini data-a=prev data-v=${t.id}></button><button class=mini data-a=pick data-v="${t.id}|${esc(t.title).replace(/\|/g,' ')}">Nutzen</button></div>`).join('')||'<div class=small>Nix gefunden</div>'}catch(e){l.innerHTML='<div class=small>Laden fehlgeschlagen (Internet?): '+esc(e.message)+'</div>'}}
 const pEl=new Audio();let pId='';
 async function hosts(){let h=['https://api.audius.co'];try{const j=await(await fetch('https://api.audius.co')).json();(j.data||[]).slice(0,4).forEach(x=>h.push(x))}catch(e){}return h}
 function tryHost(h,id){return new Promise((ok,no)=>{const to=setTimeout(()=>no('Timeüberschreitung'),9000);songEl.onloadedmetadata=()=>{clearTimeout(to);ok()};songEl.onerror=()=>{clearTimeout(to);no('Stream-Error')};songEl.crossOrigin='anonymous';songEl.src=h+'/v1/tracks/'+id+'/stream?'+AP})}
-async function mpick(v){const[id,...n]=v.split('|'),name=n.join(' ');st('Song wird gestreamt …');pEl.pause();pId='';let err='';for(const h of await hosts()){try{await tryHost(h,id);return songReady(name,null,songEl.src)}catch(e){err=e}}st('X Dieser Song lässt sich nicht streamen ('+err+') – nimm einen anderen')}
-function mprev(id){if(pId===id){pEl.pause();pId='';return}pEl.src=AU+'tracks/'+id+'/stream?'+AP;pId=id;pEl.play().catch(()=>st('X Vorschau nicht möglich'))}
+async function mpick(v){const[id,...n]=v.split('|'),name=n.join(' ');st('Song wird gestreamt …');pEl.pause();pId='';let err='';for(const h of await hosts()){try{await tryHost(h,id);return songReady(name,null,songEl.src)}catch(e){err=e}}st('Dieser Song lässt sich nicht streamen ('+err+') – nimm einen anderen')}
+function mprev(id){if(pId===id){pEl.pause();pId='';return}pEl.src=AU+'tracks/'+id+'/stream?'+AP;pId=id;pEl.play().catch(()=>st('Vorschau nicht möglich'))}
 
 Object.assign(ACT,{trend:()=>msearch(''),gen:v=>msearch(v),pick:mpick,prev:mprev});
 $('msgo').onclick=()=>msearch($('msq').value.trim());$('msq').onkeydown=e=>e.key==='Enter'&&msearch(e.target.value.trim());
@@ -2203,7 +2301,7 @@ addEventListener('resize',vh);addEventListener('orientationchange',()=>setTimeou
    else if(k==='ArrowRight'){e.preventDefault();seek(e.shiftKey?1:.1)}
    else if(k==='Home'){seek(-1e9)}
    else if(k.toLowerCase()==='k'){kfAdd(S.T)}
-   else if(k.toLowerCase()==='s'){const g=S.segs[segAt(S.T)];if(!g)return st('Load clips first ');st('Split '+splitClip(S.clips.indexOf(g.c),S.T,true))}
+   else if(k.toLowerCase()==='s'){const g=S.segs[segAt(S.T)];if(!g)return st('Lade zuerst Clips');st('Split '+splitClip(S.clips.indexOf(g.c),S.T,true))}
   }catch(err){try{st(''+err.message)}catch(x){}}
  });
  /* Beispiel-Prompts für die KI */
@@ -2286,14 +2384,14 @@ function kiBusy(on){KI.busy=on;if(on)KI.stop=false;$('kigo').disabled=on;$('kist
 function setNotes(v){KI.notes=v;const e=$('kiNotes');if(e&&e.value!==v)e.value=v}
 function officeSave(){try{const log=[...$('kilog').querySelectorAll('.mb')].slice(-60).map(d=>({w:d.classList.contains('me')?'me':'ai',t:(d.querySelector('span')||d).textContent.slice(0,1500)}));localStorage.setItem(OFF_KEY,JSON.stringify({h:KI.h.slice(-24),log,notes:KI.notes,pending:KI.pending}))}catch(e){}}
 function kiFail(e,q){const m=e.message||'';
- if(m==='__stop'){KI.pending=null;kiAdd('ai','Stop Stopp. Mit Undo nimmst du’s zurück.');return true}
- if(/Netzwerkfehler|Timeüberschreitung|HTTP 5\d\d|overload|high demand|unavailable/i.test(m)){KI.pending={q};kiAdd('ai','Netz weg. Drück Weitermachen, dann gehts da weiter.');$('kiResume').style.display='';return true}
+ if(m==='__stop'){KI.pending=null;kiAdd('ai','Gestoppt. Mit Undo nimmst du es zurück.');return true}
+ if(/Netzwerkfehler|Zeitüberschreitung|HTTP 5\d\d|overload|high demand|unavailable/i.test(m)){KI.pending={q};kiAdd('ai','Netz weg. Drück Weitermachen, dann gehts da weiter.');$('kiResume').style.display='';return true}
  return false}
 function kiResume(){if($('kigo').disabled||!KI.pending)return;const q=KI.pending.q||'';$('kiResume').style.display='none';$('kiin').value='Verbindung war weg, mach genau da weiter wo du aufgehört hast (nutze deine Notizen und den STATE, nicht von vorn). Meine Aufgabe war: '+q;kiSend()}
 (function(){
  const st_=document.createElement('style');st_.textContent='.mb.think{opacity:.78;font-style:italic;border:1px dashed var(--bd)}.kid{animation:kb 1s infinite;letter-spacing:2px;color:var(--ac)}@keyframes kb{50%{opacity:.2}}#kiNotes{min-height:80px;resize:vertical}';document.head.append(st_);
  const live=document.createElement('div');live.id='kiLive';live.className='mb ai';live.style.cssText='display:none;margin:6px 0';live.innerHTML='<b></b> <i class="kid">...</i>';$('kilog').after(live);
- const rb=document.createElement('button');rb.id='kiResume';rb.type='button';rb.className='btn hot';rb.style.cssText='display:none;width:100%;margin:6px 0';rb.textContent='Resume where I left off';rb.onclick=kiResume;live.after(rb);
+ const rb=document.createElement('button');rb.id='kiResume';rb.type='button';rb.className='btn hot';rb.style.cssText='display:none;width:100%;margin:6px 0';rb.textContent='Dort weitermachen, wo ich aufgehört habe';rb.onclick=kiResume;live.after(rb);
  const sb=document.createElement('button');sb.id='kistop';sb.type='button';sb.className='btn';sb.textContent='Stop';sb.title='Stopp';sb.style.cssText='flex:0 0 auto;display:none;background:#b3202a;border-color:#ff5d6a;color:#fff';sb.onclick=()=>{if(!KI.busy)return;KI.stop=true;kiLive('stoppt …');try{KI.ctl&&KI.ctl.abort()}catch(e){}};$('kigo').after(sb);
  const card=document.createElement('div');card.className='card';card.style.display='none';card.setAttribute('data-notr','');card.innerHTML='<h3>Büro der KI</h3><textarea id="kiNotes" class="field" placeholder="Notizbuch der KI (Plan, Fortschritt, Vorlieben). Du kannst auch selbst etwas reinschreiben."></textarea><div class="row" style="margin-top:6px"><button class="btn" id="kiNotesClr" type="button">Notizen leeren</button><button class="btn" id="kiMemClr" type="button">Gedächtnis löschen</button></div><p class="small">Gespräch und Notizen bleiben nach Neuladen oder Verbindungsabbruch erhalten.</p>';$('rigcard').before(card);card.style.display='none';
  $('kiNotes').oninput=e=>{KI.notes=e.target.value.slice(0,3000);officeSave()};$('kiNotesClr').onclick=()=>{setNotes('');officeSave()};$('kiMemClr').onclick=()=>{KI.h=[];KI.pending=null;setNotes('');$('kilog').replaceChildren();kiAdd('ai','Gedächtnis gelöscht.');$('kiResume').style.display='none';officeSave()};
@@ -2354,7 +2452,7 @@ Object.assign(DO,{
  cut_map:v=>{const a=[].concat(v).map(o=>({s:+(o&&o.s),e:+(o&&o.e),beats:+(o&&o.beats)}));for(const o of a){if(!isFinite(o.s)||!isFinite(o.e)||o.e<=o.s)throw new Error('cut_map braucht s<e');if(![1,2,4,8].includes(o.beats))throw new Error('cut_map beats nur 1, 2, 4 oder 8')}S.cutMap=a;S.autoCut=true;$('autocut').checked=true;build();return 'Timeleiste neu gebaut: '+S.segs.length+' Abschnitte, '+S.total.toFixed(2)+' s'},
  beat_times:o=>{o=o||{};if(!S.beats.length)throw new Error('Keine Beats, erst analyse oder bpm');const ev=Math.max(1,Math.round(+o.every||1)),f=+o.from||0,e=+o.to>0?+o.to:S.total,m=o.downbeats?4:ev,r=[];S.beats.forEach((b,i)=>{if(b>=f&&b<=e&&(i+S.barOff)%m===0)r.push(+b.toFixed(3))});return JSON.stringify({bpm:S.bpm,beatLen:+(60/S.bpm).toFixed(3),drop:S.dropT||null,count:r.length,times:r.slice(0,150)})},
  timeline:()=>JSON.stringify({total:+S.total.toFixed(2),bpm:S.bpm,drop:S.dropT||null,segs:S.segs.slice(0,150).map((g,i)=>[i,+g.start.toFixed(2),+g.len.toFixed(2),S.clips.indexOf(g.c),((S.beats.findIndex(b=>Math.abs(b-g.start)<.03)+S.barOff)%4===0)?'bar':'']),ev:S.ev,cutMap:S.cutMap}),
- calc:v=>{const B=60/S.bpm,L=[].concat(v).map(x=>{const f=new Function('S','B','const {min,max,abs,round,floor,ceil,sqrt,pow,sin,cos,PI,log}=Math;return ('+String(x)+')');const r=f(S,B);return typeof r==='number'?+r.toFixed(4):r});return JSON.stringify(L.length===1?L[0]:L)}
+ calc:v=>{const B=60/S.bpm,L=[].concat(v).map(x=>{const f=guardedFn(['S','B'],'const {min,max,abs,round,floor,ceil,sqrt,pow,sin,cos,PI,log}=Math;return ('+String(x)+')');const r=f(S,B);return typeof r==='number'?+r.toFixed(4):r});return JSON.stringify(L.length===1?L[0]:L)}
 });
 
 /* ---------- v26: Projektformat folgt dem Medium, jederzeit einstellbar ---------- */
@@ -2401,7 +2499,7 @@ Object.assign(ED,{setFormat:(w,h)=>{setFormat(w,h);S.fmt={mode:'custom',w:W,h:H}
 (function(){
 const css=document.createElement('style');css.textContent='#tabs button[data-v=vibe]{display:none!important}#t-clips .card:has(.qgrid){display:none!important}';document.head.appendChild(css);
 Object.assign(ACT,{
- jump:v=>{const c=S.clips[+v],g=S.segs.find(g=>g.c===c);if(!g)return;S.T=g.start;S.seg=-1;try{scrubTo?.(S.T)}catch(e){}st('Clip '+(+v+1)+' at '+g.start.toFixed(2)+'s')},
+ jump:v=>{const c=S.clips[+v],g=S.segs.find(g=>g.c===c);if(!g)return;S.T=g.start;S.seg=-1;try{const sc=$('scrub');if(sc&&S.total>0)sc.value=Math.round(S.T/S.total*1000)}catch(e){}st('Clip '+(+v+1)+' at '+g.start.toFixed(2)+'s')},
  splitHere:()=>{const g=S.segs.find(g=>S.T>=g.start&&S.T<g.start+g.len-.05);if(!g)return st('Move the playhead over a clip first');const i=S.clips.indexOf(g.c);try{st('Split '+splitClip(i,S.T,true))}catch(e){st(''+e.message)}}
 });
 const sw=$('autocut'),row=sw&&sw.closest('label'),sel=$('cutb'),lab=sel&&sel.previousElementSibling;
