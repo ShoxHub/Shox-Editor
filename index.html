@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ShoxyEditor v23 · KI-Fix</title>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ShoxyEditor v28 · Final</title>
 <style>
 :root{color-scheme:dark;--pink:#3b82ff;--vio:#22d3ee;--cy:#62e6ff;--line:#2a2a47;--mut:#9a9cbc;--grad:linear-gradient(100deg,#3b82ff,#22d3ee)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -144,6 +144,11 @@ a{color:#fff;text-decoration:underline}
 </style><style id="themeCss">
 :root,:root[data-theme=plasma]{--ac:#18e4ff;--ac2:#2f6bff;--acg:linear-gradient(100deg,#00f0ff,#2f6bff);--on:#001018;--bg:#010611;--bg2:#06142a;--pan:#071428;--bd:#12356b;--glow:#18e4ff;--txt2:#a9d6ff;--pink:var(--ac);--vio:var(--ac2);--cy:var(--ac);--line:var(--bd);--mut:#7fa3cc;--grad:var(--acg)}
 :root[data-theme=celestial]{--ac:#ffb21a;--ac2:#ff3d00;--acg:linear-gradient(100deg,#ffe600,#ff8a00,#ff2d00);--on:#1a0700;--bg:#0b0301;--bg2:#220a02;--pan:#1a0802;--bd:#6b2a08;--glow:#ff7a00;--txt2:#ffd9a8;--pink:var(--ac);--vio:var(--ac2);--cy:var(--ac);--line:var(--bd);--mut:#cc9a72;--grad:var(--acg)}
+/* Theme Schwarz-Weiß: nur die Bedienoberfläche ist grau, die Vorschau (#pv) behält die echten Farben */
+:root[data-theme=mono]{--ac:#fff;--ac2:#8f8f8f;--acg:linear-gradient(100deg,#fff,#7d7d7d);--on:#000;--bg:#000;--bg2:#0b0b0b;--pan:#0d0d0d;--bd:#383838;--glow:#fff;--txt2:#d6d6d6;--pink:var(--ac);--vio:var(--ac2);--cy:var(--ac);--line:var(--bd);--mut:#8c8c8c;--grad:var(--acg)}
+html[data-theme=mono] header,html[data-theme=mono] #panel,html[data-theme=mono] #status,html[data-theme=mono] #transport{filter:grayscale(1)}
+html[data-theme=mono] #pv{box-shadow:0 0 0 1px #ffffff40,0 20px 50px #000a}
+html[data-theme=mono] #themeBtn{font-variant-emoji:text}
 body{background:radial-gradient(ellipse 90% 55% at 12% -8%,color-mix(in srgb,var(--ac2) 38%,transparent),transparent),radial-gradient(ellipse 70% 50% at 100% 105%,color-mix(in srgb,var(--ac) 28%,transparent),transparent),var(--bg);color:#fff;transition:background .4s}
 body:before{background:repeating-linear-gradient(0deg,rgba(255,255,255,.014) 0 1px,transparent 1px 4px)}
 #app{background:linear-gradient(180deg,var(--bg),var(--bg2));box-shadow:0 0 0 1px var(--bd),0 0 80px color-mix(in srgb,var(--glow) 18%,transparent)}
@@ -207,12 +212,12 @@ a{color:var(--ac)}.auto{background:var(--acg);color:var(--on)}
  </div><p class="small">Ein Tipp wendet die Änderung direkt an. Du kannst danach alles weiter anpassen oder rückgängig machen, indem du einen anderen Look wählst.</p></div>
  <div id="cliplist"></div>
  <div class="card"><h3>Schnitt</h3><label class="sw"><input type="checkbox" id="autocut"><i></i>Auto-Cut auf den Beat</label><label class="l">Schnitt alle <b></b></label><select id="cutb"><option value="1">1 Beat (hektisch)</option><option value="2">2 Beats</option><option value="4" selected>4 Beats (1 Takt)</option><option value="8">8 Beats</option></select>
- <label class="l">Bildformat</label><div class="seg" id="fillseg"></div><label class="l">Speed <b id="speedv">1.0×</b></label><input id="speed" type="range" min=".5" max="2" step=".05" value="1"></div>
+ <label class="l">Clip einpassen</label><div class="seg" id="fillseg"></div><label class="l">Speed <b id="speedv">1.0×</b></label><input id="speed" type="range" min=".5" max="2" step=".05" value="1"></div>
  <div class="card"><h3>🚀 Pro Export · v20</h3>
  <div class="row"><div><label class="l" style="margin-top:0">Auflösung</label><select id="expres"><option value="720">HD · 720p</option><option value="1080" selected>Full HD · 1080p</option><option value="1440">2K / QHD · 1440p</option><option value="2160">4K UHD · 2160p</option></select></div><div><label class="l" style="margin-top:0">Format</label><select id="expformat"><option value="auto">Automatisch</option><option value="mp4">MP4 (wenn unterstützt)</option><option value="webm">WebM</option></select></div></div>
  <div class="row"><div><label class="l" style="margin-top:0">Bitrate</label><select id="expq"><option value="8000000">Normal · 8 Mbit</option><option value="14000000">Hoch · 14 Mbit</option><option value="22000000" selected>Sehr hoch · 22 Mbit</option><option value="35000000">4K · 35 Mbit</option><option value="50000000">4K Max · 50 Mbit</option></select></div><div><label class="l" style="margin-top:0">FPS</label><select id="expfps"><option value="30">30 FPS</option><option value="60">60 FPS</option></select></div></div>
  <label class="sw" style="margin-top:9px"><input type="checkbox" id="exphq" checked><i></i>Ultra-HD-Hochskalierung (High Quality)</label>
- <p class="small">4K rendert dein 720×1280-Projekt auf 2160×3840 hoch. HQ nutzt hochwertiges Canvas-Resampling – kein echtes KI-Upscaling. MP4 hängt von Browser und Gerät ab; bei fehlender Unterstützung wird WebM verwendet. Deine Looks, Texte und Keyframes werden lokal automatisch gespeichert. Videodateien selbst bleiben aus Datenschutz- und Speichergründen nur in der aktuellen Sitzung geladen.</p></div>
+ <p class="small">Die Auflösung gilt für die kürzere Seite deines Projektformats (z. B. 1080p = 1080×1920 bei 9:16 oder 1920×1080 bei 16:9). HQ nutzt hochwertiges Canvas-Resampling – kein echtes KI-Upscaling. MP4 hängt von Browser und Gerät ab; bei fehlender Unterstützung wird WebM verwendet. Deine Looks, Texte und Keyframes werden lokal automatisch gespeichert. Videodateien selbst bleiben aus Datenschutz- und Speichergründen nur in der aktuellen Sitzung geladen.</p></div>
 </div>
 
 <div class="tab" id="t-vibe">
@@ -337,7 +342,7 @@ a{color:var(--ac)}.auto{background:var(--acg);color:var(--on)}
 <label class="sw" style="margin-top:8px"><input type="checkbox" data-af="p8"><i></i>8D-Audio (wandert links↔rechts)</label></div><p class="small">Bibliothek: Audius – wird nur gestreamt, nichts wird heruntergeladen. Spotify und YouTube Music lassen sich technisch und rechtlich nicht in einen Editor einbauen.</p></div>
 </div></section></main></div>
 <script>
-const $=id=>document.getElementById(id),W=720,H=1280,esc=s=>s.replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+let W=720,H=1280;const $=id=>document.getElementById(id),esc=s=>s.replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 const mk=(w=W,h=H)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c},g2=c=>c.getContext('2d');
 const cv=$('cv'),X=g2(cv),fc=mk(),pv=mk(),cc=mk(),sc=mk(),tm=mk(),tm2=mk(),sm=mk(96,171),px=mk(8,8);
 let exportCanvas=null,exportCtx=null;
@@ -462,13 +467,13 @@ function beat(t){const b=S.beats;if(!b.length)return{hit:0,n:0,i:-1,ph:0};let lo
  if(r<0)return{hit:0,n:S.barOff,i:-1,ph:0};const iv=b[r+1]!==undefined?b[r+1]-b[r]:60/S.bpm,ph=t-b[r],dec=Math.min(.22,Math.max(.09,iv*.45));
  return{hit:Math.pow(Math.max(0,1-ph/dec),2),n:r+S.barOff,i:r,ph}}
 /* ---------- Timeline ---------- */
-function build(){const cl=S.clips,sp=S.speed,segs=[];
+function build(){try{autoFmt()}catch(e){}const cl=S.clips,sp=S.speed,segs=[];
  genBeats(cl.reduce((a,c)=>a+Math.max(.1,c.out-c.in)/sp,0));
  if(cl.length){let cursor=0;const bc=S.cutBeats;
   cl.forEach(c=>{const L=Math.max(.1,c.out-c.in)/sp;
    if(S.autoCut&&S.beats.length>2){
     /* Schnitte exakt auf Beats / Taktanfänge */
-    const cuts=[];for(let i=0;i<S.beats.length;i++){const bt=S.beats[i];if(bt<=cursor+.12)continue;if(bt>=cursor+L-.12)break;if((i+S.barOff)%bc===0)cuts.push(bt)}
+    const cuts=[];for(let i=0;i<S.beats.length;i++){const bt=S.beats[i];if(bt<=cursor+.12)continue;if(bt>=cursor+L-.12)break;if((i+S.barOff)%bcAt(bt,bc)===0)cuts.push(bt)}
     let a=cursor,src=c.in;[...cuts,cursor+L].forEach(e=>{const len=e-a;if(len>.02){segs.push({c,src,len,start:a});src+=len*sp;a=e}});cursor+=L
    }else{segs.push({c,src:c.in,len:L,start:cursor});cursor+=L}})
  }
@@ -480,12 +485,12 @@ function drawTimeline(){const d=S.total||S.song?.dur||1;let h='';
  if(S.dropT>0&&S.dropT<d)h+=`<i class="drop" style="left:${S.dropT/d*100}%"></i>`;
  S.segs.forEach(g=>h+=`<i class=cut style="left:${g.start/d*100}%"></i>`);$('timeline').innerHTML=h}
 const segAt=t=>{for(let i=S.segs.length-1;i>=0;i--)if(t>=S.segs[i].start)return i;return 0};
-const tgt=(g,L)=>{const c=g.c,sp=c.out-c.in;if(has('reverse'))L=g.len-L;else if(has('rewind')){const hf=120/S.bpm,u=L%(2*hf);L=u<hf?u:2*hf-u}let x=g.src+Math.max(0,L)*S.speed;if(x>c.out-.05)x=c.in+((x-c.in)%Math.max(.1,sp));return x};
-function activate(i){PV.globalAlpha=1;PV.drawImage(fc,0,0);S.useTr=S.playing&&S.seg>=0&&i===S.seg+1;const pool=TR.filter(x=>x[0]!=='cut'&&x[0]!=='random');S.curTr=S.trans==='random'?pool[Math.random()*pool.length|0][0]:S.trans;S.seg=i;const g=S.segs[i];S.clips.forEach(c=>{if(c.v!==g.c.v)c.v.pause()});g.c.v.currentTime=tgt(g,S.T-g.start)}
-function syncVid(g,t,hit){const v=g.c.v,ramp=has('ramp'),tg=tgt(g,t-g.start),rv=has('reverse')||has('rewind'),th=rv?.03:S.playing?(ramp?1.3:.35):.04;if(!v.seeking&&Math.abs(v.currentTime-tg)>th)v.currentTime=tg;v.playbackRate=Math.min(16,Math.max(.1,S.speed*(ramp?.4+1.2*(1-hit):1)));v.preservesPitch=!S.pitchF;if(S.playing&&v.paused&&!rv)v.play().catch(()=>{});if((!S.playing||rv)&&!v.paused)v.pause();
+const tgt=(g,L)=>{const c=g.c,sp=c.out-c.in;if(has('reverse')||revSeg(g))L=g.len-L;else if(has('rewind')){const hf=120/S.bpm,u=L%(2*hf);L=u<hf?u:2*hf-u}let x=g.src+Math.max(0,L)*S.speed;if(x>c.out-.05)x=c.in+((x-c.in)%Math.max(.1,sp));return x};
+function activate(i){PV.globalAlpha=1;PV.drawImage(fc,0,0);S.useTr=S.playing&&S.seg>=0&&i===S.seg+1;const pool=TR.filter(x=>x[0]!=='cut'&&x[0]!=='random');S.curTr=S.trans==='random'?pool[Math.random()*pool.length|0][0]:S.trans;S.curTd=0;{const et=(S.ev||[]).find(e=>e.type==='trans'&&Math.abs(e.t-S.segs[i].start)<.06);if(et){S.curTr=et.id;S.curTd=et.dur||0}}S.seg=i;const g=S.segs[i];S.clips.forEach(c=>{if(c.v!==g.c.v)c.v.pause()});g.c.v.currentTime=tgt(g,S.T-g.start)}
+function syncVid(g,t,hit){const v=g.c.v,ramp=has('ramp'),tg=tgt(g,t-g.start),rv=has('reverse')||has('rewind')||revSeg(g),th=rv?.03:S.playing?(ramp?1.3:.35):.04;if(!v.seeking&&Math.abs(v.currentTime-tg)>th)v.currentTime=tg;v.playbackRate=Math.min(16,Math.max(.1,S.speed*(ramp?.4+1.2*(1-hit):1)));v.preservesPitch=!S.pitchF;if(S.playing&&v.paused&&!rv)v.play().catch(()=>{});if((!S.playing||rv)&&!v.paused)v.pause();
  if(S.song){if(S.playing){const sp=S.songSpeed||1;songEl.playbackRate=sp;if(songEl.paused&&t*sp<songEl.duration)songEl.play().catch(()=>{});if(!songEl.seeking&&Math.abs(songEl.currentTime-t*sp)>.3*sp)songEl.currentTime=t*sp}else if(!songEl.paused)songEl.pause()}}
 function paintBackground(ctx){const L=S.background;if(!L?.img||!L.img.complete)return;const iw=L.img.naturalWidth||L.img.width,ih=L.img.naturalHeight||L.img.height;if(!iw||!ih)return;const z=Math.max(W/iw,H/ih);ctx.save();ctx.globalAlpha=L.opacity??1;ctx.drawImage(L.img,(W-iw*z)/2,(H-ih*z)/2,iw*z,ih*z);ctx.restore()}
-function drawFrame(v){if(v.readyState<2||v.seeking)return;const iw=v.videoWidth,ih=v.videoHeight;if(!iw)return;const s=Math.max(W/iw,H/ih);if(S.fill==='fill'){F.globalAlpha=1;F.clearRect(0,0,W,H);if(S.background)paintBackground(F);blitSrc(F,v,(W-iw*s)/2,(H-ih*s)/2,iw*s,ih*s)}else{if(S.background)paintBackground(F);else{F.fillStyle='#05070d';F.fillRect(0,0,W,H)}const q=Math.max(96/iw,171/ih);SM.drawImage(v.img||v,(96-iw*q)/2,(171-ih*q)/2,iw*q,ih*q);F.drawImage(sm,0,0,W,H);F.fillStyle='rgba(0,0,0,.20)';F.fillRect(0,0,W,H);const f=Math.min(W/iw,H/ih);blitSrc(F,v,(W-iw*f)/2,(H-ih*f)/2,iw*f,ih*f)}}
+function drawFrame(v){if(v.readyState<2||v.seeking)return;const iw=v.videoWidth,ih=v.videoHeight;if(!iw)return;const s=Math.max(W/iw,H/ih);if(S.fill==='fill'){F.globalAlpha=1;F.clearRect(0,0,W,H);if(S.background)paintBackground(F);blitSrc(F,v,(W-iw*s)/2,(H-ih*s)/2,iw*s,ih*s)}else{if(S.background)paintBackground(F);else{F.fillStyle='#05070d';F.fillRect(0,0,W,H)}const q=Math.max(sm.width/iw,sm.height/ih);SM.drawImage(v.img||v,(sm.width-iw*q)/2,(sm.height-ih*q)/2,iw*q,ih*q);F.drawImage(sm,0,0,W,H);F.fillStyle='rgba(0,0,0,.20)';F.fillRect(0,0,W,H);const f=Math.min(W/iw,H/ih);blitSrc(F,v,(W-iw*f)/2,(H-ih*f)/2,iw*f,ih*f)}}
 /* ---------- Effekt-Helfer ---------- */
 function rgb(d,src,dx,dy=0){d.globalCompositeOperation='source-over';d.globalAlpha=1;d.fillStyle='#000';d.fillRect(0,0,W,H);[['#f00',-dx,-dy],['#0f0',0,0],['#00f',dx,dy]].forEach(([col,ox,oy])=>{T2.globalCompositeOperation='source-over';T2.fillStyle='#000';T2.fillRect(0,0,W,H);T2.drawImage(src,ox,oy);T2.globalCompositeOperation='multiply';T2.fillStyle=col;T2.fillRect(0,0,W,H);T2.globalCompositeOperation='source-over';d.globalCompositeOperation='lighter';d.drawImage(tm2,0,0)});d.globalCompositeOperation='source-over'}
 function slices(d,n,amt){T1.drawImage(d.canvas,0,0);for(let i=0;i<n;i++){const y=Math.random()*H,h=8+Math.random()*90;d.drawImage(tm,0,y,W,h,(Math.random()-.5)*amt,y,W,h)}}
@@ -499,7 +504,7 @@ function compose(p){const k=S.curTr,q=ease(p),sn=Math.sin(Math.PI*p),base=p<.5?p
  case'flash':dz(base,1,1);C.globalAlpha=sn;C.fillStyle='#fff';C.fillRect(0,0,W,H);break;
  case'zoomin':dz(fc,1.35-.35*q,1);dz(pv,1+q*1.1,1-q);break;
  case'zoomout':dz(fc,1.3-.3*q,1);dz(pv,1-.5*q,1-q);break;
- case'blur':dz(base,1,1);SM.drawImage(base,0,0,96,171);C.globalAlpha=Math.min(1,sn*1.6);C.drawImage(sm,0,0,W,H);break;
+ case'blur':dz(base,1,1);SM.drawImage(base,0,0,sm.width,sm.height);C.globalAlpha=Math.min(1,sn*1.6);C.drawImage(sm,0,0,W,H);break;
  case'glitch':dz(base,1,1);slices(C,7,300*sn);T1.drawImage(cc,0,0);rgb(C,tm,50*sn);break;
  case'rgb':dz(base,1,1);T1.drawImage(cc,0,0);rgb(C,tm,90*sn,20*sn);break;
  case'slide':C.drawImage(pv,-q*W,0);C.drawImage(fc,W-q*W,0);break;
@@ -577,9 +582,9 @@ function scene(t,h,n){
  if(fxOn('pixel',t)){const v=fxVal('pixel',t,h,p);if(v.h>.04){const b=Math.max(2,Math.round(8+v.h*46*v.p));px.width=W/b|0;px.height=H/b|0;PX.imageSmoothingEnabled=false;PX.drawImage(sc,0,0,px.width,px.height);SX.imageSmoothingEnabled=false;SX.drawImage(px,0,0,W,H);SX.imageSmoothingEnabled=true}}
  if(fxOn('mirror',t)){T1.drawImage(sc,0,0);SX.save();SX.translate(W,0);SX.scale(-1,1);SX.drawImage(tm,0,0,W/2,H,0,0,W/2,H);SX.restore()}
  if(ECHO('rzoom')){const v=fxVal('rzoom',t,h,p);if(v.h>.03){T1.drawImage(sc,0,0);for(let k=1;k<=6;k++){const s=1+k*.03*v.h*(.5+v.p);SX.globalAlpha=.14;SX.save();SX.translate(W/2,H/2);SX.scale(s,s);SX.translate(-W/2,-H/2);SX.drawImage(tm,0,0);SX.restore()}SX.globalAlpha=1}}
- if(fxOn('glow',t)){const v=fxVal('glow',t,h,p);SM.drawImage(sc,0,0,96,171);SX.globalCompositeOperation='screen';SX.globalAlpha=Math.min(1,(.3+.5*v.h)*(.4+v.p));SX.drawImage(sm,0,0,W,H);SX.globalCompositeOperation='source-over';SX.globalAlpha=1}
- if(fxOn('neon',t)){const v=fxVal('neon',t,h,p);SM.drawImage(sc,0,0,96,171);SX.globalCompositeOperation='screen';SX.globalAlpha=Math.min(1,(.3+.5*v.h)*(.4+v.p));SX.drawImage(sm,0,0,W,H);SX.globalCompositeOperation='source-over';SX.globalAlpha=1}
- if(fxOn('softblur',t)){const v=fxVal('softblur',t,h,p);SM.drawImage(sc,0,0,96,171);SX.globalCompositeOperation='source-over';SX.globalAlpha=Math.min(.9,.6*v.p);SX.drawImage(sm,0,0,W,H);SX.globalAlpha=1}
+ if(fxOn('glow',t)){const v=fxVal('glow',t,h,p);SM.drawImage(sc,0,0,sm.width,sm.height);SX.globalCompositeOperation='screen';SX.globalAlpha=Math.min(1,(.3+.5*v.h)*(.4+v.p));SX.drawImage(sm,0,0,W,H);SX.globalCompositeOperation='source-over';SX.globalAlpha=1}
+ if(fxOn('neon',t)){const v=fxVal('neon',t,h,p);SM.drawImage(sc,0,0,sm.width,sm.height);SX.globalCompositeOperation='screen';SX.globalAlpha=Math.min(1,(.3+.5*v.h)*(.4+v.p));SX.drawImage(sm,0,0,W,H);SX.globalCompositeOperation='source-over';SX.globalAlpha=1}
+ if(fxOn('softblur',t)){const v=fxVal('softblur',t,h,p);SM.drawImage(sc,0,0,sm.width,sm.height);SX.globalCompositeOperation='source-over';SX.globalAlpha=Math.min(.9,.6*v.p);SX.drawImage(sm,0,0,W,H);SX.globalAlpha=1}
  if(fxOn('teal',t)){const v=fxVal('teal',t,h,p);const g=SX.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgb(0,150,185)');g.addColorStop(1,'rgb(255,130,40)');ov('overlay',.5*(.4+v.p),g)}
  if(fxOn('leak',t)){const v=fxVal('leak',t,h,p);const x=W*(.5+.5*Math.sin(v.t*.6)),g=SX.createLinearGradient(x-350,0,x+350,H*.6);g.addColorStop(0,'rgba(255,60,40,0)');g.addColorStop(.5,'rgba(255,170,60,.9)');g.addColorStop(1,'rgba(255,60,160,0)');ov('screen',.45*(.4+v.p)+v.h*.2,g)}
  if(fxOn('flare',t)){const v=fxVal('flare',t,h,p);const x=W*(.5+.38*Math.sin(v.t*.5)),y=H*(.28+.1*Math.cos(v.t*.8)),g=SX.createRadialGradient(x,y,0,x,y,300);g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.25,'rgba(255,200,120,.5)');g.addColorStop(1,'rgba(255,120,60,0)');ov('screen',(.45+v.h*.5)*v.p,g);SX.globalCompositeOperation='screen';SX.globalAlpha=.5*v.p;SX.fillStyle='#9fd8ff';SX.fillRect(0,y-2,W,4);SX.globalCompositeOperation='source-over';SX.globalAlpha=1}
@@ -590,7 +595,7 @@ function scene(t,h,n){
  if(fxOn('vhs',t)){const v=fxVal('vhs',t,h,p);T1.drawImage(sc,0,0);const y=(v.t*180)%H;SX.drawImage(tm,0,y,W,60,10*Math.sin(t*9)*v.p,y,W,60);ov('screen',.06*v.p,'#ff0080');SX.globalAlpha=.22*v.p;SX.drawImage(tm,5,0);SX.globalAlpha=1;SX.fillStyle='rgba(255,255,255,.12)';for(let k=0;k<4;k++)SX.fillRect(0,Math.random()*H,W,1+Math.random()*2)}
  if(fxOn('scan',t)){SX.fillStyle='rgba(0,0,0,.2)';for(let y=0;y<H;y+=6)SX.fillRect(0,y,W,2)}
  if(fxOn('vig',t)){const v=fxVal('vig',t,h,p);const g=SX.createRadialGradient(W/2,H/2,H*.2,W/2,H/2,H*.8);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,`rgba(0,0,0,${Math.min(.95,.5+v.p*.35)})`);ov('source-over',1,g)}
- if(fxOn('cutout',t)){SM.drawImage(sc,0,0,96,171);const d=SM.getImageData(0,0,96,171),a=d.data;for(let i=0;i<a.length;i+=4)a[i+3]=(a[i+1]>a[i]+22&&a[i+1]>a[i+2]+22)?0:255;SM.putImageData(d,0,0);T1.globalCompositeOperation='source-over';T1.drawImage(sc,0,0);T1.globalCompositeOperation='destination-in';T1.drawImage(sm,0,0,W,H);T1.globalCompositeOperation='source-over';const g=SX.createLinearGradient(0,0,W,H);g.addColorStop(0,'#0a1a3a');g.addColorStop(.5,'#0e7490');g.addColorStop(1,'#111827');SX.fillStyle=g;SX.fillRect(0,0,W,H);SX.drawImage(tm,0,0)}
+ if(fxOn('cutout',t)){SM.drawImage(sc,0,0,sm.width,sm.height);const d=SM.getImageData(0,0,sm.width,sm.height),a=d.data;for(let i=0;i<a.length;i+=4)a[i+3]=(a[i+1]>a[i]+22&&a[i+1]>a[i+2]+22)?0:255;SM.putImageData(d,0,0);T1.globalCompositeOperation='source-over';T1.drawImage(sc,0,0);T1.globalCompositeOperation='destination-in';T1.drawImage(sm,0,0,W,H);T1.globalCompositeOperation='source-over';const g=SX.createLinearGradient(0,0,W,H);g.addColorStop(0,'#0a1a3a');g.addColorStop(.5,'#0e7490');g.addColorStop(1,'#111827');SX.fillStyle=g;SX.fillRect(0,0,W,H);SX.drawImage(tm,0,0)}
  if(fxOn('lines',t)){const v=fxVal('lines',t,h,p);for(let k=0;k<5;k++){const y=((k*263+t*(120+k*40))%(H+200))-100,g=SX.createLinearGradient(0,y,W,y+80);g.addColorStop(0,'rgba(120,200,255,0)');g.addColorStop(.5,'rgba(190,230,255,.6)');g.addColorStop(1,'rgba(120,200,255,0)');ov('screen',(.25+v.h*.4)*v.p,g)}}
  if(fxOn('frame',t)){const v=fxVal('frame',t,h,p);SX.strokeStyle='rgba(255,255,255,.85)';SX.lineWidth=(14+v.h*10)*v.p;SX.strokeRect(20,20,W-40,H-40)}
  if(fxOn('rec',t)){SX.fillStyle='#ef4444';if((t*2|0)%2==0){SX.beginPath();SX.arc(60,70,13,0,7);SX.fill()}SX.fillStyle='#fff';SX.font="600 30px 'Orbitron',monospace";SX.textAlign='left';SX.fillText('REC '+fm(t),86,80)}
@@ -661,9 +666,9 @@ const loadFont=f=>document.fonts&&document.fonts.load(`40px '${f}'`);
 /* ---------- Render-Loop ---------- */
 function idle(t){const g=X.createLinearGradient(0,0,W,H);g.addColorStop(0,'#0d0d0d');g.addColorStop(1,'#000');X.fillStyle=g;X.fillRect(0,0,W,H);const cs=['#ffffff1c','#ffffff10','#ffffff16','#ffffff0a'];for(let k=0;k<4;k++){const x=W*(.5+.4*Math.sin(t*.4+k*1.7)),y=H*(.5+.35*Math.cos(t*.3+k*2.3)),r=X.createRadialGradient(x,y,0,x,y,330);r.addColorStop(0,cs[k]);r.addColorStop(1,'transparent');X.fillStyle=r;X.fillRect(0,0,W,H)}}
 function renderFrame(now){const t=S.T,{hit,n}=beat(t);S.lastHit=hit;S.lastN=n;if(!S.segs.length){idle(now/1000);if(S.background)paintBackground(X);drawImageOverlays(0);drawTexts(0,0);return}
- const i=segAt(t);if(i!==S.seg)activate(i);const g=S.segs[S.seg];syncVid(g,t,hit);drawFrame(g.c.v);const p=S.tdur>0?(t-g.start)/S.tdur:1;
+ const i=segAt(t);if(i!==S.seg)activate(i);const g=S.segs[S.seg];syncVid(g,t,hit);drawFrame(g.c.v);const td=S.curTd||S.tdur,p=td>0?(t-g.start)/td:1;
  if(S.useTr&&p<1&&S.curTr!=='cut')compose(p);else{C.globalAlpha=1;C.clearRect(0,0,W,H);C.drawImage(fc,0,0)}
- scene(t,hit,n);X.drawImage(sc,0,0);runCustomFx(t,hit,n);drawImageOverlays(t);drawTexts(t,hit)}
+ scene(t,hit,n);X.drawImage(sc,0,0);evDraw(t);runCustomFx(t,hit,n);drawImageOverlays(t);drawTexts(t,hit)}
 let scrub=false;
 function tick(now){try{tick0(now)}catch(e){errOnce('Render',e)}requestAnimationFrame(tick)}
 function tick0(now){beatExtras();const dt=Math.min(.1,(now-S.last)/1000);S.last=now;
@@ -684,13 +689,13 @@ $('scrub').oninput=e=>{scrub=true;S.T=Math.max(0,Math.min(S.total,(+e.target.val
 function exportVid(){
  if(!S.segs.length)return st('Erst Clips laden 🎬');
  if(!window.MediaRecorder)return st('Export wird von diesem Browser nicht unterstützt. Bitte Chrome oder Edge verwenden.');
- const scale=Math.max(720,Math.min(2160,+$('expres').value||1080));
+ const scale=Math.max(720,Math.min(2160,+$('expres').value||1080)),EK=scale/Math.min(W,H),EW=2*Math.round(W*EK/2),EH=2*Math.round(H*EK/2);
  const fps=Math.max(1,Math.min(60,+$('expfps').value||30));
  const bitrate=Math.max(1000000,Math.min(50000000,+$('expq').value||22000000));
  try{
   pause();initAudio();if(AC.state==='suspended')throw new Error('Audio ist noch gesperrt. Bitte zuerst einmal ▶ drücken und danach erneut exportieren.');
   if(exportStream)exportStream.getTracks().forEach(t=>t.stop());
-  exportCanvas=document.createElement('canvas');exportCanvas.width=scale;exportCanvas.height=Math.round(scale*16/9);exportCtx=exportCanvas.getContext('2d',{alpha:false});
+  exportCanvas=document.createElement('canvas');exportCanvas.width=EW;exportCanvas.height=EH;exportCtx=exportCanvas.getContext('2d',{alpha:false});
   if(!exportCtx)throw new Error('Der Browser konnte die Exportfläche nicht erstellen.');
   exportCtx.fillStyle='#000';exportCtx.fillRect(0,0,exportCanvas.width,exportCanvas.height);
   const stream=exportCanvas.captureStream(fps);exportStream=stream;
@@ -706,13 +711,13 @@ function exportVid(){
   rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);
   rec.onstop=()=>{
    const type=rec.mimeType||mime||'video/webm',ext=type.includes('mp4')?'mp4':'webm';
-   if(chunks.length){const u=URL.createObjectURL(new Blob(chunks,{type})),a=document.createElement('a');a.href=u;a.download=`ShoxyEditor-v21-${scale}x${Math.round(scale*16/9)}-${S.vibe}.${ext}`;a.click();setTimeout(()=>URL.revokeObjectURL(u),60000);st(`Export fertig ✓ ${scale}×${Math.round(scale*16/9)} · ${fps} FPS · ${ext.toUpperCase()}`)}else st('⚠ Export wurde ohne Videodaten beendet');
+   if(chunks.length){const u=URL.createObjectURL(new Blob(chunks,{type})),a=document.createElement('a');a.href=u;a.download=`ShoxyEditor-v21-${EW}x${EH}-${S.vibe}.${ext}`;a.click();setTimeout(()=>URL.revokeObjectURL(u),60000);st(`Export fertig ✓ ${EW}×${EH} · ${fps} FPS · ${ext.toUpperCase()}`)}else st('⚠ Export wurde ohne Videodaten beendet');
    exportStream?.getTracks().forEach(t=>t.stop());exportStream=null;exportCanvas=null;exportCtx=null;if(mon)mon.gain.value=1;
   };
   rec.onerror=()=>{st('⚠ Export-Fehler – abgebrochen');finishExport()};
   rec.start(250);renderFrame(performance.now());if(exportCtx){exportCtx.imageSmoothingEnabled=true;exportCtx.imageSmoothingQuality=$('exphq').checked?'high':'medium';exportCtx.drawImage(cv,0,0,exportCanvas.width,exportCanvas.height)}
   play();if(!S.playing)throw new Error('Wiedergabe konnte nicht gestartet werden.');$('exp').textContent='■ Stop';
-  st(`Export läuft: ${scale}×${Math.round(scale*16/9)} · ${fps} FPS – Tab geöffnet lassen`);
+  st(`Export läuft: ${EW}×${EH} · ${fps} FPS – Tab geöffnet lassen`);
  }catch(e){S.exporting=false;pause();if(rec&&rec.state!=='inactive'){try{rec.stop()}catch(x){}}if(mon)mon.gain.value=1;exportStream?.getTracks().forEach(t=>t.stop());exportStream=null;exportCanvas=null;exportCtx=null;$('exp').textContent='⬇ Export';st('⚠ Export konnte nicht starten: '+e.message)}
 }
 function finishExport(){if(!S.exporting)return;S.exporting=false;pause();try{if(rec&&rec.state!=='inactive')rec.stop()}catch(e){errOnce('Export',e)}if(mon)mon.gain.value=1;S.T=0;S.seg=-1;$('exp').textContent='⬇ Export'}
@@ -916,11 +921,11 @@ rm:v=>{if(S.exporting)return st('Erst Export stoppen');const c=S.clips.splice(+v
 /* v21: Edit-History + lokales Autosave für Look/Text/Keyframes */
 const HIST_KEY='shoxy_editor_v21_autosave';
 let histPast=[],histFuture=[],histBusy=false,lastHist='';
-function editSnapshot(){return {v:1,vibe:S.vibe,fx:[...S.fx],str:S.str,trans:S.trans,tdur:S.tdur,autoCut:S.autoCut,cutBeats:S.cutBeats,fill:S.fill,bright:S.bright,contrast:S.contrast,sat:S.sat,hue:S.hue,texts:S.texts,sel:S.sel,kfs:S.kfs,kfsel:S.kfsel,kfon:S.kfon,kfease:S.kfease,speed:S.speed,clipVol:S.clipVol,songVol:S.songVol};}
+function editSnapshot(){return {v:1,vibe:S.vibe,fx:[...S.fx],str:S.str,trans:S.trans,tdur:S.tdur,autoCut:S.autoCut,cutBeats:S.cutBeats,fill:S.fill,bright:S.bright,contrast:S.contrast,sat:S.sat,hue:S.hue,texts:S.texts,sel:S.sel,kfs:S.kfs,kfsel:S.kfsel,kfon:S.kfon,kfease:S.kfease,fmt:S.fmt,ev:S.ev,cutMap:S.cutMap,speed:S.speed,clipVol:S.clipVol,songVol:S.songVol};}
 function snapString(){return JSON.stringify(editSnapshot())}
 function updateHistoryButtons(){$('undoBtn').disabled=!histPast.length;$('redoBtn').disabled=!histFuture.length}
 function pushHistory(){if(histBusy)return;const snap=snapString();if(snap===lastHist)return;histPast.push(snap);if(histPast.length>40)histPast.shift();histFuture=[];lastHist=snap;updateHistoryButtons()}
-function restoreSnapshot(raw){try{const d=JSON.parse(raw);if(d.v!==1)return;histBusy=true;S.vibe=d.vibe||'custom';S.fx=new Set(d.fx||[]);['str','trans','tdur','autoCut','cutBeats','fill','bright','contrast','sat','hue','speed','clipVol','songVol','kfon','kfease'].forEach(k=>{if(d[k]!==undefined)S[k]=d[k]});S.texts=Array.isArray(d.texts)?d.texts:[];S.sel=Math.min(S.texts.length-1,Math.max(-1,Number(d.sel??-1)));S.kfs=Array.isArray(d.kfs)?d.kfs:[];S.kfsel=Math.min(S.kfs.length-1,Math.max(-1,Number(d.kfsel??-1)));if(AC)applyFx();build();syncUI();rText();volUI();$('autocut').checked=!!S.autoCut;lastHist=snapString();}catch(e){errOnce('Wiederherstellen',e)}finally{histBusy=false;updateHistoryButtons()}}
+function restoreSnapshot(raw){try{const d=JSON.parse(raw);if(d.v!==1)return;histBusy=true;S.vibe=d.vibe||'custom';S.fx=new Set(d.fx||[]);['str','trans','tdur','autoCut','cutBeats','fill','bright','contrast','sat','hue','speed','clipVol','songVol','kfon','kfease'].forEach(k=>{if(d[k]!==undefined)S[k]=d[k]});S.texts=Array.isArray(d.texts)?d.texts:[];S.sel=Math.min(S.texts.length-1,Math.max(-1,Number(d.sel??-1)));S.kfs=Array.isArray(d.kfs)?d.kfs:[];S.ev=Array.isArray(d.ev)?d.ev:[];if(d.fmt&&d.fmt.mode){S.fmt=d.fmt;if(d.fmt.mode==='custom')setFormat(d.fmt.w,d.fmt.h)}S.cutMap=Array.isArray(d.cutMap)?d.cutMap:[];S.kfsel=Math.min(S.kfs.length-1,Math.max(-1,Number(d.kfsel??-1)));if(AC)applyFx();build();syncUI();rText();volUI();$('autocut').checked=!!S.autoCut;lastHist=snapString();}catch(e){errOnce('Wiederherstellen',e)}finally{histBusy=false;updateHistoryButtons()}}
 function undoEdit(){if(!histPast.length)return;histFuture.push(snapString());const prev=histPast.pop();restoreSnapshot(prev)}
 function redoEdit(){if(!histFuture.length)return;histPast.push(snapString());const next=histFuture.pop();restoreSnapshot(next)}
 $('undoBtn').onclick=undoEdit;$('redoBtn').onclick=redoEdit;
@@ -984,11 +989,11 @@ function cmd(){const raw=$('cmd').value.trim(),q=raw.toLowerCase();if(!q)return;
  
  S.vibe=log.length&&!Object.values(P).some(p=>log[0]===p.n)?'custom':S.vibe;syncUI();$('cmdout').textContent=log.length?'EDITBOT: '+log.join(' · '):'EDITBOT: Hab nix erkannt. Probier „phonk“, „glitch rgb“, „ohne blur“, „übergang whip“, „text Hallo“.'}
 /* Layout */
-function fit(){const r=$('wrap').getBoundingClientRect();let h=r.height,w=h*9/16;if(w>r.width){w=r.width;h=w*16/9}pvEl.style.width=w+'px';pvEl.style.height=h+'px'}
+function fit(){const r=$('wrap').getBoundingClientRect();let h=r.height,w=h*W/H;if(w>r.width){w=r.width;h=w*H/W}pvEl.style.width=w+'px';pvEl.style.height=h+'px'}
 new ResizeObserver(fit).observe($('wrap'));addEventListener('resize',fit);
 /* Start */
 S.fx=new Set();S.vibe='custom';S.str=1;S.trans='cut';S.bright=1;S.contrast=1;S.sat=1;S.hue=0;
-try{const saved=localStorage.getItem(HIST_KEY);if(saved){const d=JSON.parse(saved);if(d&&d.v===1){S.vibe=d.vibe||S.vibe;S.fx=new Set(d.fx||[]);['str','trans','tdur','autoCut','cutBeats','fill','bright','contrast','sat','hue','speed','clipVol','songVol','kfon','kfease'].forEach(k=>{if(d[k]!==undefined)S[k]=d[k]});S.texts=Array.isArray(d.texts)?d.texts:[];S.sel=Math.min(S.texts.length-1,Math.max(-1,Number(d.sel??-1)));S.kfs=Array.isArray(d.kfs)?d.kfs:[];S.kfsel=Math.min(S.kfs.length-1,Math.max(-1,Number(d.kfsel??-1)));}}}catch(e){console.warn('Autosave konnte nicht geladen werden',e)}
+try{const saved=localStorage.getItem(HIST_KEY);if(saved){const d=JSON.parse(saved);if(d&&d.v===1){S.vibe=d.vibe||S.vibe;S.fx=new Set(d.fx||[]);['str','trans','tdur','autoCut','cutBeats','fill','bright','contrast','sat','hue','speed','clipVol','songVol','kfon','kfease'].forEach(k=>{if(d[k]!==undefined)S[k]=d[k]});S.texts=Array.isArray(d.texts)?d.texts:[];S.sel=Math.min(S.texts.length-1,Math.max(-1,Number(d.sel??-1)));S.kfs=Array.isArray(d.kfs)?d.kfs:[];S.ev=Array.isArray(d.ev)?d.ev:[];if(d.fmt&&d.fmt.mode){S.fmt=d.fmt;if(d.fmt.mode==='custom')setFormat(d.fmt.w,d.fmt.h)}S.cutMap=Array.isArray(d.cutMap)?d.cutMap:[];S.kfsel=Math.min(S.kfs.length-1,Math.max(-1,Number(d.kfsel??-1)));}}}catch(e){console.warn('Autosave konnte nicht geladen werden',e)}
 lastHist=snapString();updateHistoryButtons();rClips();rText();rLayers();setTab('clips');syncUI();volUI();build();fit();loadFont('Anton');
 nudgeUI();build();requestAnimationFrame(tick);
 
@@ -1008,21 +1013,41 @@ $('kimodel').onchange=e=>{KI.model=e.target.value;try{localStorage.ki_model=KI.m
 const kiAdd=(w,t)=>{const d=document.createElement('div');d.className='mb '+w;const msg=document.createElement('span');msg.textContent=t;const del=document.createElement('button');del.className='mbdel';del.type='button';del.title='Nachricht löschen';del.textContent='×';del.onclick=()=>d.remove();d.append(msg,del);$('kilog').append(d);$('kilog').scrollTop=$('kilog').scrollHeight;return d};
 $('kiclear').onclick=()=>{$('kilog').replaceChildren();KI.h=[];kiAdd('ai','Chat geleert. Deine Clips, Musik und Projekteinstellungen bleiben unverändert.')};
 kiAdd('ai','Ich bin dein Schnitt-Assistent und kann auch Dinge, die nicht als fester Button existieren: Körperteile mit natürlichem Follow-through bewegen (Kopf, Oberkörper, Arme und Beine), jeden Effekt einzeln feinsteuern und neue Effekte selbst programmieren und beliebigen Code im Editor ausführen. Ich zeige dir bei jeder Aktion ✓ oder ⚠ und prüfe mein Ergebnis am Bild. Clips und Musik fasse ich nicht ohne Auftrag an.');
-const snap=()=>({clips:S.clips.map((c,i)=>({i,n:c.name,in:c.in,out:c.out,dur:c.dur,photo:!!c.photo,rig:rigSig(c.v&&c.v.rig)})),song:S.song&&{n:S.song.name,dur:S.song.dur},fx:[...S.fx],fxi:S.fxi,fxp:S.fxp,kfs:S.kfs,vibe:S.vibe,str:S.str,trans:S.trans,tdur:S.tdur,autoCut:S.autoCut,cutBeats:S.cutBeats,speed:S.speed,look:{bright:S.bright,contrast:S.contrast,sat:S.sat,hue:S.hue},bpm:S.bpm,drop:S.dropT,beat:{mode:S.ba.mode,conf:S.ba.conf,nudge:S.nudge,bo:S.ba.bo},total:S.total,T:S.T,texts:S.texts,images:S.images.map((L,i)=>({i,name:L.name,x:L.x,y:L.y,w:L.w,h:L.h,opacity:L.opacity,blend:L.blend,s:L.s,e:L.e,rot:L.rot,rig:rigSig(L.rig)})),background:S.background?.name||null,fill:S.fill,custom:Object.values(CUSTOM).map(f=>({id:f.id,name:f.name,len:f.code.length,off:!!f.off}))});
+const snap=()=>({clips:S.clips.map((c,i)=>({i,n:c.name,in:c.in,out:c.out,dur:c.dur,photo:!!c.photo,w:(c.v&&c.v.videoWidth)||0,h:(c.v&&c.v.videoHeight)||0,rig:rigSig(c.v&&c.v.rig)})),song:S.song&&{n:S.song.name,dur:S.song.dur},fx:[...S.fx],fxi:S.fxi,fxp:S.fxp,kfs:S.kfs,vibe:S.vibe,str:S.str,trans:S.trans,tdur:S.tdur,autoCut:S.autoCut,cutBeats:S.cutBeats,speed:S.speed,look:{bright:S.bright,contrast:S.contrast,sat:S.sat,hue:S.hue},bpm:S.bpm,drop:S.dropT,beat:{mode:S.ba.mode,conf:S.ba.conf,nudge:S.nudge,bo:S.ba.bo},total:S.total,T:S.T,texts:S.texts,images:S.images.map((L,i)=>({i,name:L.name,x:L.x,y:L.y,w:L.w,h:L.h,opacity:L.opacity,blend:L.blend,s:L.s,e:L.e,rot:L.rot,rig:rigSig(L.rig)})),background:S.background?.name||null,fill:S.fill,canvas:[W,H],format:S.fmt,beatLen:S.bpm?+(60/S.bpm).toFixed(3):null,nextBeats:S.beats.filter(b=>b>=S.T).slice(0,8).map(b=>+b.toFixed(2)),segs:S.segs.slice(0,80).map(g=>({clip:S.clips.indexOf(g.c),start:+g.start.toFixed(2),len:+g.len.toFixed(2)})),vol:{clip:S.clipVol,song:S.songVol},afx:S.afx,songSpeed:S.songSpeed||1,playing:S.playing,selText:S.sel,ev:S.ev,cutMap:S.cutMap,custom:Object.values(CUSTOM).map(f=>({id:f.id,name:f.name,len:f.code.length,off:!!f.off}))});
 const SYS=()=>`Du bist ULTRA-BOSS, ein hochintelligenter Schnitt-Assistent für diesen mobilen Videoeditor. Antworte in der Sprache: ${window.LANGNAME?LANGNAME():'Deutsch'}, locker, kurz und klar.
 BÜRO (intern, erwähne es dem Nutzer gegenüber nie): Du hast ein eigenes Büro mit Notizbuch, das auch nach Verbindungsabbruch oder Neuladen erhalten bleibt. Aktueller Inhalt: ${KI.notes||'(noch leer)'}\nSchreibe bei mehrstufigen oder längeren Aufgaben im JSON-Feld "notes" fortlaufend den kompletten neuen Notizstand (Ziel, Plan, erledigte und offene Schritte, Entscheidungen, Vorlieben des Nutzers, max. 1500 Zeichen). Nach einem Abbruch machst du anhand der Notizen und STATE genau dort weiter, ohne von vorn zu beginnen.
-PERSÖNLICHKEIT: Du bist kein Befehlsempfänger, sondern ein erfahrener, selbstbewusster Editor-Kumpel mit eigenem Geschmack, der mit dem Nutzer zusammen ein richtig gutes Video baut. Du redest locker und direkt in der Sprache und im Ton des Nutzers (Slang ist okay, nie steif, nie unterwürfig, kein "Gerne!" oder "Natürlich!"-Geschwafel). Du hast Meinungen: Findest du eine Idee schwach, sag es kurz und schlag etwas Besseres vor, mach es aber trotzdem wenn der Nutzer darauf besteht. Du darfst Ideen einwerfen, Fragen stellen und mitdenken, wann immer du es für sinnvoll hältst, und du musst NICHT jedes Mal nachfragen. Ist der Wunsch klar, handle sofort. Ist etwas wirklich offen oder riskant (Stil, Länge, was gelöscht oder überschrieben würde), stell eine gezielte Frage, auch zwei wenn es sich lohnt, und biete dabei gleich deinen Vorschlag an, damit der Nutzer nur "ja" sagen muss.
-EHRLICHKEIT (wichtigste Regel): Sag NIE "erledigt", "fertig" oder "habe ich gemacht", wenn du es nicht durch ausgeführte Aktionen UND das Vorschaubild belegen kannst. Das Ergebnis der Aktionen (✓/⚠) und das neue Bild sind die Wahrheit, nicht dein Plan. Setze bei jeder sichtbaren Änderung "more":true, damit du danach das Ergebnisbild siehst und prüfst, ob es wirklich nach dem Wunsch aussieht. Siehst du ein Problem, sag es offen und korrigiere es. Weißt du etwas nicht oder kann der Editor etwas nicht, sag das klar und biete die beste echte Alternative an, statt etwas Halbes als fertig zu verkaufen. Gib ehrlich an, wie sicher du dir bist, wenn du rätst. Beschreibe im "say" immer konkret, WAS du geändert hast, WIE (Effekt, Wert, Zeitraum) und was du im Bild tatsächlich siehst, nie nur "fertig". Nach deinen Aktionen bekommst du einen SELBSTCHECK mit dem neuen Bild: sei dort dein strengster Kritiker und antworte mit "verdict":"ok" oder "problem".
-DENKWEISE: Gib im JSON IMMER zuerst das Feld "think" aus (3 bis 6 knappe Sätze: Was will der Nutzer wirklich, was zeigt STATE und Bild, was könnte schiefgehen, was ist mein Plan, was würde ich als Profi anders machen). Dann "say" (deine Antwort an den Nutzer, kurz, mit Haltung) und "do" (Aktionen). Prüfe Logik und Rechnung ehrlich: Beat-Abstand = 60/BPM Sekunden, Zeitfenster brauchen start<ende, Werte nur im erlaubten Bereich, nichts doppelt oder widersprüchlich setzen. Erledige bei Aufgaben mit mehreren Teilen alle Teile und sag am Ende ehrlich, was geklappt hat und was nicht. Bei Fragen, Erklärungen oder Brainstorming antworte ohne Aktionen (do:[] und noop:true). Ändere nichts, was nicht verlangt wurde.
- Analysiere zuerst den gesamten Wunsch und den Projektzustand, plane die kleinste sichere Änderung und prüfe das Ergebnis anhand der Bilder. Rate keine Koordinaten, erfinde keine Funktionen und behaupte nichts ohne ausgeführte Aktion. Die zugrunde liegende Intelligenz bleibt vom gewählten Gemini-Modell abhängig; nutze präzise Analyse, Rückfragen bei echter Mehrdeutigkeit und konsequente Ergebnisprüfung.
+PERSÖNLICHKEIT: Du bist ein erfahrener, selbstbewusster Editor-Kumpel mit eigenem Geschmack, kein Befehlsempfänger. Locker, direkt, im Ton des Nutzers, nie steif oder unterwürfig, kein "Gerne!". Du hast Meinungen: Findest du eine Idee schwach, sag es kurz und schlag etwas Besseres vor, mach es aber wenn der Nutzer darauf besteht. Ist der Wunsch klar, handle sofort. Fragst du nach (nur bei echter Mehrdeutigkeit oder wenn etwas gelöscht/überschrieben würde), dann gezielt und mit eigenem Vorschlag, damit "ja" reicht.
 
-DENKWEISE: Zerlege jeden Wunsch in Teilziele (was genau, wann, wie stark, welche Effekte, Ebenen oder Clips). Gleiche mit STATE ab, was schon aktiv ist, und ändere nur die Differenz. Stehen mehrere Wünsche in einer Nachricht, erledige alle. Nimm Zahlen aus STATE (total, bpm, Clips) statt zu schätzen. Bei Mehrdeutigkeit wähle die naheliegendste Lesart und nenne sie im say; frage nur nach, wenn eine falsche Wahl etwas zerstört. Bevorzuge kleine, umkehrbare Änderungen. Antworte immer auf Deutsch.
+ARBEITSWEISE (immer genau so, wie ein Profi-Editor, der sein Ergebnis wirklich anschaut):
+1. VERSTEHEN: Zerlege den Wunsch in Teilziele (was, wann, wie stark, welche Clips/Ebenen/Effekte). Mehrere Wünsche in einer Nachricht = alle erledigen. Verneinung beachten: "kein/ohne/entferne/mach aus/weg" heißt das GEGENTEIL von hinzufügen. Fragen, Erklärungen, Brainstorming = keine Aktion (do:[] und noop:true).
+2. ANSEHEN: Lies STATE genau (aktive Effekte, Fenster, segs = Schnittpunkte mit Startzeit und Länge, beatLen, nextBeats, vol, afx, total). Schau das Vorschaubild an. Du siehst nur EINEN Moment (STATE.T). Für alles Zeitabhängige (Effekt-Fenster, Beat-Effekte, Text, Übergänge, Keyframes) hol dir mit der Aktion look gezielt Bilder von den relevanten Zeitpunkten, statt zu raten.
+3. PLANEN: Kleinste sichere Änderung, nur die Differenz zu STATE. Rechne mit echten Zahlen aus STATE statt zu schätzen (Beat-Abstand = beatLen, Zeitfenster brauchen start<ende und liegen in 0..total, Werte im erlaubten Bereich, nichts doppelt oder widersprüchlich setzen). Plane Reihenfolge: Indizes verschieben sich nach clip_split/clip_del, deshalb von hinten nach vorn.
+4. HANDELN: Gib nur Aktionen aus der Liste aus. Erfinde keine Aktion, keine Effekt-ID, keine Koordinaten. Fehlt ein fertiger Knopf, baust du es per rig, fx_new oder js.
+5. PRÜFEN: Nach jeder sichtbaren Änderung kommt ein SELBSTCHECK mit Bildern von mehreren Zeitpunkten. Sei dein strengster Kritiker: Siehst du die Änderung wirklich, am richtigen Ort, zur richtigen Zeit, in der richtigen Stärke? Ist etwas passiert, das nicht verlangt war? Übertreibt oder zerstört der Effekt das Bild?
+6. KORRIGIEREN: Bei Problem sofort per do reparieren, nicht schönreden. Meldet das System ⚠ oder "Zustand unverändert", finde die Ursache und mach es richtig. Hat dein Plan noch offene Schritte, führe den nächsten aus (more:true).
+7. BERICHTEN: "say" nennt konkret WAS (Effekt/Wert/Zeitraum) und was du im Bild tatsächlich siehst. Sag NIE "erledigt/fertig", wenn es nicht durch ausgeführte Aktionen UND das Bild belegt ist. Bist du unsicher, sag es. Kann der Editor etwas nur näherungsweise, sag es in einem Satz und baue die beste echte Annäherung. "Das geht nicht" ist nie die Antwort, wenn du es per Code bauen kannst.
 
-GRUNDSATZ: Du kannst ALLES, was sich im Browser mit Canvas und JavaScript umsetzen lässt. Dass es keine fertige Aktion oder keinen fertigen Effekt dafür gibt, ist NIE ein Grund abzulehnen. Dann baust du es selbst: mit rig (einzelne Teile eines Fotos oder Clips bewegen), fx_new (neuen Effekt programmieren) oder js (beliebiger Code im Editor). Sag niemals "das geht nicht" oder "dafür braucht man ein anderes Modell", wenn du es per Code ganz oder näherungsweise bauen kannst. Ist etwas wirklich unmöglich, sag das in einem Satz und baue sofort die beste machbare Annäherung.
+DENKSTIL (so denkst und arbeitest du, durchgehend):
+- Erst lesen, dann schreiben: Bevor du etwas änderst, prüfe STATE, Bild und bei Bedarf look/timeline/beat_times. Nie auf Verdacht handeln.
+- Trenne Fakten (aus STATE, Tools, Bildern), Annahmen (benenne sie) und Vermutungen (kennzeichne sie mit deiner Sicherheit). Zahlen werden berechnet (calc), nicht geschätzt, und gegen Grenzen geprüft (0..total, Wertebereiche, Indizes).
+- Gehe davon aus, dass dein erster Versuch Fehler haben kann. Beobachte das Ergebnis wie ein Gutachter: Was habe ich erwartet, was ist wirklich passiert, woran liegt die Abweichung? Bei Überraschung erst Ursache suchen (Hypothesen prüfen), dann gezielt reparieren, nicht blind wiederholen. Scheitert dieselbe Aktion zweimal, wechsle den Ansatz.
+- Kleine, umkehrbare Schritte, aber voneinander unabhängige Aktionen bündelst du in einer Antwort. Abhängige Schritte (z.B. erst Schnitte, dann Ereignisse an den neuen Schnittpunkten) machst du nacheinander und liest dazwischen das Ergebnis.
+- Eigener Code (js, fx_new, rig code): schreib ihn defensiv und klein, rechne mit c.W/c.H statt festen Pixeln, vermeide Endlosschleifen und teure Operationen pro Frame, lies den Rückgabewert/Fehler und schau danach ins Bild.
+- Zweifle an deinem Ergebnis, bevor du es meldest: Passt es zu JEDEM Teil des Wunsches? Habe ich etwas Ungefragtes verändert? Sieht es gut aus oder nur "ausgeführt"?
+- Sag ehrlich, wenn du etwas nicht sicher weißt, und schlag den schnellsten Weg vor, es zu klären. Niemals bluffen.
+- Antworte kurz und konkret für den Nutzer, die Gründlichkeit steckt im Denken und Prüfen, nicht im Geschwafel.
 
-EHRLICHKEIT: Der Editor führt deine Aktionen aus und zeigt dem Nutzer pro Aktion ein Häkchen oder eine Warnung. Behaupte nie etwas, das du nicht als Aktion ausgegeben hast. Ohne Aktion keine Erfolgsmeldung. "say" ist ein kurzer Satz, was du wirklich getan hast. Meldet dir das System Fehler oder "Zustand unverändert", reparierst du es sofort mit neuen Aktionen. Du bekommst bei jeder Anfrage das aktuelle Vorschaubild, die Quellfotos und ein Kontrollbild mit den roten Boxen der bewegten Teile. Prüfe damit, ob dein Ergebnis wirklich stimmt. Setze "more":true, wenn du nach deinen Aktionen noch einen Prüf- oder Korrekturschritt brauchst.
+AUSGABE: ausschließlich ein JSON-Objekt, Felder in dieser Reihenfolge: {"think":"3-6 knappe Sätze: Was will der Nutzer wirklich, was zeigen STATE und Bild, was kann schiefgehen, Plan, was würde ein Profi anders machen","say":"kurze Antwort mit Haltung","do":[{"a":"aktion","v":wert}],"more":false,"verdict":"nur im Selbstcheck: ok oder problem","noop":false,"notes":"nur bei mehrstufigen Aufgaben: kompletter Notizstand"}. Kein Markdown, keine Kommentare.
 
-AUSGABE: ausschließlich valides JSON: {"think":"max. 3 Sätze: Wunsch, Ist-Zustand laut STATE, Plan, Risiken","say":"kurze Bestätigung","do":[{"a":"aktion","v":wert}],"more":false}. Kein Markdown, keine Kommentare. Reine Fragen oder Erklärungen: do:[] und "noop":true.
+BÜRO-NOTIZEN: Bei längeren Aufgaben schreibst du in "notes" Ziel, Plan, erledigte/offene Schritte, Entscheidungen, Vorlieben (max. 1500 Zeichen). Nach Abbruch machst du damit genau dort weiter.
+
+SCHNITT-WERKSTATT (Aufträge wie "cutte alles zum Beat, Übergang hier und da, Zoom, Reverse, Weißblitz"):
+1. KRISTALLISIEREN: Schreib den Wunsch in think als nummerierte Auftragsliste (Schnitt-Rhythmus, Übergänge, Zooms, Reverses, Blitze, Rest). Vage Stellen ("hier und da", "ein paar", "am Ende") entwirrst du selbst nach Musikstruktur: Drop (STATE.drop), Taktanfänge (beat_times downbeats), Phrasengrenzen (jeder 4. oder 8. Takt), Start und Ende. Wähle konkrete Zeiten, verteile gleichmäßig und nicht überladen (Faustregel: Zoom und Blitz nur auf Taktanfängen oder Drop, höchstens ein Ereignis pro ca. 2 Takte, Reverse selten und kurz, ein Übergang pro Phrase). Nenne deine Wahl im say in einem Satz, frag nur nach, wenn eine falsche Wahl etwas zerstört.
+2. RECHNEN: Hast du keinen Beat-Raster (STATE.bpm/Beats fehlen oder beat.conf niedrig), erst analyse oder bpm. Dann Zeiten mit beat_times/timeline/calc holen, NIE im Kopf schätzen. Beat-Anzahl = total / beatLen.
+3. SCHNEIDEN: Ein langes Video wird mit cut (global) oder cut_map (ruhig vs. schnell) auf Beats geschnitten, nicht mit dutzenden clip_split. clip_split nur für gezielte Einzelschnitte. Danach timeline abrufen: die Schnittpunkte sind die Anker für trans und reverse.
+4. EREIGNISSE: alle Übergänge, Zooms, Reverses, Blitze in EINER ev-Liste setzen (Zeiten aus beat_times/timeline). Dazu passende Effekte mit fx_on/fx_window, Look mit look. Prüfe die Liste im Ergebnis auf geratene Zeiten (Einrastung) und melde sie ehrlich.
+5. PRÜFEN: Mit look bei t+0.03 s nach jedem Zoom/Blitz (dort ist er am stärksten), bei Reverse mitten im Abschnitt. Übergänge sind nur beim Abspielen sichtbar, im Standbild nicht: prüfe sie über timeline/STATE.ev statt Bild und sag das ehrlich.
+6. GRENZEN: Alles läuft lokal und auf Beat-Analyse; bei unklarem Beat sag es und biete bpm-Korrektur oder nudge an.
 
 BEGRIFFE:
 - "Blue Black Hole", "Black Hole Overlay", "schwarzes Loch": overlay mit Wert blue_black_hole (transparente eigene Ebene).
@@ -1060,7 +1085,7 @@ HEADBOP-REFERENZ (gemessen an TikTok-Edits mit Titan TV Man, 30 fps, etwa 110 BP
 
 ARBEITSWEISE BEI KÖRPERTEILEN: 1) Erkennung am Bild prüfen. 2) rig mit part, optional box, poly, pivot. 3) Kontrollbild (rot und grün) prüfen, bei Abweichung korrigieren. 4) Im say kurz sagen, welches Teil sich bewegt und was bleibt. Bei Videos gilt dasselbe, der Editor analysiert den aktuellen Frame.
 
-NICHT VERHANDELBAR:
+NICHT VERHANDELBAR (gilt für Dinge, die der Nutzer NICHT verlangt; verlangt er Schnitte, Beat-Cuts, Übergänge, Reverse, Zoom usw., führst du sie aus):
 1. Clips, Reihenfolge, In/Out-Punkte, Musik, Lautstärken und Audioeffekte bleiben unverändert, außer der Nutzer fordert genau diese Änderung.
 2. Kein Löschen, Trimmen, Reverse, Speed, Auto-Cut, Preset oder Zufalls-Remix ohne ausdrücklichen Auftrag.
 3. Bei einem einzelnen Wunsch nur das ändern, was dafür nötig ist.
@@ -1075,9 +1100,19 @@ AKTIONEN:
   motion: "pro" (NEU, Standard fürs Headbop: dauerhaftes TikTok-Wippen mit Sway, Kippung, Squash, Körper-Follow, Motion-Blur; Zusatzfelder sway,tilt,squash,depth,body,blur,spring,accent 0..2, speed 0.5/1/2 = Wippen pro Beat, style "tiktok"|"smooth"|"slam"|"double"), "nod" (einfaches Kopfnicken), "bob" (hoch/runter), "sway", "shake", "pulse", "spin", "wobble" oder "custom" mit code. amount 0..3 (Stärke), speed, beat 0..1 (1 = nur auf den Beat, 0 = dauerhaft), feather 0..0.2 (weiche Kante), overlap 0..0.5, erase "auto"|true|false, remove:true entfernt das Rig.
   Eigener Bewegungscode (code): Funktionskörper mit Parameter c, Rückgabe {dx,dy,rot,sx,sy}. c.hit ist der Beat-Impuls 0..1, c.n der Beat-Zähler, c.t Sekunden, c.cyc 0..1 innerhalb eines Beats, c.a die Stärke. dx und dy in Teilgrößen, rot in Grad, sx und sy Skalierung (1 = normal).
 - detect(v={target}): liefert dir die lokale Erkennung (Kopf, Glow-Teile, Zonen) als Text, falls du sie nach einer Änderung neu brauchst.
-- fx_new(v={id,name,emoji,code}): programmiert einen NEUEN Effekt. code ist ein Funktionskörper mit Parameter c: c.X (2D-Kontext des Haupt-Canvas 720x1280), c.W, c.H, c.t (Sekunden), c.hit (Beat-Impuls 0..1), c.n (Beat-Zähler), c.p (Intensität), c.h (Beat-Faktor), c.copy() (liefert ein Canvas mit dem aktuellen Bild), c.tmp (Hilfs-Canvas). Der Code läuft jeden Frame nach den Standardeffekten, solange der Effekt aktiv ist. Halte ihn schnell, kein await. Danach erscheint er in der Effektliste und lässt sich mit fx_on, fx_off, fx_window, fxi schalten. Neu definierte Effekte sind sofort aktiv.
+- look(v={times:[sek,...]}): bis zu 4 Projektzeitpunkte; du bekommst im nächsten Schritt je ein Bild (Filmstreifen). Nutze es vor und nach Änderungen mit Zeitbezug (Fenster, Beat-Effekte, Übergänge an Schnittpunkten aus STATE.segs) und setze more:true.
+- ev(v=[{type,t,dur,amt,id,color,snap}]): Ereignisse auf der Zeitleiste, t = Projektzeit in Sekunden. type "flash" (Weißblitz, color optional, amt 0..1, dur ~0.2-0.5), "zoom" (Zoom-Punch, amt 0..2 = Mehrzoom, dur ~0.2-0.4), "reverse" (spielt den Schnitt-Abschnitt, der bei t beginnt, rückwärts; dur = Länge, Standard = ein Abschnitt), "trans" (Übergang id an dem Schnittpunkt bei t, dur optional, id aus GÜLTIGE ÜBERGÄNGE). reverse und trans rasten auf den nächsten Schnittpunkt aus STATE.segs ein, flash und zoom auf den nächsten Beat. Das Ergebnis nennt dir die tatsächlichen Zeiten. Globale Effekte reverse/rewind gibt es NICHT per fx_on, nutze dafür immer ev.
+- ev_del(v={type,from,to}) löscht Ereignisse (alle Felder optional); ev_clear löscht alle.
+- cut_map(v=[{s,e,beats}]): Schnittdichte pro Zeitbereich, beats 1/2/4/8 (z.B. ruhiger Anfang 4, ab Drop 1). Schaltet Auto-Cut ein und baut die Zeitleiste neu; Schnitte liegen exakt auf Beats.
+- beat_times(v={from,to,every,downbeats}): echte Beat-Zeiten aus der Analyse (every = jeder N-te Beat, downbeats:true = Taktanfänge). Nutze es statt zu schätzen.
+- timeline(): Liste aller Schnittabschnitte (Index, Start, Länge, Clip, Taktanfang), Ereignisse, Drop, Gesamtlänge.
+- calc(v="ausdruck" oder [..]): rechnet Ausdrücke mit Math, S (State) und B (Beat-Länge in s), z.B. "S.total/B" = Beats im Video.
+- format(v): Projektformat ändern, jederzeit. v = "auto" (folgt dem Format des ERSTEN Clips/Fotos, Standard), ein Seitenverhältnis wie "16:9", "9:16", "1:1", "4:5", "3:4", "4:3", "21:9", oder {w,h} in Pixeln, oder {ratio:"16:9"}. Neue Medien setzen das Format nur im Modus auto, ein von dir oder dem Nutzer gewähltes Format bleibt fest. Ändere es nur auf Wunsch oder wenn Medien klar ein anderes Format brauchen (dann sag es). Der Export folgt dem Format.
+- set(v={autoCut,fill,songSpeed,pitchF,click,kfon,kfease,expres,expfps,exphq,expq}): UI-Einstellungen wie der Nutzer: autoCut true/false, fill "fill"|"fit", songSpeed .5-2, pitchF, click (Metronom), kfon, kfease "smooth"|"linear", Export expres 720-2160 (kürzere Seite), expfps 1-60, exphq, expq (Bitrate).
+- undo / redo: nimmt die letzte Änderung zurück oder stellt sie wieder her. background(v=Index oder null): Bildebene als Hintergrund (sichtbar im Fit-Modus). overlay_move(v={i,to}): Ebenenreihenfolge. kf_del(v=Index).
+- fx_new(v={id,name,emoji,code}): programmiert einen NEUEN Effekt. code ist ein Funktionskörper mit Parameter c: c.X (2D-Kontext des Haupt-Canvas, Größe = c.W x c.H, hängt vom Projektformat ab, nie feste Pixelwerte annehmen), c.W, c.H, c.t (Sekunden), c.hit (Beat-Impuls 0..1), c.n (Beat-Zähler), c.p (Intensität), c.h (Beat-Faktor), c.copy() (liefert ein Canvas mit dem aktuellen Bild), c.tmp (Hilfs-Canvas). Der Code läuft jeden Frame nach den Standardeffekten, solange der Effekt aktiv ist. Halte ihn schnell, kein await. Danach erscheint er in der Effektliste und lässt sich mit fx_on, fx_off, fx_window, fxi schalten. Neu definierte Effekte sind sofort aktiv.
 - fx_del(v=id): löscht einen eigenen Effekt.
-- js(v="code"): führt beliebigen asynchronen JavaScript-Code im Editor aus (Variablen ED, S, X, W, H; await erlaubt, keine Endlosschleifen). Das ist dein Allzweckwerkzeug für alles, wofür es keine Aktion gibt. ED bietet: ED.S (Projektzustand), ED.X (Haupt-Canvas), ED.canvas(w,h) (neues Canvas), ED.overlayFromCanvas(canvas,{name,x,y,w,opacity,blend,s,e}) (macht ein selbst gezeichnetes Canvas zur Bildebene, Promise), ED.loadImage(url), ED.addText({...}), ED.defineFx({...}), ED.rigApply({...}), ED.beat(t) (liefert {hit,n,ph}), ED.addButton(label,fn) (legt einen eigenen Button im KI-Tab an), ED.log(text), ED.build(), ED.syncUI(). Bildebenen in ED.S.images haben x,y,w,h,opacity,blend,s,e,rot und lassen sich direkt ändern. Rückgabewert von return wird dir als Ergebnis gemeldet.
+- js(v="code"): führt beliebigen asynchronen JavaScript-Code im Editor aus (Variablen ED, S, X, W, H; await erlaubt, keine Endlosschleifen). Das ist dein Allzweckwerkzeug für alles, wofür es keine Aktion gibt. ED bietet zusätzlich alle Editor-Funktionen des Nutzers: ED.setFormat(w,h), ED.setSongSpeed(x), ED.setClipSpeed(x), ED.setPitchF(b), ED.undoEdit(), ED.redoEdit(), ED.trimClip(i,a,b), ED.splitClip(i,t,timeline), ED.dupClip(i), ED.delClip(i), ED.moveClip(i,to), ED.cutout(i,o), ED.trimSong(s,e), ED.applyPreset(id), ED.exportVid(), ED.play(), ED.pause(), ED.analyse(), ED.DO (jede Aktion dieser Liste als ED.DO.name(v)). Außerdem ED.W/ED.H (aktuelle Größe), ED.S (Projektzustand), ED.X (Haupt-Canvas), ED.canvas(w,h) (neues Canvas), ED.overlayFromCanvas(canvas,{name,x,y,w,opacity,blend,s,e}) (macht ein selbst gezeichnetes Canvas zur Bildebene, Promise), ED.loadImage(url), ED.addText({...}), ED.defineFx({...}), ED.rigApply({...}), ED.beat(t) (liefert {hit,n,ph}), ED.addButton(label,fn) (legt einen eigenen Button im KI-Tab an), ED.log(text), ED.build(), ED.syncUI(). Bildebenen in ED.S.images haben x,y,w,h,opacity,blend,s,e,rot und lassen sich direkt ändern. Rückgabewert von return wird dir als Ergebnis gemeldet.
 - overlay(v="blue_black_hole"), preset(v=vibe-id) nur auf ausdrücklichen Wunsch
 - fx_on(v=id oder [ids]); fx_off(v=id oder [ids]); fx_set(v=[ids])
 - fx_window(v={id,s,e}) Zeitfenster in Sekunden (e=0 bedeutet bis Ende); fxi(v={id,value:0-2}) Intensität; fxp(v={id,b:0-1,s,e}) Beat-Kopplung und Zeitfenster
@@ -1097,7 +1132,7 @@ AKTIONEN:
 PROFI-WISSEN (du bist ein Editor auf CapCut-, After-Effects- und Alight-Motion-Niveau; dass es in der App keinen Knopf dafür gibt, heißt nicht, dass du es nicht kannst):
 SCHNEIDEN: Clips teilen, kürzen, duplizieren, löschen, umsortieren (clip_*). Auf den Beat schneiden: Beat-Länge = 60 / STATE.bpm Sekunden. Für schnelle Edits cut(v=1 oder 2), für ruhige 4 oder 8. Charaktere freistellen mit cutout. Songs kürzen mit song_trim, zum Beispiel ab dem Drop (STATE.drop) beginnen. Ton pro Clip mit vol und afx steuern.
 CHARAKTER-EFFEKTE: 1) cutout liefert eine Ebene nur mit der Figur. 2) Über ED.S.images[index].img (Bild) per js ein neues Canvas mit ED.canvas() bauen, darauf mit shadowBlur und shadowColor einen Glow oder eine Outline zeichnen (Figur mehrfach mit versetztem Offset zeichnen ergibt eine Outline), Farben per globalCompositeOperation source-atop einfärben, und das Ergebnis mit ED.overlayFromCanvas wieder als Ebene einfügen. 3) Mit overlay_set bewegen, vergrößern, drehen, Zeitfenster s/e setzen. 4) Mit rig bewegen einzelne Teile (Kopf, Arme) im Beat. Eine Ebene hinter der Figur: erst Hintergrund-Overlay hinzufügen, dann Figur-Ebene danach (spätere Ebenen liegen oben).
-OVERLAYS per js zeichnen (Canvas 720x1280, transparent lassen, Blend screen oder lighter für Licht): Lichtlecks (große radiale Verläufe orange/pink), Lens Flares (Kreise und Streifen), Funken und Partikel, Staub, Regen, Schnee, Konfetti, Speedlines, Blitze, Scanlines, Film-Grain, Letterbox-Balken, Rahmen, Fadenkreuz und HUD, Countdown-Zahlen, Herzen und Sticker aus Emojis (fillText), Formen, Glitch-Balken, Sprechblasen, Pfeile. Für bewegte Overlays lieber fx_new (läuft jeden Frame, hat c.t, c.hit, c.n) statt einer Bildebene.
+OVERLAYS per js zeichnen (Canvas ED.W x ED.H = STATE.canvas, transparent lassen, Blend screen oder lighter für Licht): Lichtlecks (große radiale Verläufe orange/pink), Lens Flares (Kreise und Streifen), Funken und Partikel, Staub, Regen, Schnee, Konfetti, Speedlines, Blitze, Scanlines, Film-Grain, Letterbox-Balken, Rahmen, Fadenkreuz und HUD, Countdown-Zahlen, Herzen und Sticker aus Emojis (fillText), Formen, Glitch-Balken, Sprechblasen, Pfeile. Für bewegte Overlays lieber fx_new (läuft jeden Frame, hat c.t, c.hit, c.n) statt einer Bildebene.
 EFFEKTE AUF DEN GANZEN CLIP: erst die fertigen Effekt-IDs aus der Liste nutzen. Fehlt etwas (Chromakey, Spiegeln, Split-Screen, Zoom-Punch, Freeze, Pixelate, Mosaik, Wellen, Tunnel, Kaleidoskop, Blitz-Flash, Chromatic Aberration, VHS, Kamera-Wackeln, Film-Burn, Bloom, Tilt-Shift), baust du es mit fx_new. In c.copy() hast du das aktuelle Bild und kannst mit c.X.drawImage Ausschnitte verschoben, gespiegelt, skaliert oder getönt neu zeichnen.
 ÜBERGÄNGE: eingebaute mit trans und tdur. Eigene Übergänge (Flash, Glitch-Cut, Zoom-Through, Whip-Pan, Spin, Shake-Cut, Luma-Wipe) als fx_new mit fx_window nur um die Schnittpunkte (Zeiten aus STATE.clips und STATE.total) bauen.
 KAMERA UND BEWEGUNG: kf setzt Keyframes für Zoom z, Position x y, Rotation r, Deckkraft a. Zoom-Punch auf Beat: Effekt oder kf. Zeitlupe und Tempo über speed (gilt für alles).
@@ -1576,7 +1611,7 @@ function runCustomFx(t,hit,n){
 }
 /* ================= v8: ED-Schnittstelle für KI-Code ================= */
 const ED={
- S,X,W,H,FX,CUSTOM,preview:cv,
+ S,X,FX,CUSTOM,preview:cv,get W(){return W},get H(){return H},
  beat,addText,addImageOverlay,addBlueBlackHole,build,syncUI,rFx,rText,renderOverlayList,kfAdd,defineFx,delFx,rigApply,autoHeadBox,fxOn,fxVal,st,snap,
  canvas:(w=W,h=H)=>mk(w,h),
  ctx:c=>g2(c),
@@ -1639,7 +1674,7 @@ function detReport(){
 }
 function kiImages(onlyFrame){
  const parts=[];
- try{const f=b64Of(cv,540);if(f)parts.push({text:'[Bild: aktuelles Vorschaubild des Editors, 9:16]'},{inlineData:{mimeType:'image/jpeg',data:f.data}})}catch(e){}
+ try{const f=b64Of(cv,540);if(f)parts.push({text:'[Bild: aktuelles Vorschaubild des Editors, '+W+'×'+H+' px]'},{inlineData:{mimeType:'image/jpeg',data:f.data}})}catch(e){}
  if(!onlyFrame){try{const dr=detReport();if(dr.text){parts.push({text:'[LOKALE ERKENNUNG des Editors, nur Messwerte aus Helligkeit/Farbe, keine Wahrheit. Prüfe sie am Erkennungsbild: rot = Kopf-Box, grün = gekipptes Kopf-Polygon, gelb = Glow-Teile, cyan gestrichelt = grobe Zonen]\n'+dr.text});dr.imgs.forEach(im=>parts.push({text:'[Erkennungsbild "'+im.label+'"]'},{inlineData:{mimeType:'image/jpeg',data:im.data}}))}}catch(e){}}
  const hs=allRigHolders().filter(x=>x.src&&!x.gen&&(x.photo||x.label.startsWith('Clip')));
  let k=0;
@@ -1660,7 +1695,7 @@ function kiImages(onlyFrame){
  return parts;
 }
 function stateSig(){
- return JSON.stringify(snap())+'|'+Object.values(CUSTOM).map(f=>f.code).join('¦');
+ return JSON.stringify({...snap(),T:0,playing:0,nextBeats:0})+'|'+Object.values(CUSTOM).map(f=>f.code).join('¦');
 }
 
 async function callGemini(model,body){
@@ -1713,31 +1748,32 @@ function parseAI(txt){
 async function kiSend(){
  const q=$('kiin').value.trim();if(!q)return;$('kiin').value='';kiAdd('me',q);try{pushHistory()}catch(e){}
  // Eindeutige Sofortfälle (lokal, deterministisch)
+ const neg=/\b(kein|keine|keinen|keiner|ohne|nicht|entfern\w*|weg|lösch\w*|ausschalten|deaktivier\w*|rückgängig|stopp?|remove|delete|disable|undo|without|no)\b/i.test(q),isQ=/\?|^\s*(was|wie|warum|wieso|weshalb|wozu|kannst|kann|geht|gibt|what|how|why|can|could|is|does)\b/i.test(q),quick=!neg&&!isQ&&q.length<=110;
  const blackholeReq=/\b(blue\s*black\s*hole|black\s*hole|schwarzes?\s+loch|blaues?\s+loch)\b/i.test(q);
- if(blackholeReq){addBlueBlackHole();kiAdd('ai','Blue Black Hole als eigene Overlay-Ebene mit transparentem Hintergrund hinzugefügt – kein blauer Vollflächen-Block. Du kannst Größe, Position und Deckkraft unter Bild-Overlays anpassen.');return}
+ if(blackholeReq&&quick){addBlueBlackHole();kiAdd('ai','Blue Black Hole als eigene Overlay-Ebene mit transparentem Hintergrund hinzugefügt – kein blauer Vollflächen-Block. Du kannst Größe, Position und Deckkraft unter Bild-Overlays anpassen.');return}
  const rainbowReq=/\b(rainbow|regenbogen|spectrum)\b/i.test(q);
  const firstThree=/\b(erste[nr]?\s+)?(3|drei)\s*(sekunden|sek|s)\b/i.test(q);
- if(rainbowReq&&firstThree){S.fx.add('rainbow');S.fxp.rainbow={...(S.fxp.rainbow||{b:0}),b:0,s:0,e:3};syncUI();rFx();kiAdd('ai','Rainbow ist von 0 bis 3 Sekunden aktiv und blendet in den letzten 0,6 Sekunden weich aus. RGB Split bleibt aus.');KI.h.push({role:'user',parts:[{text:q}]},{role:'model',parts:[{text:'Rainbow: fx_on(rainbow), fx_window(rainbow,0,3).'}]});return}
+ if(rainbowReq&&firstThree&&quick&&!/\b(fade|ausblend\w*|dann|danach|und)\b/i.test(q)){S.fx.add('rainbow');S.fxp.rainbow={...(S.fxp.rainbow||{b:0}),b:0,s:0,e:3};syncUI();rFx();kiAdd('ai','Rainbow ist von 0 bis 3 Sekunden aktiv. RGB Split bleibt aus.');KI.h.push({role:'user',parts:[{text:q}]},{role:'model',parts:[{text:'Rainbow: fx_on(rainbow), fx_window(rainbow,0,3).'}]});return}
  // Deterministische Effekt-Befehle: konkrete Effekt-Namen haben Vorrang vor beiläufigen Wörtern wie "Headbop".
  const shakeMention=/\bshake\b/i.test(q);
  const everyBeat=/\b(jedem|jeden|alle[nr]?)\s+beat\b|\b(each|every)\s+beat\b/i.test(q);
  const faster=/\b(schneller|mehr speed|höhere geschwindigkeit|fast(er)?|increase speed)\b/i.test(q);
  const slower=/\b(langsamer|weniger speed|geringere geschwindigkeit|slow(er)?|decrease speed)\b/i.test(q);
  if(!shakeMention&&(q.length>40||/\b(headbop|rig|text|clip|musik|song|preset|cut|blur|glow|zoom)/i.test(q)))KI.focus='';
- if(shakeMention && everyBeat){
+ if(quick&&shakeMention&&everyBeat){
   S.fx.add('shake');
   S.fxp.shake={...(S.fxp.shake||{}),b:1,s:0,e:0,sp:S.fxp.shake?.sp??1};
   KI.focus='fx:shake';syncUI();rFx();
   const msg='Shake ist jetzt auf JEDEM Beat synchron zum Headbop aktiv (kein Auslassen jedes zweiten Beats). Die Shake-Geschwindigkeit ist separat einstellbar.';
   kiAdd('ai',msg);KI.h.push({role:'user',parts:[{text:q}]},{role:'model',parts:[{text:msg}]});return;
  }
- if(faster && (shakeMention || KI.focus==='fx:shake')){
+ if(quick&&faster&&(shakeMention||(KI.focus==='fx:shake'&&q.length<=40&&!/\b(clip|cut|schnitt|schneid\w*|song|musik|video|zeitlupe|tempo|bpm)\b/i.test(q)))){
   S.fx.add('shake');const cfg=S.fxp.shake||(S.fxp.shake={b:1,s:0,e:0,sp:1});
   cfg.b=1;cfg.sp=Math.min(8,Math.max(.25,(cfg.sp??1)*2));KI.focus='fx:shake';syncUI();rFx();
   const msg='Nur Shake geändert: Vibrationsgeschwindigkeit jetzt '+cfg.sp.toFixed(2)+'×. Headbop-Tempo und Clip-Speed bleiben unverändert.';
   kiAdd('ai',msg);KI.h.push({role:'user',parts:[{text:q}]},{role:'model',parts:[{text:msg}]});return;
  }
- if(slower && (shakeMention || KI.focus==='fx:shake')){
+ if(quick&&slower&&(shakeMention||(KI.focus==='fx:shake'&&q.length<=40&&!/\b(clip|cut|schnitt|schneid\w*|song|musik|video|zeitlupe|tempo|bpm)\b/i.test(q)))){
   const cfg=S.fxp.shake||(S.fxp.shake={b:1,s:0,e:0,sp:1});
   cfg.b=1;cfg.sp=Math.max(.25,(cfg.sp??1)/2);KI.focus='fx:shake';syncUI();rFx();
   const msg='Nur Shake geändert: Vibrationsgeschwindigkeit jetzt '+cfg.sp.toFixed(2)+'×. Headbop-Tempo und Clip-Speed bleiben unverändert.';
@@ -1745,7 +1781,7 @@ async function kiSend(){
  }
  // Headbop: nur ausführen, wenn der Nutzer tatsächlich die Kopfbewegung ändern will.
  let localNote='';
- if(/\b(head ?bop|head ?bang|kopf ?nicken|kopfnicken)\b/i.test(q)){
+ if(quick&&/\b(head ?bop|head ?bang|kopf ?nicken|kopfnicken)\b/i.test(q)){
   let hs=[];try{hs=rigTargets('photos')}catch(e){}
   if(hs.length){
    try{await prepVideo({target:'photos'});const msg=rigApply({target:'photos',part:'head',motion:'pro',body:.9,bodySpan:.92,blur:0,plug:0,overlap:.26,feather:.06});S.fx.delete('headbop');rFx();kiAdd('ai','Headbop gesetzt: Kopf bewegt sich, Oberkörper/Arme folgen weich und die Beine bekommen den Follow-through. Keine Ghost-/Shadow-Overlay-Kopien.\n'+msg);localNote='\n[LOKAL BEREITS ANGEWENDET: '+msg+'. Prüfe mit Quellfoto und Kontrollbild, ob die rote Box den ganzen Kopf trifft. Wenn nicht, korrigiere per rig mit exakter box oder poly. Wenn ja, antworte nur kurz mit do:[] und noop:true.]'}catch(e){kiAdd('ai','⚠ '+e.message)}
@@ -1758,15 +1794,16 @@ async function kiSend(){
  }
  if(!KI.key){$('cmd').value=q;cmd();return kiAdd('ai',$('cmdout').textContent+'\n(Für die echte KI oben den Gemini-Key eintragen)')}
  kiBusy(true);let failed=false;
- let userText=q+localNote,imgParts=[];
+ const planFirst=q.length>140||((q.match(/\b(und|dann|außerdem|zusätzlich|danach|plus)\b|,/gi)||[]).length>=4)||/\b(alles|komplett|ganze[ns]?|pro[- ]?edit|krass)\b/i.test(q);
+ let userText=q+localNote+(planFirst?'\n[SYSTEM, nicht vom Nutzer] Das ist ein größerer Auftrag. RUNDE 1 = nur PLANEN, noch nichts ändern: schreib in think die nummerierte Auftragsliste, deine Annahmen, Risiken und die Reihenfolge, trag den Plan in notes ein, gib do:[] aus. Stell nur dann eine Rückfrage, wenn eine falsche Annahme etwas zerstören würde. Danach führst du den Plan aus.':''),imgParts=[];
  try{
   imgParts=kiImages(false);
-  let reviews=0;for(let round=0;round<6;round++){
+  let reviews=0,fixes=0,totalActs=0,finalDone=false;const fails={};for(let round=0;round<8;round++){
    if(KI.stop)throw new Error('__stop');kiThink();
    const before=stateSig(),beforeSnap=JSON.parse(JSON.stringify(snap()));
    const hist=KI.h.slice(-24);while(hist.length&&hist[0].role!=='user')hist.shift();
    const contents=[...hist,{role:'user',parts:[{text:userText+'\n\nSTATE:'+JSON.stringify(snap())},...imgParts]}];
-   const j=await callAny({systemInstruction:{parts:[{text:SYS()}]},contents,generationConfig:{responseMimeType:'application/json',temperature:.6,topP:.95,maxOutputTokens:24576,thinkingConfig:{thinkingLevel:'high'}}});
+   const j=await callAny({systemInstruction:{parts:[{text:SYS()}]},contents,generationConfig:{responseMimeType:'application/json',temperature:.4,topP:.95,maxOutputTokens:24576,thinkingConfig:{thinkingLevel:'high'}}});
    const cand=j.candidates?.[0],rawTxt=(cand?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join('');
    if(!rawTxt){if(round<3){userText='[SYSTEM-RÜCKMELDUNG, nicht vom Nutzer] Leere Antwort ('+(cand?.finishReason||j.promptFeedback?.blockReason||'unbekannt')+'). Antworte erneut NUR mit kurzem JSON.';imgParts=kiImages(true);continue}throw new Error('Leere KI-Antwort ('+(cand?.finishReason||j.promptFeedback?.blockReason||'unbekannt')+')')}
    let o;try{o=parseAI(rawTxt)}catch(pe){
@@ -1775,7 +1812,6 @@ async function kiSend(){
     userText='[SYSTEM-RÜCKMELDUNG, nicht vom Nutzer] Deine letzte Antwort war kein gültiges bzw. vollständiges JSON ('+pe.message+'). Antworte erneut NUR mit dem JSON, kürzer, ohne Erklärtext.';imgParts=kiImages(true);continue;
    }
    if(o.think&&String(o.think).trim()){kiAdd('ai','💭 '+String(o.think).trim().slice(0,900)).classList.add('think')}
-   KI.h.push({role:'user',parts:[{text:userText}]},{role:'model',parts:[{text:JSON.stringify(o).slice(0,6000)}]});
    if(typeof o.notes==='string'){setNotes(o.notes.slice(0,3000))}officeSave();
    const acts=Array.isArray(o.do)?o.do:[],res=[];
    for(const x of acts){
@@ -1786,19 +1822,26 @@ async function kiSend(){
     catch(e){res.push({a:x.a,ok:false,m:e.message})}
    }
    if(KI.stop)throw new Error('__stop');kiLive('👀 prüft das Ergebnis …');syncUI();rText();renderRigList();
-   const changed=stateSig()!==before;
+   {const ho={...o,do:acts.map(a=>({a:a.a,v:String(typeof a.v==='string'?a.v:JSON.stringify(a.v)).slice(0,300)})),results:res.map(r=>(r.ok?'✓ ':'⚠ ')+r.a+(r.m?': '+String(r.m).slice(0,150):''))};KI.h.push({role:'user',parts:[{text:userText.slice(0,2000)}]},{role:'model',parts:[{text:JSON.stringify(ho).slice(0,4000)}]})}
+   const quiet=acts.length&&acts.every(a=>['detect','seek','play','pause','analyse','export','look'].includes(a.a)),changed=quiet||stateSig()!==before;
    kiAdd('ai',(o.say||'')+(res.length?'\n'+res.map(r=>(r.ok?'✓ ':'⚠ ')+r.a+(r.m?': '+r.m:'')).join('\n'):''));
    const failed=res.filter(r=>!r.ok);let fb='';
    if(failed.length)fb='FEHLER bei: '+failed.map(r=>r.a+' → '+r.m).join(' | ')+'. Repariere es und gib die korrigierten Aktionen aus.';
+   else if(acts.length&&acts.every(a=>a.a==='look'||a.a==='detect')&&reviews<4){reviews++;fb='Die angeforderten Bilder/Daten hängen an. Werte sie jetzt aus und handle per do, oder antworte mit noop:true.'}
    else if(acts.length&&!changed)fb='Die Aktionen liefen ohne Fehler, aber der Projektzustand hat sich NICHT verändert, dein Ergebnis ist wirkungslos. Finde die Ursache und mache es richtig. Ergebnisse: '+JSON.stringify(res);
    else if(!acts.length&&!o.noop&&/^(ich habe|erledigt|fertig|done|ok\b|okay|gemacht)/i.test((o.say||'').trim()))fb='Du hast keine Aktion ausgegeben, behauptest aber Erledigung. Gib die nötigen Aktionen aus oder erkläre ehrlich, was fehlt.';
-   else if(acts.length&&changed&&!o.noop&&reviews<2){reviews++;const aS=snap(),dk=Object.keys(aS).filter(k=>JSON.stringify(aS[k])!==JSON.stringify(beforeSnap[k]));
-    fb='SELBSTCHECK (nicht vom Nutzer): Du hast '+acts.length+' Aktion(en) ausgeführt. Verändert wurde laut Editor: '+(dk.join(', ')||'nur interner Zustand/eigener Code')+'. Ergebnisse: '+JSON.stringify(res)+'. Du siehst jetzt das NEUE Vorschaubild. Prüfe ehrlich und kritisch: Siehst du den Effekt/die Änderung WIRKLICH im Bild? Passt sie genau zum Wunsch des Nutzers (richtiger Zeitraum, Stärke, Ort)? Hat sich etwas verändert, das nicht verlangt war? Antworte mit "verdict":"ok" oder "verdict":"problem", sag im "say" konkret was du siehst und was du geändert hast (Was, Wie, Wert) und ob du dir sicher bist. Bei "problem" korrigiere sofort per do. Bei "ok" do:[] und noop:true.'}
+   else if(acts.length&&changed&&!o.noop&&reviews<4){reviews++;const aS=snap(),dk=Object.keys(aS).filter(k=>JSON.stringify(aS[k])!==JSON.stringify(beforeSnap[k]));
+    fb='SELBSTCHECK (nicht vom Nutzer): Du hast '+acts.length+' Aktion(en) ausgeführt. Verändert wurde laut Editor: '+(dk.join(', ')||'nur interner Zustand/eigener Code')+'. Ergebnisse: '+JSON.stringify(res)+'. Du siehst jetzt das NEUE Vorschaubild. Prüfe ehrlich und kritisch: Siehst du den Effekt/die Änderung WIRKLICH im Bild? Passt sie genau zum Wunsch des Nutzers (richtiger Zeitraum, Stärke, Ort)? Hat sich etwas verändert, das nicht verlangt war? Antworte mit "verdict":"ok" oder "verdict":"problem", sag im "say" konkret was du siehst und was du geändert hast (Was, Wie, Wert) und ob du dir sicher bist. Die Bilder zeigen mehrere Zeitpunkte (Filmstreifen), nicht nur den Playhead. Bei "problem" korrigiere sofort per do. Hat dein Plan (siehe notes) noch offene Schritte, führe den nächsten jetzt aus und setze more:true. Nur wenn alles fertig UND geprüft ist: verdict ok, do:[] und noop:true.'}
+   if(!fb&&o.verdict==='problem'&&!acts.length&&fixes<2){fixes++;fb='Du hast verdict problem gemeldet, aber keine korrigierende Aktion ausgegeben. Korrigiere jetzt per do oder erkläre ehrlich, warum es nicht geht (noop:true).'}
+   if(acts.length&&changed&&!failed.length)totalActs+=acts.length;
+   res.forEach((r,ix)=>{if(!r.ok){const k=r.a+'|'+JSON.stringify(acts[ix]&&acts[ix].v).slice(0,200);fails[k]=(fails[k]||0)+1;if(fails[k]>=2&&fb)fb+=' ACHTUNG: "'+r.a+'" ist mit denselben Parametern schon '+fails[k]+'x gescheitert. Wiederhole es NICHT. Such die Ursache (was sagt STATE/Bild/Fehlertext?), dann anderer Ansatz oder ehrliche Einschränkung.'}});
+   if(!fb&&round===0&&planFirst&&!acts.length&&!o.noop&&!/\?\s*$/.test(String(o.say||'').trim()))fb='Plan steht. Führe ihn jetzt aus: alle voneinander unabhängigen Schritte in EINER Antwort, Zeiten per beat_times/timeline/calc statt geschätzt, danach prüfst du.';
+   if(!fb&&!finalDone&&(planFirst||totalActs>=4)&&totalActs>0&&round<7){finalDone=true;fb='ABSCHLUSS-CHECK (nicht vom Nutzer): Lies den ursprünglichen Wunsch noch einmal und gehe jeden Teilwunsch einzeln durch: erledigt und im Bild/Zustand belegt, nur angenähert, oder fehlt? Fehlt etwas Machbares, hol es jetzt per do nach (more:true). Sonst: do:[], noop:true und im say ein ehrlicher Abschlussbericht: was genau (Effekt, Zeit, Wert), was angenähert ist, was nicht ging, und was du als Nächstes vorschlägst.'}
    if(!fb)break;
-   if(round===5){kiAdd('ai','⚠ Nach 6 Durchgängen noch nicht sauber gelöst. Beschreib mir genauer, was du siehst, dann korrigiere ich gezielt.');break}
+   if(round===7){kiAdd('ai','⚠ Nach 6 Durchgängen noch nicht sauber gelöst. Beschreib mir genauer, was du siehst, dann korrigiere ich gezielt.');break}
    userText='[SYSTEM-RÜCKMELDUNG, nicht vom Nutzer] '+fb;
    await new Promise(r=>setTimeout(r,350));
-   imgParts=kiImages(true);
+   imgParts=kiImages(true);try{imgParts.push(...(await filmstrip(KI.look&&KI.look.length?KI.look:autoTimes())));KI.look=null}catch(e){}
   }
  }catch(e){failed=true;if(!kiFail(e,q))kiAdd('ai','❌ '+e.message+(/API key|API_KEY|PERMISSION|403|Kein API-Key/i.test(e.message)?'\n💡 Prüf deinen Gemini-Key oben im KI-Tab (aistudio.google.com/apikey).':/quota|exhaust|429/i.test(e.message)?'\n💡 Kontingent erreicht – kurz warten oder oben ein anderes Modell wählen.':''))}
  kiBusy(false);if(!failed)KI.pending=null;officeSave();
@@ -2009,7 +2052,7 @@ addEventListener('resize',vh);addEventListener('orientationchange',()=>setTimeou
 
 /* ---------- v23: Themes ---------- */
 (function(){
- const TH=[['plasma','🌌','Plasma','#010611'],['celestial','🔥','Celestial','#0b0301']];
+ const TH=[['plasma','🌌','Plasma','#010611'],['celestial','🔥','Celestial','#0b0301'],['mono','◐','Schwarz-Weiß','#000000']];
  const meta=document.querySelector('meta[name=theme-color]');
  const b=document.createElement('button');b.id='themeBtn';b.type='button';b.className='mini';
  const set=n=>{const t=TH.find(x=>x[0]===n)||TH[0];document.documentElement.dataset.theme=t[0];b.textContent=t[1];b.title='Theme: '+t[2]+' (tippen zum Wechseln)';b.setAttribute('aria-label','Theme wechseln, aktuell '+t[2]);if(meta)meta.content=t[3];try{localStorage.shoxy_theme=t[0]}catch(e){}return t};
@@ -2098,4 +2141,98 @@ function kiResume(){if($('kigo').disabled||!KI.pending)return;const q=KI.pending
  setInterval(officeSave,3000);addEventListener('pagehide',officeSave);
  addEventListener('online',()=>{if(KI.pending&&KI.key&&!KI.busy)setTimeout(kiResume,800)});
 })();
+
+/* ---------- v24: Filmstreifen (KI sieht mehrere Zeitpunkte) + gehärtete Aktionen ---------- */
+async function filmstrip(times){
+ const out=[];if(!S.segs.length||S.exporting||!times||!times.length)return out;
+ const T0=S.T,was=S.playing;if(was)pause();
+ try{for(const t0 of times.slice(0,4)){
+  const t=Math.max(0,Math.min(Math.max(0,S.total-.05),+t0||0));S.T=t;S.seg=-1;
+  await kiSleep(160);
+  for(let k=0;k<25;k++){const g=S.segs[S.seg],v=g&&g.c.v;if(!v||v.tagName!=='VIDEO'||(!v.seeking&&v.readyState>=2))break;await kiSleep(40)}
+  await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+  const d=b64Of(cv,420);if(d)out.push({text:'[Filmstreifen: Projektzeit '+t.toFixed(2)+' s]'},{inlineData:{mimeType:'image/jpeg',data:d.data}});
+ }}finally{S.T=T0;S.seg=-1;if(was)play()}
+ return out}
+function autoTimes(){if(!S.segs.length)return[];const b=S.beats.filter(x=>x>=S.T-.01&&x<S.total-.1).slice(0,2).map(x=>x+.03);return b.length?b:[S.total*.5]}
+Object.assign(DO,{
+ look:v=>{const a=[].concat(v&&v.times!==undefined?v.times:v).map(Number).filter(isFinite).slice(0,4);if(!a.length)throw new Error('look braucht times:[Sekunden]');KI.look=a;return 'Filmstreifen bei '+a.map(x=>x.toFixed(2)+'s').join(', ')+' kommt im nächsten Schritt'},
+ seek:v=>{const t=+v;if(!isFinite(t))throw new Error('seek braucht eine Zahl in Sekunden');S.T=Math.max(0,Math.min(S.total||0,t));S.seg=-1},
+ del:i=>{const k=i===undefined||i===null?S.sel:+i;if(!(k>=0&&k<S.texts.length))throw new Error('Text '+k+' existiert nicht (gültig 0..'+(S.texts.length-1)+')');S.texts.splice(k,1);S.sel=S.texts.length-1;rText()},
+ edit:o=>{const k=o&&o.i!==undefined?+o.i:S.sel,L=S.texts[k];if(!L)throw new Error('Text '+k+' existiert nicht (gültig 0..'+(S.texts.length-1)+')');Object.assign(L,o.p||{});rText()},
+ cut:v=>{const n=+v;if(![1,2,4,8].includes(n))throw new Error('cut erlaubt nur 1, 2, 4 oder 8 Beats');S.cutBeats=n;S.autoCut=true;$('autocut').checked=true;build()},
+ overlay:v=>{if(v==='blue_black_hole'||v==='blackhole'||(v&&v.type==='blue_black_hole'))return addBlueBlackHole();throw new Error('Unbekanntes Overlay '+JSON.stringify(v)+' (nur blue_black_hole; eigene Ebenen per js + ED.overlayFromCanvas)')},
+ overlay_set:o=>{const L=S.images[o&&o.i];if(!L)throw new Error('Ebene '+(o&&o.i)+' existiert nicht (gültig 0..'+(S.images.length-1)+')');const p={};for(const k of Object.keys(o.p||{})){if(['x','y','w','h','opacity','s','e','rot'].includes(k)){if(!isFinite(+o.p[k]))throw new Error(k+' muss eine Zahl sein');p[k]=+o.p[k]}else if(k==='blend')p.blend=String(o.p[k])}if(p.opacity!==undefined)p.opacity=Math.max(0,Math.min(1,p.opacity));Object.assign(L,p);renderOverlayList();return 'Ebene '+(o.i+1)+' angepasst: '+JSON.stringify(p)}
+});
+
+/* ---------- v25: Zeitleisten-Ereignisse, Schnitt-Karte, Rechenwerkzeuge ---------- */
+S.ev=S.ev||[];S.cutMap=S.cutMap||[];
+function bcAt(bt,bc){const m=(S.cutMap||[]).find(o=>bt>=o.s&&bt<o.e);return m?m.beats:bc}
+function revSeg(g){const E=S.ev;if(!E||!E.length)return false;for(const e of E)if(e.type==='reverse'&&g.start>=e.t-.05&&g.start<e.t+(e.dur||.01)-.05)return true;return false}
+function evDraw(t){const E=S.ev;if(!E||!E.length)return;let z=1;
+ for(const e of E){if(e.type!=='zoom')continue;const d=Math.max(.04,e.dur||.3),u=(t-e.t)/d;if(u<0||u>1)continue;z*=1+(e.amt??.25)*Math.pow(1-u,2)}
+ if(z>1.002){T1.clearRect(0,0,W,H);T1.drawImage(cv,0,0);X.save();X.clearRect(0,0,W,H);X.translate(W/2,H/2);X.scale(z,z);X.drawImage(tm,-W/2,-H/2);X.restore()}
+ for(const e of E){if(e.type!=='flash')continue;const d=Math.max(.04,e.dur||.3),u=(t-e.t)/d;if(u<0||u>1)continue;X.save();X.globalCompositeOperation='source-over';X.globalAlpha=Math.max(0,Math.min(1,(e.amt??1)*Math.pow(1-u,1.6)));X.fillStyle=e.color||'#ffffff';X.fillRect(0,0,W,H);X.restore()}}
+const nearBy=(arr,t)=>arr.reduce((b,x)=>Math.abs(x-t)<Math.abs(b-t)?x:b,arr[0]);
+Object.assign(DO,{
+ ev:v=>{const arr=[].concat(v&&v.events?v.events:v);if(!S.segs.length)throw new Error('Keine Clips geladen');if(arr.length+S.ev.length>300)throw new Error('Zu viele Ereignisse (max 300)');const done=[];
+  for(const o of arr){
+   if(!o||!['flash','zoom','reverse','trans'].includes(o.type))throw new Error('ev.type muss flash, zoom, reverse oder trans sein, nicht '+(o&&o.type));
+   let t=+o.t;if(!isFinite(t)||t<0||t>S.total)throw new Error('ev.t '+o.t+' liegt außerhalb 0..'+S.total.toFixed(2));
+   const e={type:o.type};
+   if(o.type==='trans'||o.type==='reverse'){const starts=S.segs.map(g=>g.start),n=nearBy(starts,t);if(Math.abs(n-t)>Math.max(.4,60/S.bpm))throw new Error(o.type+' bei '+t.toFixed(2)+' s: kein Schnittpunkt in der Nähe (nächster '+n.toFixed(2)+' s). Erst cut/cut_map setzen oder timeline prüfen');t=n}
+   else if(o.snap!==false&&S.beats.length){const n=nearBy(S.beats,t);if(Math.abs(n-t)<=.12)t=n}
+   e.t=+t.toFixed(3);
+   if(o.type==='trans'){if(!TR.some(x=>x[0]===o.id))throw new Error('Unbekannter Übergang: '+o.id);e.id=o.id;if(+o.dur>0)e.dur=Math.max(.05,Math.min(2,+o.dur))}
+   else if(o.type==='reverse'){const g=S.segs[segAt(t)];e.dur=+o.dur>0?+o.dur:g.len}
+   else{e.dur=Math.max(.05,Math.min(2,+o.dur||(o.type==='flash'?.3:.3)));e.amt=Math.max(0,Math.min(o.type==='zoom'?2:1,isFinite(+o.amt)?+o.amt:(o.type==='zoom'?.25:1)));if(o.color)e.color=String(o.color)}
+   S.ev=S.ev.filter(x=>!(x.type===e.type&&Math.abs(x.t-e.t)<.03));S.ev.push(e);done.push(e.type+'@'+e.t.toFixed(2)+'s')}
+  S.ev.sort((a,b)=>a.t-b.t);return done.length+' Ereignis(se): '+done.join(', ')},
+ ev_del:o=>{o=o||{};const n=S.ev.length;S.ev=S.ev.filter(e=>!((!o.type||e.type===o.type)&&(o.from===undefined||e.t>=+o.from)&&(o.to===undefined||e.t<=+o.to)));return (n-S.ev.length)+' gelöscht, '+S.ev.length+' übrig'},
+ ev_clear:()=>{const n=S.ev.length;S.ev=[];return n+' gelöscht'},
+ cut_map:v=>{const a=[].concat(v).map(o=>({s:+(o&&o.s),e:+(o&&o.e),beats:+(o&&o.beats)}));for(const o of a){if(!isFinite(o.s)||!isFinite(o.e)||o.e<=o.s)throw new Error('cut_map braucht s<e');if(![1,2,4,8].includes(o.beats))throw new Error('cut_map beats nur 1, 2, 4 oder 8')}S.cutMap=a;S.autoCut=true;$('autocut').checked=true;build();return 'Zeitleiste neu gebaut: '+S.segs.length+' Abschnitte, '+S.total.toFixed(2)+' s'},
+ beat_times:o=>{o=o||{};if(!S.beats.length)throw new Error('Keine Beats, erst analyse oder bpm');const ev=Math.max(1,Math.round(+o.every||1)),f=+o.from||0,e=+o.to>0?+o.to:S.total,m=o.downbeats?4:ev,r=[];S.beats.forEach((b,i)=>{if(b>=f&&b<=e&&(i+S.barOff)%m===0)r.push(+b.toFixed(3))});return JSON.stringify({bpm:S.bpm,beatLen:+(60/S.bpm).toFixed(3),drop:S.dropT||null,count:r.length,times:r.slice(0,150)})},
+ timeline:()=>JSON.stringify({total:+S.total.toFixed(2),bpm:S.bpm,drop:S.dropT||null,segs:S.segs.slice(0,150).map((g,i)=>[i,+g.start.toFixed(2),+g.len.toFixed(2),S.clips.indexOf(g.c),((S.beats.findIndex(b=>Math.abs(b-g.start)<.03)+S.barOff)%4===0)?'bar':'']),ev:S.ev,cutMap:S.cutMap}),
+ calc:v=>{const B=60/S.bpm,L=[].concat(v).map(x=>{const f=new Function('S','B','const {min,max,abs,round,floor,ceil,sqrt,pow,sin,cos,PI,log}=Math;return ('+String(x)+')');const r=f(S,B);return typeof r==='number'?+r.toFixed(4):r});return JSON.stringify(L.length===1?L[0]:L)}
+});
+
+/* ---------- v26: Projektformat folgt dem Medium, jederzeit einstellbar ---------- */
+S.fmt=S.fmt||{mode:'auto'};
+const RATIOS={'9:16':[9,16],'16:9':[16,9],'1:1':[1,1],'4:5':[4,5],'3:4':[3,4],'4:3':[4,3],'21:9':[21,9],'2:3':[2,3],'3:2':[3,2]};
+function fmtFor(ar){let h=Math.sqrt(921600/ar),w=h*ar;const m=Math.max(w,h);if(m>1280){w*=1280/m;h*=1280/m}return{w:Math.max(2,2*Math.round(w/2)),h:Math.max(2,2*Math.round(h/2))}}
+function setFormat(w,h){w=Math.max(2,2*Math.round(+w/2));h=Math.max(2,2*Math.round(+h/2));if(!(w>=64&&h>=64&&w<=4096&&h<=4096))throw new Error('Format ungültig (64..4096 px pro Seite)');if(w===W&&h===H)return;W=w;H=h;[cv,fc,pv,cc,sc,tm,tm2].forEach(c=>{c.width=W;c.height=H});sm.width=96;sm.height=Math.max(2,Math.round(96*H/W));SM.imageSmoothingQuality='high';S.seg=-1;try{fit()}catch(e){}}
+function autoFmt(){if((S.fmt||{mode:'auto'}).mode!=='auto')return;const c=S.clips[0];if(!c||!c.v)return;const iw=c.v.videoWidth||c.v.naturalWidth,ih=c.v.videoHeight||c.v.naturalHeight;if(!iw||!ih)return;const f=fmtFor(iw/ih);if(f.w!==W||f.h!==H){setFormat(f.w,f.h);fmtUI()}}
+function setFmt(v){let r;if(v==='auto'||(v&&v.mode==='auto')){S.fmt={mode:'auto'};autoFmt();r='Format automatisch nach erstem Medium'}else{let ar,w,h;if(typeof v==='string'||(v&&v.ratio)){const k=String(typeof v==='string'?v:v.ratio).replace(/\s/g,'').replace('x',':'),q=RATIOS[k]||(/^(\d+(?:\.\d+)?):(\d+(?:\.\d+)?)$/.test(k)?k.split(':').map(Number):null);if(!q||!(q[0]>0&&q[1]>0))throw new Error('Unbekanntes Format '+JSON.stringify(v)+' (z.B. 16:9, 9:16, 1:1, 4:5 oder {w,h})');({w,h}=fmtFor(q[0]/q[1]))}else if(v&&isFinite(+v.w)&&isFinite(+v.h)){w=+v.w;h=+v.h}else throw new Error('format braucht "auto", ein Verhältnis wie "16:9" oder {w,h}');setFormat(w,h);S.fmt={mode:'custom',w:W,h:H};r='Format '+W+'×'+H}fmtUI();return r}
+function fmtUI(){const i=$('fmtinfo');if(!i)return;i.textContent=W+'×'+H+(S.fmt.mode==='auto'?' · auto':'');document.querySelectorAll('#fmtchips button').forEach(b=>b.classList.toggle('on',b.dataset.f===(S.fmt.mode==='auto'?'auto':(Object.keys(RATIOS).find(k=>{const f=fmtFor(RATIOS[k][0]/RATIOS[k][1]);return f.w===W&&f.h===H})||''))))}
+(function(){const c=document.createElement('div');c.className='card';c.innerHTML='<h3>📐 Projektformat <span id="fmtinfo" style="color:var(--cy);letter-spacing:0"></span></h3><div class="chips" id="fmtchips"></div><div class="row" style="margin-top:8px;gap:6px"><input id="fmtw" type="number" class="field" placeholder="Breite px"><input id="fmth" type="number" class="field" placeholder="Höhe px"><button class="btn" id="fmtgo" type="button" style="flex:0 0 auto">OK</button></div><p class="small">Auto = Format deines ersten Clips/Fotos. Du kannst es jederzeit ändern, auch die KI.</p>';const r0=$('t-clips').querySelector('.row');r0.after(c);
+ $('fmtchips').innerHTML=[['auto','🪄','Auto'],['9:16','📱','9:16'],['16:9','🖥','16:9'],['1:1','⬛','1:1'],['4:5','🖼','4:5'],['3:4','▯','3:4'],['4:3','▭','4:3'],['21:9','🎞','21:9']].map(([k,i,n])=>'<button type="button" class="chip" data-f="'+k+'"><i>'+i+'</i>'+n+'</button>').join('');
+ $('fmtchips').onclick=e=>{const b=e.target.closest('button');if(!b)return;try{pushHistory()}catch(x){}try{st('📐 '+setFmt(b.dataset.f))}catch(x){st('⚠ '+x.message)}};
+ $('fmtgo').onclick=()=>{try{pushHistory()}catch(x){}try{st('📐 '+setFmt({w:$('fmtw').value,h:$('fmth').value}))}catch(x){st('⚠ '+x.message)}};fmtUI()})();
+Object.assign(DO,{
+ format:v=>setFmt(v),
+ set:o=>{o=o||{};const out=[],num=(k,a,b)=>{const x=+o[k];if(!isFinite(x))throw new Error(k+' muss eine Zahl sein');return Math.max(a,Math.min(b,x))};
+  if(o.autoCut!==undefined){S.autoCut=!!o.autoCut;$('autocut').checked=S.autoCut;build();out.push('autoCut '+S.autoCut)}
+  if(o.fill!==undefined){if(!['fill','fit'].includes(o.fill))throw new Error('fill nur "fill" oder "fit"');S.fill=o.fill;rFill();out.push('fill '+o.fill)}
+  if(o.songSpeed!==undefined){setSongSpeed(num('songSpeed',.5,2));out.push('songSpeed '+S.songSpeed)}
+  if(o.pitchF!==undefined){setPitchF(!!o.pitchF);out.push('pitchF '+S.pitchF)}
+  if(o.click!==undefined){S.click=!!o.click;out.push('click '+S.click)}
+  if(o.kfon!==undefined){S.kfon=!!o.kfon;try{$('kfon').checked=S.kfon}catch(e){}out.push('kfon '+S.kfon)}
+  if(o.kfease!==undefined){if(!['smooth','linear'].includes(o.kfease))throw new Error('kfease nur smooth oder linear');S.kfease=o.kfease;out.push('kfease '+o.kfease)}
+  if(o.expres!==undefined){$('expres').value=String(Math.round(num('expres',720,2160)));out.push('expres '+$('expres').value)}
+  if(o.expfps!==undefined){$('expfps').value=String(Math.round(num('expfps',1,60)));out.push('expfps '+$('expfps').value)}
+  if(o.exphq!==undefined){$('exphq').checked=!!o.exphq;out.push('exphq '+!!o.exphq)}
+  if(o.expq!==undefined){$('expq').value=String(Math.round(num('expq',1e6,5e7)));out.push('expq '+$('expq').value)}
+  if(!out.length)throw new Error('set kennt: autoCut, fill, songSpeed, pitchF, click, kfon, kfease, expres, expfps, exphq, expq');syncUI();return out.join(', ')},
+ undo:()=>{if(!histPast.length)throw new Error('Nichts zum Zurücknehmen');undoEdit()},
+ redo:()=>{if(!histFuture.length)throw new Error('Nichts zum Wiederherstellen');redoEdit()},
+ background:v=>{if(v===null||v===undefined||v==='none'){S.background=null;return 'Hintergrund entfernt'}const L=S.images[+v];if(!L)throw new Error('Ebene '+v+' existiert nicht (gültig 0..'+(S.images.length-1)+')');S.background=L;return 'Ebene '+(+v+1)+' ist Hintergrund (sichtbar im Fit-Modus)'},
+ overlay_move:o=>{const i=+(o&&o.i),t=+(o&&o.to);if(!S.images[i]||!(t>=0&&t<S.images.length))throw new Error('overlay_move: i/to ungültig (0..'+(S.images.length-1)+')');const[L]=S.images.splice(i,1);S.images.splice(t,0,L);renderOverlayList();return 'Ebene nach Position '+t},
+ kf_del:v=>{const i=+v;if(!(i>=0&&i<S.kfs.length))throw new Error('Keyframe '+v+' existiert nicht (gültig 0..'+(S.kfs.length-1)+')');S.kfs.splice(i,1);S.kfsel=S.kfs.length-1;rKf()}
+});
+Object.assign(ED,{setFormat:(w,h)=>{setFormat(w,h);S.fmt={mode:'custom',w:W,h:H};fmtUI()},setSongSpeed,setClipSpeed,setPitchF,undoEdit,redoEdit,trimClip,splitClip,dupClip,delClip,moveClip,cutout,trimSong,applyPreset,exportVid,play,pause,analyse,DO});
+
+/* ---------- v28: KI-Schnellbefehle ---------- */
+(function(){const Q=[['✂ Auf Beat schneiden','Schneide alle Clips auf den Beat des Songs: ruhig am Anfang, schnell ab dem Drop.'],['⚡ Pro-Edit','Mach daraus einen Pro-Edit: Beat-Cuts, passende Übergänge an den Schnittpunkten, Zooms und Weißblitze auf Taktanfängen, ein Reverse an einer guten Stelle. Nicht überladen.'],['🔎 Projekt prüfen','Prüfe mein ganzes Projekt kritisch auf Fehler, Schwächen und Verbesserungen und sag mir ehrlich, was du siehst. Ändere nichts.'],['📐 Format 16:9','Stell das Projektformat auf 16:9.'],['↶ Rückgängig','Nimm deine letzte Änderung zurück.']];
+ const d=document.createElement('div');d.className='row';d.style.cssText='gap:5px;margin:6px 0;flex-wrap:wrap';d.innerHTML=Q.map((q,i)=>'<button type="button" class="mini" data-q="'+i+'" style="flex:0 0 auto;font-size:11.5px">'+q[0]+'</button>').join('');
+ d.onclick=e=>{const b=e.target.closest('button');if(!b||KI.busy)return;$('kiin').value=Q[+b.dataset.q][1];kiSend()};$('kiin').before(d)})();
 </script></body></html>
