@@ -192,6 +192,21 @@ a{color:var(--ac)}.auto{background:var(--acg);color:var(--on)}
 .tab.on{animation:in2 .3s ease}@keyframes in2{from{opacity:0;transform:translateY(10px) scale(.99)}to{opacity:1;transform:none}}
 </style>
 <script>try{document.documentElement.dataset.theme=localStorage.shoxy_theme||'plasma'}catch(e){document.documentElement.dataset.theme='plasma'}</script>
+<style id="v29">
+#t-ki.on{display:flex;flex-direction:column;height:100%;min-height:0;gap:8px}
+#body:has(#t-ki.on){overflow:hidden;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+.kihead{display:flex;align-items:center;gap:6px;flex:0 0 auto}.kihead b{font-size:13px;letter-spacing:.5px}.kihead .sp{flex:1}#kiacts{display:flex;gap:6px}
+.kihead .mini,#kiacts .mini{min-height:34px;padding:4px 10px;font-size:14px}
+#t-ki .kl{flex:1;height:auto;min-height:0;gap:6px;padding:2px 0;overscroll-behavior:contain}
+#t-ki .kl:empty:before{content:'Sag mir, was für n Edit das wird 🔥';margin:auto;color:var(--mut);font-size:13px;text-align:center}
+.mb{max-width:84%;padding:8px 12px!important;border-radius:18px;font-size:14px;line-height:1.35;white-space:pre-wrap;word-break:break-word}
+.mb.me{border-bottom-right-radius:5px}.mb.ai{border-bottom-left-radius:5px}
+.mbdel{display:none!important}.mb.think{display:none}
+#kiLive{margin:0!important;padding:6px 12px!important;font-size:12px;opacity:.8;flex:0 0 auto;align-self:flex-start}
+#t-ki #kiin{border-radius:22px;padding:11px 14px}#t-ki #kigo{border-radius:50%;width:42px;height:42px;padding:0;flex:0 0 42px!important}
+#t-ki>.row{flex:0 0 auto;margin:0!important;flex-wrap:nowrap}#kistop{border-radius:50%;width:42px;height:42px;padding:0}
+#kitools:empty{display:none}#kiResume{margin:0!important}
+</style>
 </head><body>
 <div id="app">
 <header><div class="logo">Shoxy<b>Editor</b></div><div style="display:flex;align-items:center;gap:5px"><button class="mini" id="undoBtn" title="Rückgängig (Strg+Z)" aria-label="Rückgängig">↶</button><button class="mini" id="redoBtn" title="Wiederholen (Strg+Y)" aria-label="Wiederholen">↷</button><button class="btn hot" id="exp">⬇ Export</button></div></header>
@@ -298,7 +313,8 @@ a{color:var(--ac)}.auto{background:var(--acg);color:var(--on)}
 </div>
 
 <div class="tab" id="t-ki">
- <div class="card">
+<div class="kihead"><b>Shoxy KI</b><span class="sp"></span><button class="mini" id="kikeyBtn" type="button" title="API-Key & Modell">⚙</button><span id="kiacts"><button class="mini" id="kiclear" type="button" title="Chat leeren">🗑</button></span></div>
+ <div class="card" id="kicfg" style="display:none">
   <div class="row">
    <input id="kikey" class="field" type="password" placeholder="Gemini API-Key (AIza...)">
    <select id="kimodel" style="max-width:175px">
@@ -311,11 +327,10 @@ a{color:var(--ac)}.auto{background:var(--acg);color:var(--on)}
    </select>
   </div>
  </div>
- <div class="row" style="justify-content:flex-end;margin:6px 0"><button class="btn" id="kiclear" type="button">🗑 Chat leeren</button></div><div class="kl" id="kilog"></div>
- <div class="row" style="margin-top:6px"><input id="kiin" class="field" placeholder="z.B. aktiviere Shake auf jedem zweiten Beat"><button class="btn hot" id="kigo" style="flex:0 0 auto">➤</button></div>
+<div class="kl" id="kilog"></div>
+ <div class="row" style="margin-top:6px"><input id="kiin" class="field" placeholder="Schreib einfach, was du willst …"><button class="btn hot" id="kigo" style="flex:0 0 auto">➤</button></div>
  <div class="card" id="rigcard" style="display:none;margin-top:8px"><h3>Foto-Teile (Rig)</h3><div id="riglist"></div></div>
   <div class="row" id="kitools" style="margin-top:8px"></div>
-  <div class="small">Die KI sieht Vorschau und Quellfotos, kann Teile eines Fotos einzeln bewegen, neue Effekte programmieren und Code im Editor ausführen. Jede Aktion wird mit ✓ oder ⚠ angezeigt, ohne echte Änderung korrigiert sie sich selbst. KI-Code läuft nur in deinem Browser. Dein API-Key bleibt lokal in diesem Browser.</div>
 </div>
 
 <div class="tab" id="t-music"><div class="card"><div class="row"><input id="msq" class="field" placeholder="Song / Artist suchen …"><button class="btn hot" id="msgo" style="flex:0 0 auto">🔍</button></div><div style="margin-top:7px"><button class="chip2" data-a="trend">🔥 Trending</button><button class="chip2" data-a="gen" data-v="phonk">Phonk</button><button class="chip2" data-a="gen" data-v="edm">EDM</button><button class="chip2" data-a="gen" data-v="lofi">Lo-Fi</button><button class="chip2" data-a="gen" data-v="hip hop">Hip-Hop</button><button class="chip2" data-a="gen" data-v="cinematic">Cinematic</button></div></div><div id="mslist"></div><div class="grp">Mix</div> <div class="card"><h3>Song &amp; Lautstärke</h3><div class="small" id="songinfo">Kein Song geladen – der Ton der Clips wird genutzt.</div><label class="l">Clip-Ton <b></b></label><input id="clipVol" type="range" min="0" max="1" step=".05" value="1"><label class="l">Song <b></b></label><input id="songVol" type="range" min="0" max="1" step=".05" value="1"></div>
@@ -673,7 +688,8 @@ let scrub=false;
 function tick(now){try{tick0(now)}catch(e){errOnce('Render',e)}requestAnimationFrame(tick)}
 function tick0(now){beatExtras();const dt=Math.min(.1,(now-S.last)/1000);S.last=now;
  if(S.playing){S.T+=dt;followAudio();if(S.T>=S.total){if(S.exporting)finishExport();else{S.T=0;S.seg=-1;if(S.song)songEl.currentTime=0}}}
- renderFrame(now);
+ if(document.hidden&&!S.exporting)return;
+ if(S.playing||S.exporting||scrub||now-(S.lr||0)>66){S.lr=now;renderFrame(now)}
  if(S.exporting&&exportCanvas&&exportCtx){exportCtx.imageSmoothingEnabled=true;exportCtx.imageSmoothingQuality=$('exphq')?.checked?'high':'medium';exportCtx.clearRect(0,0,exportCanvas.width,exportCanvas.height);exportCtx.drawImage(cv,0,0,exportCanvas.width,exportCanvas.height)}
  if(!scrub)$('scrub').value=S.total?S.T/S.total*1000:0;
  $('time').textContent=fm(S.T)+' / '+fm(S.total);
@@ -874,11 +890,11 @@ function beatExtras(){clickTick();const d=$('bdot');if(d){const h=S.playing?(S.l
 /* ---------- Medien ---------- */
 async function addClips(files){
  const picked=[...files];if(!picked.length)return;st(`Importiere ${picked.length} Datei(en) …`);
- const loaded=await Promise.all(picked.map(f=>new Promise(resolve=>{
+ const loaded=[];let _n=0;for(const f of picked){st(`Lade ${++_n}/${picked.length} …`);loaded.push(await new Promise(resolve=>{
   const url=URL.createObjectURL(f);
   if(f.type.startsWith('image/')){const im=new Image();im.onload=()=>resolve({file:f,url,name:f.name,dur:3,v:{img:im,readyState:4,seeking:false,videoWidth:im.naturalWidth,videoHeight:im.naturalHeight,paused:true,currentTime:0,playbackRate:1,pause(){},play(){return Promise.resolve()}},in:0,out:3,photo:1});im.onerror=()=>{URL.revokeObjectURL(url);resolve(null)};im.src=url;return}
   const v=document.createElement('video');let settled=false;const done=value=>{if(settled)return;settled=true;clearTimeout(timer);v.onloadedmetadata=v.onerror=null;resolve(value)};const timer=setTimeout(()=>{v.removeAttribute('src');v.load();URL.revokeObjectURL(url);done(null)},15000);v.setAttribute('playsinline','');v.preload='metadata';v.onloadedmetadata=()=>{const dur=Number(v.duration);if(!Number.isFinite(dur)||dur<=0){URL.revokeObjectURL(url);done(null);return}done({file:f,url,name:f.name,dur,v,in:0,out:dur})};v.onerror=()=>{URL.revokeObjectURL(url);done(null)};v.src=url;
- })));
+ }));await new Promise(r=>setTimeout(r,60))}
  const good=loaded.filter(Boolean);S.clips.push(...good);if(AC)good.forEach(connClip);build();rClips();st(`${good.length} Clip(s)/Foto(s) hinzugefügt · ${S.clips.length} insgesamt`+(good.length<picked.length?` · ⚠ ${picked.length-good.length} Datei(en) nicht lesbar (Format/Codec?)`:''));
 }
 $('videos').onchange=e=>{addClips(e.target.files);e.target.value=''};
@@ -936,7 +952,7 @@ const historyField=t=>t&&t.matches('input,select,textarea')&&/^(str|bright|contr
 document.addEventListener('pointerdown',e=>{if(historyField(e.target)||['kfadd','kfdel','kfclr'].includes(e.target.id))pushHistory()},true);
 document.addEventListener('focusin',e=>{if(historyField(e.target))pushHistory()},true);
 function saveEditState(){try{localStorage.setItem(HIST_KEY,snapString())}catch(e){errOnce('Autosave',e)}}
-setInterval(saveEditState,1800);addEventListener('pagehide',saveEditState);
+setInterval(()=>{if(S.playing||S.exporting||document.hidden)return;(self.requestIdleCallback||setTimeout)(saveEditState)},5000);addEventListener('pagehide',saveEditState);
 
 document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b&&ACT[b.dataset.a])ACT[b.dataset.a](b.dataset.v)});
 document.addEventListener('change',e=>{const t=e.target;if(t.dataset.trim===undefined)return;const c=S.clips[+t.dataset.trim],k=t.dataset.k;let v=Math.min(c.photo?60:c.dur,Math.max(0,+t.value||0));if(k==='in')c.in=Math.min(v,c.out-.2);else c.out=Math.max(v,c.in+.2);build();rClips()});
@@ -1011,12 +1027,22 @@ $('kimodel').value=KI.model;
 $('kikey').oninput=$('kikey').onchange=e=>{KI.key=e.target.value.replace(/\s+/g,'');try{localStorage.ki_key=KI.key}catch(x){}};
 $('kimodel').onchange=e=>{KI.model=e.target.value;try{localStorage.ki_model=KI.model}catch(x){}};
 const kiAdd=(w,t)=>{const d=document.createElement('div');d.className='mb '+w;const msg=document.createElement('span');msg.textContent=t;const del=document.createElement('button');del.className='mbdel';del.type='button';del.title='Nachricht löschen';del.textContent='×';del.onclick=()=>d.remove();d.append(msg,del);$('kilog').append(d);$('kilog').scrollTop=$('kilog').scrollHeight;return d};
-$('kiclear').onclick=()=>{$('kilog').replaceChildren();KI.h=[];kiAdd('ai','Chat geleert. Deine Clips, Musik und Projekteinstellungen bleiben unverändert.')};
-kiAdd('ai','Ich bin dein Schnitt-Assistent und kann auch Dinge, die nicht als fester Button existieren: Körperteile mit natürlichem Follow-through bewegen (Kopf, Oberkörper, Arme und Beine), jeden Effekt einzeln feinsteuern und neue Effekte selbst programmieren und beliebigen Code im Editor ausführen. Ich zeige dir bei jeder Aktion ✓ oder ⚠ und prüfe mein Ergebnis am Bild. Clips und Musik fasse ich nicht ohne Auftrag an.');
+$('kiclear').onclick=()=>{$('kilog').replaceChildren();KI.h=[]};
+/* v29: keine Begrüßung mehr */
 const snap=()=>({clips:S.clips.map((c,i)=>({i,n:c.name,in:c.in,out:c.out,dur:c.dur,photo:!!c.photo,w:(c.v&&c.v.videoWidth)||0,h:(c.v&&c.v.videoHeight)||0,rig:rigSig(c.v&&c.v.rig)})),song:S.song&&{n:S.song.name,dur:S.song.dur},fx:[...S.fx],fxi:S.fxi,fxp:S.fxp,kfs:S.kfs,vibe:S.vibe,str:S.str,trans:S.trans,tdur:S.tdur,autoCut:S.autoCut,cutBeats:S.cutBeats,speed:S.speed,look:{bright:S.bright,contrast:S.contrast,sat:S.sat,hue:S.hue},bpm:S.bpm,drop:S.dropT,beat:{mode:S.ba.mode,conf:S.ba.conf,nudge:S.nudge,bo:S.ba.bo},total:S.total,T:S.T,texts:S.texts,images:S.images.map((L,i)=>({i,name:L.name,x:L.x,y:L.y,w:L.w,h:L.h,opacity:L.opacity,blend:L.blend,s:L.s,e:L.e,rot:L.rot,rig:rigSig(L.rig)})),background:S.background?.name||null,fill:S.fill,canvas:[W,H],format:S.fmt,beatLen:S.bpm?+(60/S.bpm).toFixed(3):null,nextBeats:S.beats.filter(b=>b>=S.T).slice(0,8).map(b=>+b.toFixed(2)),segs:S.segs.slice(0,80).map(g=>({clip:S.clips.indexOf(g.c),start:+g.start.toFixed(2),len:+g.len.toFixed(2)})),vol:{clip:S.clipVol,song:S.songVol},afx:S.afx,songSpeed:S.songSpeed||1,playing:S.playing,selText:S.sel,ev:S.ev,cutMap:S.cutMap,custom:Object.values(CUSTOM).map(f=>({id:f.id,name:f.name,len:f.code.length,off:!!f.off}))});
 const SYS=()=>`Du bist ULTRA-BOSS, ein hochintelligenter Schnitt-Assistent für diesen mobilen Videoeditor. Antworte in der Sprache: ${window.LANGNAME?LANGNAME():'Deutsch'}, locker, kurz und klar.
 BÜRO (intern, erwähne es dem Nutzer gegenüber nie): Du hast ein eigenes Büro mit Notizbuch, das auch nach Verbindungsabbruch oder Neuladen erhalten bleibt. Aktueller Inhalt: ${KI.notes||'(noch leer)'}\nSchreibe bei mehrstufigen oder längeren Aufgaben im JSON-Feld "notes" fortlaufend den kompletten neuen Notizstand (Ziel, Plan, erledigte und offene Schritte, Entscheidungen, Vorlieben des Nutzers, max. 1500 Zeichen). Nach einem Abbruch machst du anhand der Notizen und STATE genau dort weiter, ohne von vorn zu beginnen.
-PERSÖNLICHKEIT: Du bist ein erfahrener, selbstbewusster Editor-Kumpel mit eigenem Geschmack, kein Befehlsempfänger. Locker, direkt, im Ton des Nutzers, nie steif oder unterwürfig, kein "Gerne!". Du hast Meinungen: Findest du eine Idee schwach, sag es kurz und schlag etwas Besseres vor, mach es aber wenn der Nutzer darauf besteht. Ist der Wunsch klar, handle sofort. Fragst du nach (nur bei echter Mehrdeutigkeit oder wenn etwas gelöscht/überschrieben würde), dann gezielt und mit eigenem Vorschlag, damit "ja" reicht.
+PERSÖNLICHKEIT: Du bist kein Befehlsempfänger, sondern ein erfahrener TikTok-Editor und bester Kumpel des Nutzers mit eigenem Geschmack. Du denkst mit, hast Meinungen und bringst eigene Ideen. Findest du etwas schwach, sag es kurz und schlag was Besseres vor, mach es aber, wenn der Nutzer darauf besteht. Nie steif, nie unterwürfig, kein "Gerne!", kein "Natürlich!", kein "Ich habe ... ausgeführt".
+
+SPRACHE (sehr wichtig): Schreib wie ein Gleichaltriger auf TikTok/Discord. Kurze Sätze, Gen-Z-Slang, Umgangssprache, maximal 1-2 Emojis. Beispiele für Wörter: bro, digga, safe, krass, lowkey, highkey, cooked, goated, sheesh, fr, no cap, mid, cringe, hart, geil, läuft, wild. Nicht übertreiben, ein oder zwei Slang-Wörter pro Antwort reichen, damit es natürlich klingt und nicht cringe. Nie Behördendeutsch, nie nerdig. Nenne im "say" KEINE Effekt-IDs, Aktionsnamen, Variablen oder Zahlen-Listen, sag stattdessen "Shake auf jedem Beat" oder "Zoom beim Drop". Maximal 2-3 kurze Sätze. Passe dich dem Ton des Nutzers an (spricht er Slang, sprichst du Slang).
+
+TIKTOK-WISSEN (du weißt, was gemeint ist, frag NIE nach der Bedeutung): Headbop/Headbob = Kopf oder Figur nickt auf jeden Beat. Shake Edit = Bild wackelt hart im Takt auf den Beats. Phonk Edit = dunkel, Cowbell-Beat, RGB Split, Shake, Zoom, Grain, Vignette, harte Flashes. Velocity Edit = Speed Ramps mit Slow-Mo und Beschleunigung auf dem Beat. Funk/Brazilian Edit = Beat-Zoom, Glow, Headbop. Aura/Sigma Edit = dunkel, Slow-Mo, Vignette, viel Bass, Zoom auf den Drop. Drop = der Moment, wo der Beat einsetzt, dort kommt der größte Effekt. Jump Cut, Freeze Frame, Zoom Punch, Flash auf Beat, Glitch Transition, Whip Pan, Rewind/Neymar-Reverse, Slowed+Reverb, Sped-up/Nightcore. Gute Edits: starker Hook in den ersten 1-2 Sekunden, Schnitte auf dem Beat, Effekte sparsam und nicht alles gleichzeitig, Text kurz und gut lesbar, Ende loopt oder hat einen Knall. Übersetze Slang selbst auf passende Effekte, Zeiten und Werte aus deiner Aktionsliste.
+
+NICHTS UNGEFRAGT ÄNDERN: Du fügst NIE von selbst Effekte, Übergänge, Texte oder Schnitte hinzu, wenn der Nutzer nichts verlangt hat. Bei Fragen, Smalltalk, Ideen oder Feedback bleibt do leer (noop:true). Hast du eine Idee, schlag sie vor ("Soll ich am Drop nen Flash setzen?") und warte auf Ja. Ausnahme: Der Nutzer sagt ausdrücklich "mach einfach", "mach alles" oder "überrasch mich".
+
+FRAGEN STELLEN: Du darfst und sollst nachfragen, wenn der Wunsch unklar ist (Vibe, wie hart, welcher Clip, welcher Text, welcher Song-Part). Genau EINE kurze Frage pro Antwort, mit 2-3 Vorschlägen zum Antippen-Tippen ("Phonk hart oder eher smooth?"), nie ein Verhör. Ist der Wunsch klar, mach es erst und frag danach höchstens, ob er es so feiert. Wird etwas gelöscht oder überschrieben, frag vorher.
+
+QUALITÄTS-CHECK WIE EIN ZUSCHAUER: Schau dir nach jeder Änderung das Ergebnis an und frag dich: Würde ich weiterscrollen? Typische Fehler: zu viele Effekte gleichzeitig, Shake zu hart, Bild kaputt oder schwarz, Text nicht lesbar, Effekt nicht auf dem Beat, ungefragte Nebenwirkung. Ist es schlecht, mach es NICHT nur ein bisschen nachjustieren: nimm die Änderung zurück (undo) und bau es mit einem anderen Ansatz von neu. Sag dann ehrlich in einem Satz, was los war ("war mid, mach neu"). Klappt es nach zwei Neustarts nicht oder du bist dir unsicher, was der Nutzer will, frag ihn kurz, statt weiter zu raten. In Selbstcheck-Runden: ist alles gut, lass "say" leer oder nur ein kurzer Satz, wiederhole nicht, was du schon gesagt hast.
 
 ARBEITSWEISE (immer genau so, wie ein Profi-Editor, der sein Ergebnis wirklich anschaut):
 1. VERSTEHEN: Zerlege den Wunsch in Teilziele (was, wann, wie stark, welche Clips/Ebenen/Effekte). Mehrere Wünsche in einer Nachricht = alle erledigen. Verneinung beachten: "kein/ohne/entferne/mach aus/weg" heißt das GEGENTEIL von hinzufügen. Fragen, Erklärungen, Brainstorming = keine Aktion (do:[] und noop:true).
@@ -1821,10 +1847,10 @@ async function kiSend(){
     try{const r=await f(x.v);res.push({a:x.a,ok:true,m:r===undefined||r===null?'':String(r).slice(0,500)})}
     catch(e){res.push({a:x.a,ok:false,m:e.message})}
    }
-   if(KI.stop)throw new Error('__stop');kiLive('👀 prüft das Ergebnis …');syncUI();rText();renderRigList();
+   if(KI.stop)throw new Error('__stop');kiLive('checkt sein Ergebnis');syncUI();rText();renderRigList();
    {const ho={...o,do:acts.map(a=>({a:a.a,v:String(typeof a.v==='string'?a.v:JSON.stringify(a.v)).slice(0,300)})),results:res.map(r=>(r.ok?'✓ ':'⚠ ')+r.a+(r.m?': '+String(r.m).slice(0,150):''))};KI.h.push({role:'user',parts:[{text:userText.slice(0,2000)}]},{role:'model',parts:[{text:JSON.stringify(ho).slice(0,4000)}]})}
    const quiet=acts.length&&acts.every(a=>['detect','seek','play','pause','analyse','export','look'].includes(a.a)),changed=quiet||stateSig()!==before;
-   kiAdd('ai',(o.say||'')+(res.length?'\n'+res.map(r=>(r.ok?'✓ ':'⚠ ')+r.a+(r.m?': '+r.m:'')).join('\n'):''));
+   {const bad=res.filter(r=>!r.ok),sy=String(o.say||'').trim();if(sy||bad.length)kiAdd('ai',sy+(bad.length?(sy?'\n':'')+'⚠ '+bad.map(r=>r.a+(r.m?': '+String(r.m).slice(0,120):'')).join(' · '):''))}
    const failed=res.filter(r=>!r.ok);let fb='';
    if(failed.length)fb='FEHLER bei: '+failed.map(r=>r.a+' → '+r.m).join(' | ')+'. Repariere es und gib die korrigierten Aktionen aus.';
    else if(acts.length&&acts.every(a=>a.a==='look'||a.a==='detect')&&reviews<4){reviews++;fb='Die angeforderten Bilder/Daten hängen an. Werte sie jetzt aus und handle per do, oder antworte mit noop:true.'}
@@ -1997,7 +2023,7 @@ addEventListener('resize',vh);addEventListener('orientationchange',()=>setTimeou
  const ex=['Mach es wie ein Phonk-Edit','Shake auf jeden Beat','Kopf nickt im Takt (Headbop)','Rainbow nur die ersten 3 Sekunden','Schneide alle 2 Beats mit Whip-Übergang','Füge einen Titel „MEIN EDIT“ ein'];
  const box=document.createElement('div');box.className='row';box.style.cssText='margin:8px 0;gap:6px';
  ex.forEach(t=>{const b=document.createElement('button');b.type='button';b.className='chip2';b.textContent=t;b.style.cssText='flex:0 0 auto;font-size:11.5px;padding:6px 10px';b.onclick=()=>{$('kiin').value=t;if(!$('kigo').disabled)kiSend()};box.append(b)});
- $('kilog').before(box);
+ /* v29: keine Vorlagen-Chips */
  /* Schutz vor versehentlichem Schließen: Clips/Song liegen nur im Arbeitsspeicher */
  addEventListener('beforeunload',e=>{if(S.clips.length&&!S.exporting){e.preventDefault();e.returnValue=''}});
 })();
@@ -2012,7 +2038,7 @@ addEventListener('resize',vh);addEventListener('orientationchange',()=>setTimeou
  $('prjLoad').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const t=await f.text(),d=JSON.parse(t);if(!d||d.v!==1)throw new Error('Keine gültige Projektdatei');pushHistory();restoreSnapshot(t);st('📂 Projekt geladen')}catch(err){st('⚠ '+err.message)}};
  $('shotBtn').onclick=()=>{try{cv.toBlob(b=>{if(!b)return st('⚠ Standbild fehlgeschlagen');dl(b,'standbild-'+S.T.toFixed(2)+'s.png');st('📸 Standbild gespeichert')},'image/png')}catch(e){st('⚠ '+e.message)}};
  $('kiUndo').onclick=()=>{try{undoEdit();st('↶ Zurückgesetzt')}catch(e){st('⚠ '+e.message)}};
- const kb=document.createElement('button');kb.type='button';kb.className='btn';kb.textContent='↶ KI-Änderung zurück';kb.onclick=()=>{try{undoEdit();kiAdd('ai','↶ Letzte Änderung rückgängig gemacht.')}catch(e){kiAdd('ai','⚠ '+e.message)}};
+ const kb=document.createElement('button');kb.type='button';kb.className='btn';kb.textContent='↶';kb.title='Letzte KI-Änderung zurück';kb.onclick=()=>{try{undoEdit();kiAdd('ai','↶ zurück')}catch(e){kiAdd('ai','⚠ '+e.message)}};
  $('kiclear').before(kb);
 })();
 
@@ -2046,7 +2072,7 @@ addEventListener('resize',vh);addEventListener('orientationchange',()=>setTimeou
  if(!idx.list||!idx.list.length||!cur()){idx={cur:'',list:[]};const p={id:uid(),name:'Projekt 1',t:Date.now()};idx.list.push(p);idx.cur=p.id;wr(PK+p.id,snapNow());saveIdx()}
  else{const raw=rd(PK+idx.cur);if(raw)load(raw)}
  last=snapNow();ui();stamp();
- setInterval(save,1500);
+ setInterval(()=>{if(S.playing||S.exporting||document.hidden)return;(self.requestIdleCallback||setTimeout)(save)},6000);
  document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});addEventListener('pagehide',save);
 })();
 
@@ -2120,25 +2146,25 @@ const OFF_KEY='shoxy_ki_office';KI.notes='';KI.pending=null;KI.stop=false;KI.bus
 const kiSleep=ms=>new Promise(r=>setTimeout(r,ms));let liveT=[];
 function setLive(t){const e=$('kiLive');if(!e)return;e.style.display=t?'block':'none';const b=e.querySelector('b');if(b)b.textContent=t||''}
 function kiLive(t){liveT.forEach(clearTimeout);liveT=[];setLive(t)}
-function kiThink(){kiLive('👀 schaut sich Vorschau & Zustand an');liveT=[setTimeout(()=>setLive('🧠 denkt nach'),900),setTimeout(()=>setLive('🤔 wägt Möglichkeiten ab'),5000),setTimeout(()=>setLive('📝 plant die Schritte'),11000),setTimeout(()=>setLive('⏳ komplexe Sache, das dauert kurz …'),22000)]}
+function kiThink(){kiLive('denkt nach');liveT=[setTimeout(()=>setLive('checkt dein Projekt'),2500),setTimeout(()=>setLive('komplexe Sache, dauert kurz'),15000)]}
 function kiBusy(on){KI.busy=on;if(on)KI.stop=false;$('kigo').disabled=on;$('kistop').style.display=on?'':'none';if(on)$('kiResume').style.display='none';else kiLive('')}
 function setNotes(v){KI.notes=v;const e=$('kiNotes');if(e&&e.value!==v)e.value=v}
 function officeSave(){try{const log=[...$('kilog').querySelectorAll('.mb')].slice(-60).map(d=>({w:d.classList.contains('me')?'me':'ai',t:(d.querySelector('span')||d).textContent.slice(0,1500)}));localStorage.setItem(OFF_KEY,JSON.stringify({h:KI.h.slice(-24),log,notes:KI.notes,pending:KI.pending}))}catch(e){}}
 function kiFail(e,q){const m=e.message||'';
- if(m==='__stop'){KI.pending=null;kiAdd('ai','⏹ Gestoppt. Was schon lief, bleibt – mit „↶ KI-Änderung zurück“ nimmst du es zurück.');return true}
- if(/Netzwerkfehler|Zeitüberschreitung|HTTP 5\d\d|overload|high demand|unavailable/i.test(m)){KI.pending={q};kiAdd('ai','📡 Verbindung abgebrochen ('+m+'). Mein Fortschritt ist gespeichert. Ich mache genau da weiter, sobald du „Weitermachen“ drückst oder das Internet wieder da ist.');$('kiResume').style.display='';return true}
+ if(m==='__stop'){KI.pending=null;kiAdd('ai','⏹ Stopp. Mit ↶ nimmst du’s zurück.');return true}
+ if(/Netzwerkfehler|Zeitüberschreitung|HTTP 5\d\d|overload|high demand|unavailable/i.test(m)){KI.pending={q};kiAdd('ai','📡 Netz weg. Drück Weitermachen, dann gehts da weiter.');$('kiResume').style.display='';return true}
  return false}
 function kiResume(){if($('kigo').disabled||!KI.pending)return;const q=KI.pending.q||'';$('kiResume').style.display='none';$('kiin').value='Verbindung war weg, mach genau da weiter wo du aufgehört hast (nutze deine Notizen und den STATE, nicht von vorn). Meine Aufgabe war: '+q;kiSend()}
 (function(){
  const st_=document.createElement('style');st_.textContent='.mb.think{opacity:.78;font-style:italic;border:1px dashed var(--bd)}.kid{animation:kb 1s infinite;letter-spacing:2px;color:var(--ac)}@keyframes kb{50%{opacity:.2}}#kiNotes{min-height:80px;resize:vertical}';document.head.append(st_);
  const live=document.createElement('div');live.id='kiLive';live.className='mb ai';live.style.cssText='display:none;margin:6px 0';live.innerHTML='<b></b> <i class="kid">●●●</i>';$('kilog').after(live);
  const rb=document.createElement('button');rb.id='kiResume';rb.type='button';rb.className='btn hot';rb.style.cssText='display:none;width:100%;margin:6px 0';rb.textContent='▶ Weitermachen (da, wo ich war)';rb.onclick=kiResume;live.after(rb);
- const sb=document.createElement('button');sb.id='kistop';sb.type='button';sb.className='btn';sb.textContent='⏹';sb.title='Stopp';sb.style.cssText='flex:0 0 auto;display:none;background:#b3202a;border-color:#ff5d6a;color:#fff';sb.onclick=()=>{if(!KI.busy)return;KI.stop=true;kiLive('⏹ stoppe …');try{KI.ctl&&KI.ctl.abort()}catch(e){}};$('kigo').after(sb);
+ const sb=document.createElement('button');sb.id='kistop';sb.type='button';sb.className='btn';sb.textContent='⏹';sb.title='Stopp';sb.style.cssText='flex:0 0 auto;display:none;background:#b3202a;border-color:#ff5d6a;color:#fff';sb.onclick=()=>{if(!KI.busy)return;KI.stop=true;kiLive('stoppt …');try{KI.ctl&&KI.ctl.abort()}catch(e){}};$('kigo').after(sb);
  const card=document.createElement('div');card.className='card';card.style.display='none';card.setAttribute('data-notr','');card.innerHTML='<h3>🗂 Büro der KI</h3><textarea id="kiNotes" class="field" placeholder="Notizbuch der KI (Plan, Fortschritt, Vorlieben). Du kannst auch selbst etwas reinschreiben."></textarea><div class="row" style="margin-top:6px"><button class="btn" id="kiNotesClr" type="button">Notizen leeren</button><button class="btn" id="kiMemClr" type="button">Gedächtnis löschen</button></div><p class="small">Gespräch und Notizen bleiben nach Neuladen oder Verbindungsabbruch erhalten.</p>';$('rigcard').before(card);card.style.display='none';
  $('kiNotes').oninput=e=>{KI.notes=e.target.value.slice(0,3000);officeSave()};$('kiNotesClr').onclick=()=>{setNotes('');officeSave()};$('kiMemClr').onclick=()=>{KI.h=[];KI.pending=null;setNotes('');$('kilog').replaceChildren();kiAdd('ai','Gedächtnis gelöscht.');$('kiResume').style.display='none';officeSave()};
  $('kiclear').addEventListener('click',()=>{setNotes('');KI.pending=null;$('kiResume').style.display='none';officeSave()});
  try{const d=JSON.parse(localStorage.getItem(OFF_KEY)||'null');if(d){KI.h=Array.isArray(d.h)?d.h:[];setNotes(d.notes||'');KI.pending=d.pending||null;if(d.log&&d.log.length){$('kilog').replaceChildren();d.log.forEach(m=>{const e=kiAdd(m.w,m.t);if(m.t.startsWith('💭'))e.classList.add('think')})}if(KI.pending){kiAdd('ai','Ich war mitten in einer Aufgabe, als es abgebrochen ist. Drück „Weitermachen“, dann mache ich da weiter.');$('kiResume').style.display=''}}}catch(e){}
- setInterval(officeSave,3000);addEventListener('pagehide',officeSave);
+ setInterval(()=>{if(S.playing||S.exporting||KI.busy||document.hidden)return;officeSave()},8000);addEventListener('pagehide',officeSave);
  addEventListener('online',()=>{if(KI.pending&&KI.key&&!KI.busy)setTimeout(kiResume,800)});
 })();
 
@@ -2232,7 +2258,7 @@ Object.assign(DO,{
 Object.assign(ED,{setFormat:(w,h)=>{setFormat(w,h);S.fmt={mode:'custom',w:W,h:H};fmtUI()},setSongSpeed,setClipSpeed,setPitchF,undoEdit,redoEdit,trimClip,splitClip,dupClip,delClip,moveClip,cutout,trimSong,applyPreset,exportVid,play,pause,analyse,DO});
 
 /* ---------- v28: KI-Schnellbefehle ---------- */
-(function(){const Q=[['✂ Auf Beat schneiden','Schneide alle Clips auf den Beat des Songs: ruhig am Anfang, schnell ab dem Drop.'],['⚡ Pro-Edit','Mach daraus einen Pro-Edit: Beat-Cuts, passende Übergänge an den Schnittpunkten, Zooms und Weißblitze auf Taktanfängen, ein Reverse an einer guten Stelle. Nicht überladen.'],['🔎 Projekt prüfen','Prüfe mein ganzes Projekt kritisch auf Fehler, Schwächen und Verbesserungen und sag mir ehrlich, was du siehst. Ändere nichts.'],['📐 Format 16:9','Stell das Projektformat auf 16:9.'],['↶ Rückgängig','Nimm deine letzte Änderung zurück.']];
- const d=document.createElement('div');d.className='row';d.style.cssText='gap:5px;margin:6px 0;flex-wrap:wrap';d.innerHTML=Q.map((q,i)=>'<button type="button" class="mini" data-q="'+i+'" style="flex:0 0 auto;font-size:11.5px">'+q[0]+'</button>').join('');
- d.onclick=e=>{const b=e.target.closest('button');if(!b||KI.busy)return;$('kiin').value=Q[+b.dataset.q][1];kiSend()};$('kiin').before(d)})();
+(function(){})();
+/* ---------- v29: KI-Tab Feinschliff ---------- */
+(function(){const cfg=$('kicfg'),kbn=$('kikeyBtn');kbn.onclick=()=>{cfg.style.display=cfg.style.display==='none'?'block':'none'};if(!$('kikey').value)cfg.style.display='block';$('kiin').setAttribute('enterkeyhint','send');$('kiin').setAttribute('autocomplete','off')})();
 </script></body></html>
