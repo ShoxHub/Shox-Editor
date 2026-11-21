@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ShoxyEditor v68.1 ki-fix</title>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ShoxyEditor v68.2 perf</title>
 <style>
 :root{color-scheme:dark;--pink:#3b82ff;--vio:#22d3ee;--cy:#62e6ff;--line:#2a2a47;--mut:#9a9cbc;--grad:linear-gradient(100deg,#3b82ff,#22d3ee)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -761,7 +761,7 @@ function drawTimeline(){const _n=performance.now();if(_n-_dtT<90){if(!_dtP)_dtP=
 const segAt=t=>{for(let i=S.segs.length-1;i>=0;i--)if(t>=S.segs[i].start)return i;return 0};
 const tgt=(g,L)=>{const c=g.c,sp=c.out-c.in;if(has('reverse')||revSeg(g))L=g.len-L;else if(has('rewind')){const hf=120/S.bpm,u=L%(2*hf);L=u<hf?u:2*hf-u}let x=spSrc(g,L);if(x>c.out-.05)x=c.in+((x-c.in)%Math.max(.1,sp));return x};
 function activate(i){PV.globalAlpha=1;PV.drawImage(fc,0,0);S.useTr=S.playing&&S.seg>=0&&i===S.seg+1;const pool=TR.filter(x=>x[0]!=='cut'&&x[0]!=='random');S.curTr=S.trans==='random'?pool[Math.random()*pool.length|0][0]:S.trans;S.curTd=0;{const et=(S.ev||[]).find(e=>e.type==='trans'&&Math.abs(e.t-S.segs[i].start)<.06);if(et){S.curTr=et.id;S.curTd=et.dur||0}}S.seg=i;const g=S.segs[i];if(g.first&&g.c.tr&&i>0){S.curTr=g.c.tr.id;S.curTd=g.c.tr.dur||0}S.clips.forEach(c=>{if(c.v!==g.c.v)c.v.pause()});g.c.v.currentTime=tgt(g,S.T-g.start)}
-function syncVid(g,t,hit){if(g.c.photo)return;const v=g.c.v,ramp=has('ramp'),tg=tgt(g,t-g.start),rv=has('reverse')||has('rewind')||revSeg(g),th=rv?.03:S.playing?(ramp?1.3:.35):.04;if(!v.seeking&&Math.abs(v.currentTime-tg)>th)v.currentTime=tg;v.playbackRate=Math.min(16,Math.max(.1,S.speed*(g.c.spd||1)*spv(g,t)*(ramp?.4+1.2*(1-hit):1)));v.preservesPitch=g.c.tone!==false;{const c=g.c;if(c.g){let f=1;const lt=t-(c._s||0),L=(c._e||0)-(c._s||0);if(c.afi>0)f=Math.min(f,lt/c.afi);if(c.afo>0)f=Math.min(f,(L-lt)/c.afo);c.g.gain.value=S.clipVol*(c.vol??1)*Math.max(0,Math.min(1,f))}}if(S.playing&&v.paused&&!rv)v.play().catch(()=>{});if((!S.playing||rv)&&!v.paused)v.pause();
+function syncVid(g,t,hit){if(g.c.photo)return;const v=g.c.v,ramp=has('ramp'),tg=tgt(g,t-g.start),rv=has('reverse')||has('rewind')||revSeg(g),th=rv?.08:S.playing?(ramp?1.6:.55):.12;if(!v.seeking&&Math.abs(v.currentTime-tg)>th){try{v.currentTime=tg}catch(e){}};v.playbackRate=Math.min(16,Math.max(.1,S.speed*(g.c.spd||1)*spv(g,t)*(ramp?.4+1.2*(1-hit):1)));v.preservesPitch=g.c.tone!==false;{const c=g.c;if(c.g){let f=1;const lt=t-(c._s||0),L=(c._e||0)-(c._s||0);if(c.afi>0)f=Math.min(f,lt/c.afi);if(c.afo>0)f=Math.min(f,(L-lt)/c.afo);c.g.gain.value=S.clipVol*(c.vol??1)*Math.max(0,Math.min(1,f))}}if(S.playing&&v.paused&&!rv)v.play().catch(()=>{});if((!S.playing||rv)&&!v.paused)v.pause();
  if(S.song){if(S.playing){const sp=S.songSpeed||1;songEl.playbackRate=sp;if(songEl.paused&&t*sp<songEl.duration)songEl.play().catch(()=>{});if(!songEl.seeking&&Math.abs(songEl.currentTime-t*sp)>.3*sp)songEl.currentTime=t*sp}else if(!songEl.paused)songEl.pause()}}
 function paintBackground(ctx){const L=S.background;if(!L?.img||!L.img.complete)return;const iw=L.img.naturalWidth||L.img.width,ih=L.img.naturalHeight||L.img.height;if(!iw||!ih)return;const z=Math.max(W/iw,H/ih);ctx.save();ctx.globalAlpha=L.opacity??1;ctx.drawImage(L.img,(W-iw*z)/2,(H-ih*z)/2,iw*z,ih*z);ctx.restore()}
 function drawFrame(v){if(v.readyState<2||v.seeking)return;const iw=v.videoWidth,ih=v.videoHeight;if(!iw)return;const s=Math.max(W/iw,H/ih);if(S.fill==='fill'){F.globalAlpha=1;F.clearRect(0,0,W,H);if(S.background)paintBackground(F);blitSrc(F,v,(W-iw*s)/2,(H-ih*s)/2,iw*s,ih*s)}else{if(S.background)paintBackground(F);else{F.fillStyle='#05070d';F.fillRect(0,0,W,H)}const q=Math.max(sm.width/iw,sm.height/ih);SM.drawImage(v.img||v,(sm.width-iw*q)/2,(sm.height-ih*q)/2,iw*q,ih*q);F.drawImage(sm,0,0,W,H);F.fillStyle='rgba(0,0,0,.20)';F.fillRect(0,0,W,H);const f=Math.min(W/iw,H/ih);blitSrc(F,v,(W-iw*f)/2,(H-ih*f)/2,iw*f,ih*f)}}
@@ -1010,7 +1010,7 @@ function tick0(now){beatExtras();const dt=Math.min(S.exporting?1:.1,(now-S.last)
  if(S.playing){S.T+=dt;followAudio();if(S.T>=S.total){if(S.exporting)finishExport();else{S.T=0;S.seg=-1;if(S.song)songEl.currentTime=0}}}
  if(S.exporting&&S.total&&S.T>=S.total){finishExport();return}
  if(document.hidden&&!S.exporting)return;
- if(S.playing||S.exporting||scrub||now-(S.lr||0)>(now<_dirty?100:450)){if(S.exporting||!S.playing||now-(S._pf||0)>=30){S._pf=now;S.lr=now;if(!window.__thBusy||S.exporting)renderFrame(now)}}
+ if(S.playing||S.exporting||scrub||now-(S.lr||0)>(now<_dirty?140:700)){if(S.exporting||!S.playing||now-(S._pf||0)>=(S.exporting?0:33)){S._pf=now;S.lr=now;if(!window.__thBusy||S.exporting)renderFrame(now)}}
  if(S.exporting&&exportCanvas&&exportCtx){exportCtx.imageSmoothingEnabled=true;exportCtx.imageSmoothingQuality=$('exphq')?.checked?'high':'medium';exportCtx.clearRect(0,0,exportCanvas.width,exportCanvas.height);exportCtx.drawImage(cv,0,0,exportCanvas.width,exportCanvas.height)}
  if(!scrub)setIf('scrub','v',S.total?Math.round(S.T/S.total*1000):0);
  setIf('time','t',fm(S.T)+' / '+fm(S.total));
@@ -1223,7 +1223,7 @@ async function addClips(files){
   if(f.type.startsWith('image/')){const im=new Image();im.onload=async()=>{let img=im,u=url;try{const mx=Math.max(im.naturalWidth,im.naturalHeight);if(mx>2560){const k=2560/mx,w=Math.max(1,Math.round(im.naturalWidth*k)),h=Math.max(1,Math.round(im.naturalHeight*k)),cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(im,0,0,w,h);const keepA=/png|webp|gif/i.test(f.type),b=await new Promise(r=>cv.toBlob(r,keepA?'image/png':'image/jpeg',.92));if(b){const u2=URL.createObjectURL(b),i2=new Image();await new Promise((ok,no)=>{i2.onload=ok;i2.onerror=no;i2.src=u2});URL.revokeObjectURL(url);img=i2;u=u2}}}catch(e){img=im;u=url}resolve({file:f,url:u,name:f.name,dur:3,v:{img,readyState:4,seeking:false,videoWidth:img.naturalWidth,videoHeight:img.naturalHeight,paused:true,currentTime:0,playbackRate:1,pause(){},play(){return Promise.resolve()}},in:0,out:3,photo:1})};im.onerror=()=>{URL.revokeObjectURL(url);resolve(null)};im.src=url;return}
   const v=document.createElement('video');let settled=false;const done=value=>{if(settled)return;settled=true;clearTimeout(timer);v.onloadedmetadata=v.onerror=null;resolve(value)};const timer=setTimeout(()=>{v.removeAttribute('src');v.load();URL.revokeObjectURL(url);done(null)},15000);v.setAttribute('playsinline','');v.preload='metadata';v.onloadedmetadata=()=>{const dur=Number(v.duration);if(!Number.isFinite(dur)||dur<=0){URL.revokeObjectURL(url);done(null);return}done({file:f,url,name:f.name,dur,v,in:0,out:dur})};v.onerror=()=>{URL.revokeObjectURL(url);done(null)};v.src=url;
  }));await new Promise(r=>setTimeout(r,60))}
- const good=loaded.filter(Boolean);S._pend=null;try{if(typeof KI!=='undefined'){KI.pending=null;const rb=document.getElementById('kiResume');if(rb)rb.style.display='none'}}catch(e){}S.clips.push(...good);if(AC)good.forEach(connClip);build();rClips();st(`${good.length} clip(s)/photo(s) added · ${S.clips.length} total`+(good.length<picked.length?` · ${picked.length-good.length} file(s) unreadable (format/codec?)`:''));
+ const good=loaded.filter(Boolean);S._pend=null;try{if(typeof KI!=='undefined'){KI.pending=null;const rb=document.getElementById('kiResume');if(rb)rb.style.display='none'}}catch(e){}S.clips.push(...good);good.forEach(c=>{try{if(c.v&&c.v.tagName==='VIDEO'){c.v.preload='metadata';c.v.muted=true;c.v.playsInline=true;c.v.pause()}}catch(e){}});if(AC)good.forEach(connClip);build();rClips();st(`${good.length} clip(s)/photo(s) added · ${S.clips.length} total`+(good.length<picked.length?` · ${picked.length-good.length} file(s) unreadable (format/codec?)`:''));
 }
 $('videos').onchange=e=>{addClips(e.target.files);e.target.value=''};
 function songReady(name,file,url){const sp=S.songSpeed||1;S.song={name,dur:songEl.duration/sp,file,url};if(AC)connSong();vols();$('songinfo').textContent=''+name+' ('+fm(songEl.duration)+')';build();volUI();st('Song loaded. Music stays unchanged until you change it yourself');if($('autoan')&&$('autoan').checked)analyse()}
@@ -1934,7 +1934,7 @@ GÜLTIGE PRESETS (nur bei expliziter Bitte): ${JSON.stringify(Object.keys(P).fil
 FONTS: ${JSON.stringify(FONTS)}
 TEXTSTYLES: solid, outline, glow, neon, glitch, 3d, gradient, box. ANIMS: none, pop, slide, type, bounce, shake, beat, fade, zoom, glitch, wave, words.
 Nutze normalerweise 1-3 Effekte, nicht alles gleichzeitig. JSON muss parsebar sein.
-ARBEITSMODUS: ${window.SHOXY_AI_MODE==='quick'?'QUICK MODE (HARD RULES): Antworte in GENAU einer Runde. Maximal 5 Aktionen. KEINE Planungsrunde, KEINE Selbstprüfung, KEIN more:true, KEIN Referenzvergleich, KEINE Messungs-Feedback-Schleife, KEINE zusätzlichen Effekte/Keyframes/Texte die nicht explizit verlangt wurden. Bei Unklarheit: eine kurze Rückfrage statt raten.':'PRECISE MODE: Arbeite kontrolliert. Plane bei großen Aufträgen, führe aus, maximal EINE Review-Runde. Keine unnötigen Extras. Unsicherheiten ehrlich melden.'}
+ARBEITSMODUS: ${window.SHOXY_AI_MODE==='quick'?'QUICK MODE (HARD RULES): Eine Runde. Max 5 Aktionen. Kein Plan, kein Review, kein more:true, keine Extras. Handle entschlossen: wenn der User einen Effekt will, setze ihn; wenn er etwas löschen will, lösche es. Kein Gelaber, keine halben Sachen. Bei Unklarheit eine kurze Rückfrage.':'PRECISE MODE: Entschlossen und ehrlich. Plane nur wenn nötig, dann ausführen. Maximal eine Review-Runde. Keine unnötigen Extras. Wenn du unsicher bist, sag es – aber deliver zuerst die beste klare Aktion.'}
 Beide Modi: Behaupte keine nicht ausgeführten Änderungen. Verändere nur, was zum Auftrag gehört.`;
 const validFx=k=>FX.some(g=>g[1].some(x=>x[0]===k))||!!CUSTOM[k];
 const DO={
@@ -4584,6 +4584,74 @@ header:after,.auto,.logo b,#play{animation:none!important}
   window.__shoxyIsQuick=()=>mode()==='quick';
 
   console.info('[Shoxy v68-strict] Quick mode hard rules + AI transaction lock active. All features kept.');
+})();
+</script>
+
+
+<script id="shoxy-v68-perf">
+(()=>{
+  // Performance guard: stop random freezes from over-seeking + background work
+  const $ = id => document.getElementById(id);
+
+  // Cap concurrent video decodes: only the active segment video should play.
+  try{
+    if(typeof activate === 'function' && !activate.__perf){
+      const _act = activate;
+      activate = function(i){
+        const r = _act.apply(this, arguments);
+        try{
+          const g = S.segs[i];
+          S.clips.forEach(c=>{
+            if(!c||!c.v||c.photo) return;
+            if(g && c.v === g.c.v) return;
+            try{ c.v.pause(); }catch(e){}
+          });
+        }catch(e){}
+        return r;
+      };
+      activate.__perf = true;
+    }
+  }catch(e){}
+
+  // When tab is hidden, hard-pause everything (saves decode + battery)
+  document.addEventListener('visibilitychange', ()=>{
+    if(document.hidden){
+      try{
+        if(S.playing && !S.exporting) pause();
+        S.clips.forEach(c=>{ try{ if(c.v && c.v.pause) c.v.pause(); }catch(e){} });
+        try{ songEl.pause(); }catch(e){}
+      }catch(e){}
+    }
+  });
+
+  // Timeline filmstrip queue: don't hammer while user is interacting
+  try{
+    if(typeof tNext === 'function' && !tNext.__perf){
+      const _tn = tNext;
+      tNext = function(){
+        if(S.playing || S.exporting || document.hidden || S._opLock) {
+          setTimeout(()=>{ try{ tNext(); }catch(e){} }, 1500);
+          return;
+        }
+        return _tn.apply(this, arguments);
+      };
+      tNext.__perf = true;
+    }
+  }catch(e){}
+
+  // Reduce main canvas work on low-end: prefer medium smoothing when not exporting
+  try{
+    const cv = $('cv');
+    if(cv){
+      const ctx = cv.getContext('2d', { alpha:false, desynchronized:true });
+      if(ctx){ ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'medium'; }
+    }
+  }catch(e){}
+
+  // AI: stop looking unmotivated — if model returns noop with empty do on a clear imperative, nudge once is already in loop.
+  // Extra: raise temperature slightly only in precise (already 0.4). Leave as-is.
+
+  console.info('[Shoxy perf] seek throttle + active-clip only + hidden pause');
 })();
 </script>
 
