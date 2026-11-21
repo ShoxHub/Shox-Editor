@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ShoxyEditor v68.2 perf</title>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ShoxyEditor v68.3 key+perf</title>
 <style>
 :root{color-scheme:dark;--pink:#3b82ff;--vio:#22d3ee;--cy:#62e6ff;--line:#2a2a47;--mut:#9a9cbc;--grad:linear-gradient(100deg,#3b82ff,#22d3ee)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -999,7 +999,11 @@ function idle(t){const g=X.createLinearGradient(0,0,W,H);g.addColorStop(0,'#0d0d
 function renderFrame(now){const t=S.T,{hit,n}=beat(t);S.lastHit=hit;S.lastN=n;if(!S.segs.length){idle(now/1000);if(S.background)paintBackground(X);drawImageOverlays(0);drawTexts(0,0);return}
  const i=segAt(t);if(i!==S.seg)activate(i);const g=S.segs[S.seg];syncVid(g,t,hit);drawFrame(g.c.v);const td=S.curTd||S.tdur,p=td>0?(t-g.start)/td:1;
  if(S.useTr&&p<1&&S.curTr!=='cut')compose(p);else{C.globalAlpha=1;C.clearRect(0,0,W,H);C.drawImage(fc,0,0)}
- scene(t,hit,n);X.drawImage(sc,0,0);evDraw(t);runCustomFx(t,hit,n);drawImageOverlays(t);drawTexts(t,hit)}
+ // Fast path: no global effects / no custom fx / no events → skip heavy scene pipeline
+ const _heavy=(S.fx&&S.fx.size)||(S.ev&&S.ev.length)||(typeof CUSTOM==='object'&&Object.keys(CUSTOM).some(k=>CUSTOM[k]&&!CUSTOM[k].off));
+ if(_heavy){scene(t,hit,n);X.drawImage(sc,0,0);evDraw(t);runCustomFx(t,hit,n)}
+ else{X.drawImage(cc,0,0)}
+ drawImageOverlays(t);drawTexts(t,hit)}
 let scrub=false;
 let _dirty=0;['input','change','click','pointerdown','pointerup','keydown','seeked','loadeddata','canplay','load'].forEach(ev=>addEventListener(ev,e=>{const t=e.target;if(t&&t.closest&&t.closest('#tabs'))return;_dirty=performance.now()+900},true));
 let _cache={};function setIf(id,prop,v){if(_cache[id+prop]===v)return;_cache[id+prop]=v;const e=$(id);if(e){if(prop==='v')e.value=v;else if(prop==='l')e.style.left=v;else e.textContent=v}}let _lp=-1;
@@ -1344,7 +1348,11 @@ nudgeUI();build();requestAnimationFrame(tick);
 
 /* ---------- AI chat: provider system (Gemini active, room for more AIs) ---------- */
 const GEMINI_KEY='';/* optional: paste your Gemini key between the quotes to have it built in (https://aistudio.google.com/apikey) */
-const KI_LS=(k,v)=>{try{const isKey=String(k).startsWith('ki_key_');if(isKey){if(v===undefined){const live=sessionStorage.getItem(k);if(live)return live;const legacy=localStorage.getItem(k)||'';if(legacy){sessionStorage.setItem(k,legacy);localStorage.removeItem(k)}return legacy}sessionStorage.setItem(k,String(v));localStorage.removeItem(k);return ''}if(v===undefined)return localStorage.getItem(k)||'';localStorage.setItem(k,v)}catch(e){}return ''};
+const KI_LS=(k,v)=>{try{const isKey=String(k).startsWith('ki_key_');if(isKey){if(v===undefined){// Prefer permanent localStorage, fall back to session (migration)
+const perm=localStorage.getItem(k);if(perm)return perm;const live=sessionStorage.getItem(k)||'';if(live){try{localStorage.setItem(k,live)}catch(e){}return live}return ''}
+// Save permanently so the user does not re-enter the key every visit
+try{localStorage.setItem(k,String(v))}catch(e){}try{sessionStorage.setItem(k,String(v))}catch(e){}return ''}
+if(v===undefined)return localStorage.getItem(k)||'';localStorage.setItem(k,v)}catch(e){}return ''};
 const AI_PROVIDERS={};
 const KI={h:[],prov:'gemini',keys:{},models:{},focus:'',
  get key(){return this.keys[this.prov]||''},set key(v){this.keys[this.prov]=String(v||'').replace(/\s+/g,'')},
@@ -4652,6 +4660,93 @@ header:after,.auto,.logo b,#play{animation:none!important}
   // Extra: raise temperature slightly only in precise (already 0.4). Leave as-is.
 
   console.info('[Shoxy perf] seek throttle + active-clip only + hidden pause');
+})();
+</script>
+
+
+<script id="shoxy-v68-persist-perf">
+(()=>{
+  // --- API key: ensure load into input on boot ---
+  try{
+    const fill=()=>{
+      if(typeof KI==='undefined'||!KI)return;
+      // Re-hydrate keys from permanent storage
+      Object.keys(AI_PROVIDERS||{}).forEach(id=>{
+        const k = (typeof KI_LS==='function' && KI_LS('ki_key_'+id)) || '';
+        if(k) KI.keys[id]=k;
+      });
+      const inp=document.getElementById('kikey');
+      if(inp && KI.key && !inp.value) inp.value=KI.key;
+      // Don't force-open settings if key already present
+      const cfg=document.getElementById('kicfg');
+      if(cfg && KI.key) cfg.style.display='none';
+    };
+    // run after providers init
+    setTimeout(fill,0);
+    setTimeout(fill,300);
+  }catch(e){}
+
+  // --- Mobile: lower internal preview resolution while not exporting ---
+  const isMobile=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  if(isMobile && typeof setFormat==='function' && !setFormat.__mobileCap){
+    const _sf=setFormat;
+    // Cap live preview buffers; export path temporarily restores via existing exportPrev logic
+    const capLive=()=>{
+      if(S.exporting) return;
+      const maxSide=540; // good enough on phone screens, huge CPU win
+      const m=Math.max(W,H);
+      if(m>maxSide){
+        const k=maxSide/m;
+        const nw=2*Math.round(W*k/2), nh=2*Math.round(H*k/2);
+        if(nw!==W||nh!==H){
+          try{ _sf(nw,nh); }catch(e){}
+        }
+      }
+    };
+    setFormat=function(w,h){
+      const r=_sf.apply(this,arguments);
+      // After any format change outside export, re-apply mobile cap
+      if(!S.exporting) setTimeout(capLive,0);
+      return r;
+    };
+    setFormat.__mobileCap=true;
+    // Apply once now
+    setTimeout(capLive,500);
+  }
+
+  // --- Harder pause of non-active videos on every activate ---
+  try{
+    if(typeof activate==='function'){
+      const _a=activate;
+      activate=function(i){
+        const r=_a.apply(this,arguments);
+        try{
+          const g=S.segs[i];
+          S.clips.forEach(c=>{
+            if(!c||c.photo||!c.v)return;
+            if(g&&c.v===g.c.v)return;
+            try{c.v.pause()}catch(e){}
+          });
+        }catch(e){}
+        return r;
+      };
+    }
+  }catch(e){}
+
+  // --- Scrub: don't seek video every pointermove harder ---
+  try{
+    const scrubEl=document.getElementById('scrub');
+    if(scrubEl && !scrubEl.__debounced){
+      let t=null;
+      scrubEl.addEventListener('input',()=>{
+        clearTimeout(t);
+        t=setTimeout(()=>{ try{ if(typeof renderFrame==='function') renderFrame(performance.now()); }catch(e){} }, 40);
+      }, true);
+      scrubEl.__debounced=true;
+    }
+  }catch(e){}
+
+  console.info('[Shoxy] key persists + mobile preview cap + video pause');
 })();
 </script>
 
