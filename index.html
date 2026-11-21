@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ShoxyEditor</title>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ShoxyEditor v68 strict</title>
 <style>
 :root{color-scheme:dark;--pink:#3b82ff;--vio:#22d3ee;--cy:#62e6ff;--line:#2a2a47;--mut:#9a9cbc;--grad:linear-gradient(100deg,#3b82ff,#22d3ee)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -505,6 +505,12 @@ input[type=range]{height:8px!important}
 <div class="card" id="refcard"><h3>Reference video</h3><div class="row" style="gap:6px"><select id="refsel"></select><button class="btn" id="refup" type="button" style="flex:0 0 auto">Upload</button></div><input type="file" id="reffile" accept="video/*" style="display:none"><img id="refimg" alt="" style="display:none;width:100%;max-height:84px;object-fit:contain;margin-top:8px;border-radius:8px"><p class="small" id="refstat" style="min-height:16px"></p><div class="row" style="gap:6px"><button class="btn hot" id="refgo" type="button">Rebuild this in my video</button><button class="btn" id="refoff" type="button" style="flex:0 0 auto">Remove</button></div><p class="small">The AI looks at the reference, builds your whole video, looks at its own result, compares it with the reference and fixes the differences (up to 3 rounds).</p></div>
 <div class="kl" id="kilog"></div>
  <div class="row" style="margin-top:6px"><input id="kiin" class="field" placeholder="Just say what you want ..."><button class="btn hot" id="kigo" style="flex:0 0 auto;min-width:48px;font-size:18px">➤</button></div>
+<div id="shoxyModeBar" class="row" style="margin-top:7px;gap:7px;align-items:center">
+ <span class="small" style="opacity:.75">AI mode</span>
+ <button type="button" class="btn" id="shoxyQuick" aria-pressed="true" style="flex:1">⚡ Quick</button>
+ <button type="button" class="btn" id="shoxyPrecise" aria-pressed="false" style="flex:1">◎ Precise</button>
+</div>
+<div id="shoxyModeHint" class="small" style="margin:3px 0 0;opacity:.72">Quick: few targeted edits, no self-review loop.</div>
  <div class="card" id="rigcard" style="display:none;margin-top:8px"><h3 id="rigtoggle" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center">Photo parts (rig)<span style="display:flex;gap:6px;align-items:center"><span id="rigarrow">Show</span><span id="rigclose" role="button" aria-label="Close" style="padding:0 10px;font-size:20px;line-height:1">✕</span></span></h3><div id="riglist"></div></div>
   <div class="row" id="kitools" style="margin-top:8px"></div>
 </div>
@@ -543,11 +549,28 @@ const SEC_BAD=/\b(defaultView|ownerDocument|contentWindow|contentDocument|__prot
 const SEC_DOC=Object.freeze({createElement:t=>{if(String(t).toLowerCase()!=='canvas')throw new Error('Only canvas elements are allowed');return document.createElement('canvas')}});
 function loopGuard(b){return 'let __lc=0;'+b.replace(/\bdo\s*\{/g,'do{if(++__lc>2e6)throw new Error("Loop limit reached");').replace(/\b(for|while)\s*\(([^()]*)\)\s*\{/g,(m,k,h)=>k+'('+h+'){if(++__lc>2e6)throw new Error("Loop limit reached");')}
 function guardedFn(args,body,isAsync){
- body=String(body);if(SEC_BAD.test(body))throw new Error('Blocked: code uses a forbidden API (window, document access, Function/eval, storage, network, DOM injection, prototype access).');
- body=loopGuard(body);
- const F=isAsync?Object.getPrototypeOf(async function(){}).constructor:Function;
- const fn=new F(...args,...SEC_BLOCK,'window','globalThis','self','top','parent','frames','document','Function','eval',body);
- return function(...a){return fn.call(SEC_WIN,...a.slice(0,args.length),...SEC_BLOCK.map(()=>undefined),SEC_WIN,SEC_WIN,SEC_WIN,SEC_WIN,SEC_WIN,SEC_WIN,SEC_DOC,undefined,undefined)};
+ /* Only the numeric calculator is permitted to compile an expression.
+    AI/user supplied JavaScript for effects, rigs or editor access is disabled. */
+ if(isAsync||!Array.isArray(args)||args.length!==2||args[0]!=='S'||args[1]!=='B')
+  throw new Error('Executable custom code is disabled for security. Use built-in effects and editing actions.');
+ const prefix='const {min,max,abs,round,floor,ceil,sqrt,pow,sin,cos,PI,log}=Math;return (';
+ body=String(body);
+ if(!body.startsWith(prefix)||!body.endsWith(')'))
+  throw new Error('Only safe numeric expressions are allowed.');
+ const expr=body.slice(prefix.length,-1).trim();
+ if(!expr||expr.length>300||!/^[0-9A-Za-z_\s.+\-*/%(),?:<>=!&|^~]+$/.test(expr))
+  throw new Error('Calculator expression contains unsupported syntax.');
+ const allowed=new Set(['S','B','min','max','abs','round','floor','ceil','sqrt','pow','sin','cos','PI','log','total','bpm','T','speed','clips','length']);
+ const ids=expr.match(/[A-Za-z_][A-Za-z0-9_]*/g)||[];
+ if(ids.some(x=>!allowed.has(x)))throw new Error('Calculator identifier is not allowed.');
+ const fields=['S.total','S.bpm','S.T','S.speed','S.clips.length'];
+ let check=expr;for(const f of fields)check=check.replaceAll(f,'0');
+ if(/\bS\s*\.|\bS\s*\[|\b(?:clips|length|total|bpm|speed|T)\b/.test(check))
+  throw new Error('Only S.total, S.bpm, S.T, S.speed and S.clips.length may be read.');
+ check=check.replace(/(?:\d+\.\d*|\.\d+|\d+)/g,'');
+ if(check.includes('.'))throw new Error('Property access is not allowed.');
+ const fn=new Function('S','B','Math','const {min,max,abs,round,floor,ceil,sqrt,pow,sin,cos,PI,log}=Math;return ('+expr+');');
+ return function(Sv,Bv){return fn(Sv,Bv,Math)};
 }
 const mk=(w=W,h=H)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c},g2=c=>c.getContext('2d');
 const cv=$('cv'),X=g2(cv),fc=mk(),pv=mk(),cc=mk(),sc=mk(),tm=mk(),tm2=mk(),sm=mk(96,171),px=mk(8,8);
@@ -1321,7 +1344,7 @@ nudgeUI();build();requestAnimationFrame(tick);
 
 /* ---------- AI chat: provider system (Gemini active, room for more AIs) ---------- */
 const GEMINI_KEY='';/* optional: paste your Gemini key between the quotes to have it built in (https://aistudio.google.com/apikey) */
-const KI_LS=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)||'';localStorage.setItem(k,v)}catch(e){}return ''};
+const KI_LS=(k,v)=>{try{const isKey=String(k).startsWith('ki_key_');if(isKey){if(v===undefined){const live=sessionStorage.getItem(k);if(live)return live;const legacy=localStorage.getItem(k)||'';if(legacy){sessionStorage.setItem(k,legacy);localStorage.removeItem(k)}return legacy}sessionStorage.setItem(k,String(v));localStorage.removeItem(k);return ''}if(v===undefined)return localStorage.getItem(k)||'';localStorage.setItem(k,v)}catch(e){}return ''};
 const AI_PROVIDERS={};
 const KI={h:[],prov:'gemini',keys:{},models:{},focus:'',
  get key(){return this.keys[this.prov]||''},set key(v){this.keys[this.prov]=String(v||'').replace(/\s+/g,'')},
@@ -1820,7 +1843,7 @@ AKTIONEN:
 - undo / redo: nimmt die letzte Änderung zurück oder stellt sie wieder her. background(v=Index oder null): Bildebene als Hintergrund (sichtbar im Fit-Modus). overlay_move(v={i,to}): Ebenenreihenfolge. kf_del(v=Index).
 - fx_new(v={id,name,emoji,code}): programmiert einen NEUEN Effekt. code ist ein Funktionskörper mit Parameter c: c.X (2D-Kontext des Haupt-Canvas, Size = c.W x c.H, hängt vom Projektformat ab, nie feste Pixelwerte annehmen), c.W, c.H, c.t (Sekunden), c.hit (Beat-Impuls 0..1), c.n (Beat-Zähler), c.p (Intensität), c.h (Beat-Faktor), c.copy() (liefert ein Canvas mit dem aktuellen Bild), c.tmp (Hilfs-Canvas). Der Code läuft jeden Frame nach den Standardeffekten, solange der Effekt aktiv ist. Halte ihn schnell, kein await. Danach erscheint er in der Effektliste und lässt sich mit fx_on, fx_off, fx_window, fxi schalten. Neu definierte Effekte sind sofort aktiv.
 - fx_del(v=id): löscht einen eigenen Effekt.
-- js(v="code"): führt beliebigen asynchronen JavaScript-Code im Editor aus (Variablen ED, S, X, W, H; await erlaubt, keine Endlosschleifen). Das ist dein Allzweckwerkzeug für alles, wofür es keine Aktion gibt. ED bietet zusätzlich alle Editor-Funktionen des Nutzers: ED.setFormat(w,h), ED.setSongSpeed(x), ED.setClipSpeed(x), ED.setPitchF(b), ED.undoEdit(), ED.redoEdit(), ED.trimClip(i,a,b), ED.splitClip(i,t,timeline), ED.dupClip(i), ED.delClip(i), ED.moveClip(i,to), ED.cutout(i,o), ED.trimSong(s,e), ED.applyPreset(id), ED.exportVid(), ED.play(), ED.pause(), ED.analyse(), ED.DO (jede Aktion dieser Liste als ED.DO.name(v)). Außerdem ED.W/ED.H (aktuelle Size), ED.S (Projektzustand), ED.X (Haupt-Canvas), ED.canvas(w,h) (neues Canvas), ED.overlayFromCanvas(canvas,{name,x,y,w,opacity,blend,s,e}) (macht ein selbst gezeichnetes Canvas zur Bildebene, Promise), ED.loadImage(url), ED.addText({...}), ED.defineFx({...}), ED.rigApply({...}), ED.beat(t) (liefert {hit,n,ph}), ED.addButton(label,fn) (legt einen eigenen Button im KI-Tab an), ED.log(text), ED.build(), ED.syncUI(). Bildebenen in ED.S.images haben x,y,w,h,opacity,blend,s,e,rot und lassen sich direkt ändern. Rückgabewert von return wird dir als Ergebnis gemeldet.
+- js: DEAKTIVIERT. Niemals freien JavaScript-Code ausgeben oder ausführen. Nutze ausschließlich die eingebauten, freigegebenen Editor-Aktionen. ED bietet zusätzlich alle Editor-Funktionen des Nutzers: ED.setFormat(w,h), ED.setSongSpeed(x), ED.setClipSpeed(x), ED.setPitchF(b), ED.undoEdit(), ED.redoEdit(), ED.trimClip(i,a,b), ED.splitClip(i,t,timeline), ED.dupClip(i), ED.delClip(i), ED.moveClip(i,to), ED.cutout(i,o), ED.trimSong(s,e), ED.applyPreset(id), ED.exportVid(), ED.play(), ED.pause(), ED.analyse(), ED.DO (jede Aktion dieser Liste als ED.DO.name(v)). Außerdem ED.W/ED.H (aktuelle Size), ED.S (Projektzustand), ED.X (Haupt-Canvas), ED.canvas(w,h) (neues Canvas), ED.overlayFromCanvas(canvas,{name,x,y,w,opacity,blend,s,e}) (macht ein selbst gezeichnetes Canvas zur Bildebene, Promise), ED.loadImage(url), ED.addText({...}), ED.defineFx({...}), ED.rigApply({...}), ED.beat(t) (liefert {hit,n,ph}), ED.addButton(label,fn) (legt einen eigenen Button im KI-Tab an), ED.log(text), ED.build(), ED.syncUI(). Bildebenen in ED.S.images haben x,y,w,h,opacity,blend,s,e,rot und lassen sich direkt ändern. Rückgabewert von return wird dir als Ergebnis gemeldet.
 - overlay(v="blue_black_hole"), preset(v=vibe-id) nur auf ausdrücklichen Wunsch
 - fx_on(v=id oder [ids]); fx_off(v=id oder [ids]); fx_set(v=[ids])
 - fx_window(v={id,s,e}) Timefenster in Sekunden (e=0 bedeutet bis Ende); fxi(v={id,value:0-2}) Intensität; fxp(v={id,b:0-1,s,e}) Beat-Kopplung und Timefenster
@@ -1884,7 +1907,9 @@ WANN WAS: Schnelle Beat-Schnitte -> whip, rgbwhip, shakecut, zoomspin, flash. Ru
 GÜLTIGE PRESETS (nur bei expliziter Bitte): ${JSON.stringify(Object.keys(P).filter(x=>x!=='neymar'))}
 FONTS: ${JSON.stringify(FONTS)}
 TEXTSTYLES: solid, outline, glow, neon, glitch, 3d, gradient, box. ANIMS: none, pop, slide, type, bounce, shake, beat, fade, zoom, glitch, wave, words.
-Nutze normalerweise 1-3 Effekte, nicht alles gleichzeitig. JSON muss parsebar sein.`;
+Nutze normalerweise 1-3 Effekte, nicht alles gleichzeitig. JSON muss parsebar sein.
+ARBEITSMODUS: ${window.SHOXY_AI_MODE==='quick'?'QUICK MODE (HARD RULES): Antworte in GENAU einer Runde. Maximal 5 Aktionen. KEINE Planungsrunde, KEINE Selbstprüfung, KEIN more:true, KEIN Referenzvergleich, KEINE Messungs-Feedback-Schleife, KEINE zusätzlichen Effekte/Keyframes/Texte die nicht explizit verlangt wurden. Bei Unklarheit: eine kurze Rückfrage statt raten.':'PRECISE MODE: Arbeite kontrolliert. Plane bei großen Aufträgen, führe aus, maximal EINE Review-Runde. Keine unnötigen Extras. Unsicherheiten ehrlich melden.'}
+Beide Modi: Behaupte keine nicht ausgeführten Änderungen. Verändere nur, was zum Auftrag gehört.`;
 const validFx=k=>FX.some(g=>g[1].some(x=>x[0]===k))||!!CUSTOM[k];
 const DO={
  overlay:v=>{if(v==='blue_black_hole'||v==='blackhole'||v?.type==='blue_black_hole')addBlueBlackHole()},
@@ -2256,7 +2281,7 @@ function rigApply(o){
   if(o.motion){if(typeof o.motion==='string')m.type=o.motion;else Object.assign(m,o.motion)}
   if(o.style&&PROSTYLE[o.style]){Object.assign(m,PROSTYLE[o.style]);m.type='pro'}
   for(const k of['amount','speed','beat','dir','sway','tilt','squash','depth','body','blur','spring','accent','plug','lag','bodySpan'])if(o[k]!==undefined)m[k]=+o[k];
-  if(o.code){m.code=String(o.code);m.type='custom';part._fn=null;part._err=0;try{guardedFn(['c'],m.code)}catch(e){throw new Error('Bewegungscode Syntaxfehler: '+e.message)}}
+  if(o.code)throw new Error('Eigener JavaScript-Bewegungscode ist aus Sicherheitsgründen deaktiviert.');
   rig.v++;rig.on=true;if(src)src._rigC=null;
   const am=rigAmp(part),b=part.box;
   out.push(label+' · Teil "'+name+'" ('+origin+', x '+Math.round(b[0]*100)+'–'+Math.round(b[2]*100)+'%, y '+Math.round(b[1]*100)+'–'+Math.round(b[3]*100)+'%) · '+m.type+' · max '+am.rot.toFixed(1)+'° Kippung, '+Math.round(am.mv*100)+'% Verschiebung');
@@ -2357,14 +2382,9 @@ window.ED=ED;
 Object.assign(DO,{
  rig:async o=>{await prepVideo(o);return rigApply(o)},
  detect:async v=>{await prepVideo(v);const r=detReport();return r.text||'nichts erkannt'},
- fx_new:o=>defineFx(o),
+ fx_new:o=>{throw new Error('Eigene ausführbare KI-Effekte sind aus Sicherheitsgründen deaktiviert.');},
  fx_del:id=>delFx(id),
- js:async code=>{
-  let fn;
-  try{fn=guardedFn(['ED','S','X','W','H'],String(code),true)}catch(e){throw new Error('Syntaxfehler: '+e.message)}
-  const r=await fn(ED,S,X,W,H);
-  return r===undefined?'':(typeof r==='string'?r:JSON.stringify(r));
- }
+ js:async code=>{throw new Error('Aus Sicherheitsgründen ist die freie KI-JavaScript-Aktion deaktiviert. Nutze die eingebauten Editor-Aktionen.')} 
 });
 /* ================= v8: KI-Bilder (Vorschau, Quellfotos, Kontrollbild) ================= */
 function b64Of(src,max){
@@ -2629,6 +2649,7 @@ function kiSmall(q){const w=String(q).toLowerCase().replace(/[^a-zäöüß' ]/g,
 const KI_EDITV=/\b(add|apply|make|create|edit|change|remove|delete|turn|set|put|cut|trim|export|play|speed|zoom|flash|shake|beat|bpm|effect|effekt\w*|text|title|titel|clip|foto|photo|video|musik|music|song|fade|transition|[uü]bergang|f[uü]g\w*|mach\w*|[aä]nder\w*|entfern\w*|l[oö]sch\w*|setz\w*|schneid\w*|erstell\w*|spiel\w*|schneller|langsamer|lauter|leiser|filter|farbe|color|look|sync|rig|head|kopf|bop|glow|blur|slow|fast|bitte|please)\b/i;
 const kiQ2=q=>q.length<=120&&/\?\s*$/.test(q)&&!KI_EDITV.test(q)&&!/\b(kannst|kann|k[oö]nntest|can|could|would|w[uü]rdest)\b/i.test(q);
 async function kiSend(){
+ if(KI.busy||S.exporting||(S._opLock&&S._opLock!=='ai'))return;
  const q=$('kiin').value.trim();if(!q)return;$('kiin').value='';kiAdd('me',q);try{pushHistory()}catch(e){}
  const styleOK=!!KI.styleOK,choice=KI.choice||null;KI.styleOK=false;KI.choice=null;
  // Instant local greeting: no model round-trip for greetings / small talk.
@@ -2709,18 +2730,18 @@ async function kiSend(){
   if(!bt.ok){if(strict){kiAdd('ai',bt.msg);kiBusy(false);return}localNote+='\n[SYSTEM, nicht vom Nutzer] Es gibt KEINE gemessenen Beats (STATE.beat.real=false). Erfinde keine Beat-Zeiten und synchronisiere nichts auf den Beat.'}
   else{kiStep('Beats',bt.info);if(bt.weak)localNote+='\n[SYSTEM, nicht vom Nutzer] Beat-Erkennung ist unsicher ('+bt.info+'). Sag das dem Nutzer ehrlich und bitte um Bestätigung der BPM.'}
  }
- const planFirst=q.length>220||((q.match(/\b(und|dann|außerdem|zusätzlich|danach|plus)\b|,/gi)||[]).length>=5)||/\b(alles|komplett|pro[- ]?edit)\b/i.test(q);
+ const aiQuick=window.SHOXY_AI_MODE!=='precise';const planFirst=!aiQuick&&(q.length>220||((q.match(/\b(und|dann|außerdem|zusätzlich|danach|plus)\b|,/gi)||[]).length>=5)||/\b(alles|komplett|pro[- ]?edit)\b/i.test(q));
  const simple=!planFirst&&q.length<=160;let userText=q+localNote+(planFirst?'\n[SYSTEM, nicht vom Nutzer] Das ist ein größerer Auftrag. RUNDE 1 = nur PLANEN, noch nichts ändern: schreib in think die nummerierte Auftragsliste, deine Annahmen, Risiken und die Reihenfolge, trag den Plan in notes ein, gib do:[] aus. Stell nur dann eine Rückfrage, wenn eine falsche Annahme etwas zerstören würde. Danach führst du den Plan aus.':''),imgParts=[];
  const REF=!!(KI.ref&&KI.refTask);let refPass=0;
  try{
   imgParts=kiImages(simple&&!/(head|kopf|rig|bop|bob|arm|bein|körper|cutout|freistell|charakter|figur|foto|photo)/i.test(q));
   if(KI.ref&&(REF||/(referenz|reference|nachbau|nachmachen|recreate|copy|kopier|wie (in|bei|das|dieses) (video|edit))/i.test(q)))imgParts.push(...refParts());
-  let reviews=0,fixes=0,msFix=0,totalActs=0,finalDone=false;const fails={};for(let round=0;round<6;round++){
+  let reviews=0,fixes=0,msFix=0,totalActs=0,finalDone=false;const fails={};for(let round=0;round<(aiQuick?1:4);round++){
    if(KI.stop)throw new Error('__stop');kiThink();
    const before=stateSig(),beforeSnap=JSON.parse(JSON.stringify(snap()));
    const hist=KI.h.slice(-24);while(hist.length&&hist[0].role!=='user')hist.shift();
    const contents=[...hist,{role:'user',parts:[{text:userText+'\n\nSTATE:'+JSON.stringify(snap())},...imgParts]}];
-   const t0=Date.now();kiStep('Asking AI','Round '+(round+1)+' of max 6, model '+KI.model);const j=await callAny({systemInstruction:{parts:[{text:SYS()}]},contents,generationConfig:{responseMimeType:'application/json',temperature:.4,topP:.95,maxOutputTokens:planFirst?16384:6144,thinkingConfig:{thinkingLevel:planFirst?'medium':'minimal'}}});
+   const t0=Date.now();kiStep('Asking AI','Round '+(round+1)+' of max 6, model '+KI.model);const j=await callAny({systemInstruction:{parts:[{text:SYS()+(aiQuick?`\n\nHARD MODE OVERRIDE — QUICK MODE (highest priority): This request gets exactly ONE model response and ONE execution pass. Do not plan, do not ask for a self-review, do not request measurements, do not use more:true, do not request another round, do not add optional polish. Choose the smallest sufficient set of actions. Maximum 5 actions in do. Do not claim verification unless the editor reports it. The js action is forbidden; use only built-in actions. If the request cannot be completed in one pass, do the safest useful subset and state what remains.`:`\n\nPRECISE MODE LIMIT: You may use at most one self-review/verification round. Never exceed the six-round hard limit. Free JavaScript execution is disabled; use only built-in actions.`)}]},contents,generationConfig:{responseMimeType:'application/json',temperature:.4,topP:.95,maxOutputTokens:planFirst?16384:6144,thinkingConfig:{thinkingLevel:planFirst?'medium':'minimal'}}});
    kiStep('AI answered','in '+((Date.now()-t0)/1000).toFixed(1)+' s');const cand=j.candidates?.[0],rawTxt=(cand?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join('');
    if(!rawTxt){if(round<3){userText='[SYSTEM-RÜCKMELDUNG, nicht vom Nutzer] Leere Antwort ('+(cand?.finishReason||j.promptFeedback?.blockReason||'unbekannt')+'). Antworte erneut NUR mit kurzem JSON.';imgParts=kiImages(true);continue}throw new Error('Leere KI-Antwort ('+(cand?.finishReason||j.promptFeedback?.blockReason||'unbekannt')+')')}
    let o;try{o=parseAI(rawTxt)}catch(pe){
@@ -2730,7 +2751,7 @@ async function kiSend(){
    }
    if(o.think&&String(o.think).trim()){kiStep('Thinking', String(o.think).trim().slice(0,700))}
    if(typeof o.notes==='string'){setNotes(o.notes.slice(0,3000))}officeSave();
-   const acts=Array.isArray(o.do)?o.do:[],res=[];
+   const acts=(Array.isArray(o.do)?o.do:[]).slice(0,aiQuick?5:40),res=[];if(aiQuick){o.more=false;delete o.verdict;}
    for(const x of acts){
     if(KI.stop)break;
     const label=String(x.a||'aktion').replace(/_/g,' ');
@@ -2746,20 +2767,20 @@ async function kiSend(){
    {const bad=res.filter(r=>!r.ok),sy=String(o.say||'').trim();if(sy)roundSays.push(sy);if(bad.length)kiStep('Error', bad.map(r=>r.a+(r.m?': '+String(r.m).slice(0,120):'')).join(' · '))}
    const failed=res.filter(r=>!r.ok);let fb='';
    if(failed.length)fb='FEHLER bei: '+failed.map(r=>r.a+' '+r.m).join(' | ')+'. Repariere es und gib die korrigierten Aktionen aus.';
-   else if(acts.length&&acts.every(a=>['look','ref_look','detect','measure','timeline','beat_times','calc'].includes(a.a))&&reviews<4){reviews++;fb='Die angeforderten Bilder/Daten hängen an. Werte sie jetzt aus und handle per do, oder antworte mit noop:true.'}
+   else if(acts.length&&acts.every(a=>['look','ref_look','detect','measure','timeline','beat_times','calc'].includes(a.a))&&!aiQuick&&reviews<1){reviews++;fb='Die angeforderten Bilder/Daten hängen an. Werte sie jetzt aus und handle per do, oder antworte mit noop:true.'}
    else if(acts.length&&!changed)fb='Die Aktionen liefen ohne Error, aber der Projektzustand hat sich NICHT verändert, dein Ergebnis ist wirkungslos. Finde die Ursache und mache es richtig. Ergebnisse: '+JSON.stringify(res);
    else if(!acts.length&&!o.noop&&/^(ich habe|erledigt|fertig|done|ok\b|okay|gemacht)/i.test((o.say||'').trim()))fb='Du hast keine Aktion ausgegeben, behauptest aber Erledigung. Gib die nötigen Aktionen aus oder erkläre ehrlich, was fehlt.';
-   else if(REF&&acts.length&&changed&&!o.noop&&refPass<3&&round<9){refPass++;fb='REFERENCE COMPARE (pass '+refPass+' of 3, not from the user): you changed '+acts.length+' thing(s). Now you see A) MY RESULT at the same proportions of the whole length and B) the REFERENCE. Compare honestly, like a critical viewer: colors and palette, brightness, cut speed per section, effect strength, flashes, transitions, text, ending. List the real differences in think. Fix every difference you can fix with real actions (more:true). If nothing important differs, answer do:[] and noop:true with the honest verdict. Results: '+JSON.stringify(res)}
-   else if(acts.length&&changed&&!o.noop&&reviews<2&&!(simple&&acts.length<=3&&round===0)){reviews++;const aS=snap(),dk=Object.keys(aS).filter(k=>JSON.stringify(aS[k])!==JSON.stringify(beforeSnap[k]));
+   else if(REF&&acts.length&&changed&&!o.noop&&!aiQuick&&reviews<1&&refPass<1&&round<6){refPass++;reviews++;fb='REFERENCE COMPARE (pass '+refPass+' of 3, not from the user): you changed '+acts.length+' thing(s). Now you see A) MY RESULT at the same proportions of the whole length and B) the REFERENCE. Compare honestly, like a critical viewer: colors and palette, brightness, cut speed per section, effect strength, flashes, transitions, text, ending. List the real differences in think. Fix every difference you can fix with real actions (more:true). If nothing important differs, answer do:[] and noop:true with the honest verdict. Results: '+JSON.stringify(res)}
+   else if(acts.length&&changed&&!o.noop&&!aiQuick&&reviews<1&&!(simple&&acts.length<=3&&round===0)){reviews++;const aS=snap(),dk=Object.keys(aS).filter(k=>JSON.stringify(aS[k])!==JSON.stringify(beforeSnap[k]));
     fb='SELBSTCHECK (nicht vom Nutzer): Du hast '+acts.length+' Aktion(en) ausgeführt. Verändert wurde laut Editor: '+(dk.join(', ')||'nur interner Zustand/eigener Code')+'. Ergebnisse: '+JSON.stringify(res)+'. Du siehst jetzt das NEUE Vorschaubild. Prüfe ehrlich und kritisch: Siehst du den Effekt/die Änderung WIRKLICH im Bild? Passt sie genau zum Wunsch des Nutzers (richtiger Timeraum, Stärke, Ort)? Hat sich etwas verändert, das nicht verlangt war? Antworte mit "verdict":"ok" oder "verdict":"problem", sag im "say" konkret was du siehst und was du geändert hast (Was, Wie, Wert) und ob du dir sicher bist. Die Bilder zeigen mehrere Timepunkte (Filmstreifen), nicht nur den Playhead. Bei "problem" korrigiere sofort per do. Hat dein Plan (siehe notes) noch offene Schritte, führe den nächsten jetzt aus und setze more:true. Nur wenn alles fertig UND geprüft ist: verdict ok, do:[] und noop:true.'}
    if(!fb&&o.verdict==='problem'&&!acts.length&&fixes<2){fixes++;fb='Du hast verdict problem gemeldet, aber keine korrigierende Aktion ausgegeben. Korrigiere jetzt per do oder erkläre ehrlich, warum es nicht geht (noop:true).'}
    if(acts.length&&changed&&!failed.length){totalActs+=acts.length;totalActsGlobal=totalActs}
    res.forEach((r,ix)=>{if(!r.ok){const k=r.a+'|'+JSON.stringify(acts[ix]&&acts[ix].v).slice(0,200);fails[k]=(fails[k]||0)+1;if(fails[k]>=2&&fb)fb+=' ACHTUNG: "'+r.a+'" ist mit denselben Parametern schon '+fails[k]+'x gescheitert. Wiederhole es NICHT. Such die Ursache (was sagt STATE/Bild/Errortext?), dann anderer Ansatz oder ehrliche Einschränkung.'}});
-   if(acts.length&&changed&&!failed.length&&msFix<3&&round<9){const ms=kiMeasure();if(ms.P.length){msFix++;fb=(fb?fb+' ':'')+'MESSUNG (vom Editor gemessen, nicht geschätzt): '+ms.P.join(' | ')+' Behebe das jetzt mit echten Aktionen oder erkläre ehrlich, warum es nicht geht.'}}
+   if(acts.length&&changed&&!failed.length&&!aiQuick&&msFix<1&&round<9){const ms=kiMeasure();if(ms.P.length){msFix++;fb=(fb?fb+' ':'')+'MESSUNG (vom Editor gemessen, nicht geschätzt): '+ms.P.join(' | ')+' Behebe das jetzt mit echten Aktionen oder erkläre ehrlich, warum es nicht geht.'}}
    if(!fb&&round===0&&planFirst&&!acts.length&&!o.noop&&!/\?\s*$/.test(String(o.say||'').trim()))fb='Plan steht. Führe ihn jetzt aus: alle voneinander unabhängigen Schritte in EINER Antwort, Timeen per beat_times/timeline/calc statt geschätzt, danach prüfst du.';
-   if(!fb&&!finalDone&&(planFirst||totalActs>=4)&&totalActs>0&&round<7){finalDone=true;fb='ABSCHLUSS-CHECK (nicht vom Nutzer): Lies den ursprünglichen Wunsch noch einmal und gehe jeden Teilwunsch einzeln durch: erledigt und im Bild/Zustand belegt, nur angenähert, oder fehlt? Fehlt etwas Machbares, hol es jetzt per do nach (more:true). Sonst: do:[], noop:true und im say ein ehrlicher Abschlussbericht: was genau (Effekt, Time, Wert), was angenähert ist, was nicht ging, und was du als Nächstes vorschlägst.'}
+   if(!aiQuick&&!fb&&!finalDone&&(planFirst||totalActs>=4)&&totalActs>0&&round<7){finalDone=true;fb='ABSCHLUSS-CHECK (nicht vom Nutzer): Lies den ursprünglichen Wunsch noch einmal und gehe jeden Teilwunsch einzeln durch: erledigt und im Bild/Zustand belegt, nur angenähert, oder fehlt? Fehlt etwas Machbares, hol es jetzt per do nach (more:true). Sonst: do:[], noop:true und im say ein ehrlicher Abschlussbericht: was genau (Effekt, Time, Wert), was angenähert ist, was nicht ging, und was du als Nächstes vorschlägst.'}
    if(!fb)break;
-   if(round===9){kiAdd('ai','Not cleanly solved after 10 rounds. Tell me exactly what you see and I will fix it precisely.');break}
+   if(round===5){kiAdd('ai','Not cleanly solved after 6 rounds. Tell me exactly what you see and I will fix it precisely.');break}
    userText='[SYSTEM-RÜCKMELDUNG, nicht vom Nutzer] '+fb;
    await new Promise(r=>setTimeout(r,350));
    imgParts=kiImages(true);try{if(REF&&refPass>0&&!(KI.look&&KI.look.length))KI.look=refPropTimes();const mine=await filmstrip(KI.look&&KI.look.length?KI.look:autoTimes());KI.look=null;if(REF&&refPass>0){imgParts.push({text:'[A) MY RESULT, frames at the same proportions of the whole length]'},...mine,{text:'[B) THE REFERENCE for comparison]'},...refParts())}else imgParts.push(...mine)}catch(e){}
@@ -3865,7 +3886,7 @@ function tnTr(x,k,t){const w=TNW,h=TNH,pv=tnCan.A,fc=tnCan.B,u=(t%2.4)/2.4,p=u<.
 
 function tnDraw(c,t){const x=c._x||(c._x=c.getContext('2d'));try{if(c.dataset.tr)tnTr(x,c.dataset.tr,t);else if(c.dataset.p){const p=P[c.dataset.p];tnFx(x,p?p.fx.split(' '):[],t)}else tnFx(x,[c.dataset.k],t)}catch(e){}}
 let tnLast=0;
-function tnLoop(now){requestAnimationFrame(tnLoop);if(tnOK!==3||window.__thBusy||performance.now()-(window.__thEnd||0)<600||document.hidden||S.exporting||S.playing||now-tnLast<150)return;tnLast=now;const vh=innerHeight,t=now/1000;let _tn=0;document.querySelectorAll('canvas.tn').forEach(c=>{if(_tn>=10)return;const r=c.getBoundingClientRect();if(!r.width||r.bottom<0||r.top>vh)return;_tn++;tnDraw(c,t)})}
+function tnLoop(now){requestAnimationFrame(tnLoop);if(tnOK!==3||window.__thBusy||performance.now()-(window.__thEnd||0)<600||document.hidden||S.exporting||S.playing||(S.tab!=='fx'&&S.tab!=='trans')||now-tnLast<250)return;tnLast=now;const vh=innerHeight,t=now/1000;let _tn=0;document.querySelectorAll('canvas.tn').forEach(c=>{if(_tn>=5)return;const r=c.getBoundingClientRect();if(!r.width||r.bottom<0||r.top>vh)return;_tn++;tnDraw(c,t)})}
 requestAnimationFrame(tnLoop);
 
 
@@ -4052,7 +4073,7 @@ const spd1=setSpd;setSpd=function(c,v){const o=c.spd||1;spd1(c,v);if(c.efk&&o!==
 const eBase=editSnapshot,rBase=restoreSnapshot;const CLIPREG=new Map(),cid=c=>c._id||(c._id='c'+(++window.__cidSeq||(window.__cidSeq=1))+'_'+Date.now().toString(36));
 editSnapshot=function(){const o=eBase();o.efk=JSON.parse(JSON.stringify(S.efk||{}));S.clips.forEach(c=>CLIPREG.set(cid(c),c));o.ids=S.clips.map(c=>c._id);o.cp=S.clips.map(c=>JSON.parse(JSON.stringify({i:c.in,o:c.out,s:c.spd,tn:c.tone,fi:c.afi,fo:c.afo,v:c.vol,r:c.rev,k:c.kfs,f:c.fx,t:c.tr,an:c.anim,fh:c.flipH,fv:c.flipV,fl:c.flt,ef:c.efk,sc:c.spc,n:c.name})));return o};
 const rApply=function(raw){let warn='';try{const d=JSON.parse(raw);if(d.v!==1)return false;S.efk=d.efk||{};
-if(Array.isArray(d.ids)&&d.ids.length&&d.ids.every(i=>CLIPREG.has(i))&&(d.ids.length!==S.clips.length||d.ids.some((i,k)=>S.clips[k]._id!==i))){const old=new Set(S.clips);S.clips=d.ids.map(i=>CLIPREG.get(i));S.clips.forEach(c=>{if(!old.has(c)){try{if(c.g&&c.source&&!c.photo){c.source.connect(c.g);c.g.connect(BUS.clip.in)}}catch(e){errOnce('Audio reconnect',e)}}});try{build()}catch(e){}try{rClips()}catch(e){}}if(Array.isArray(d.cp)){const same=d.cp.length===S.clips.length&&d.cp.every((p,i)=>p.n===undefined||p.n===S.clips[i].name)&&(!d.ids||d.ids.every((x,i)=>S.clips[i]._id===x));if(same){d.cp.forEach((p,i)=>{const c=S.clips[i];c.in=p.i;c.out=p.o;c.spd=p.s;c.vol=p.v;c.rev=p.r;c.tone=p.tn;c.afi=p.fi;c.afo=p.fo;c.kfs=p.k;c.fx=p.f;c.tr=p.t;c.anim=p.an;c.flipH=p.fh;c.flipV=p.fv;c.flt=p.fl;c.efk=p.ef;c.spc=p.sc;c._spk=null})}else warn='Clips differ from the saved state (count or names): per-clip settings were NOT restored.'}}catch(e){errOnce('Restore',e);return false}
+if(Array.isArray(d.ids)&&d.ids.every(i=>CLIPREG.has(i))&&(d.ids.length!==S.clips.length||d.ids.some((i,k)=>S.clips[k]._id!==i))){const old=new Set(S.clips);S.clips=d.ids.map(i=>CLIPREG.get(i));S.clips.forEach(c=>{if(!old.has(c)){try{if(c.g&&c.source&&!c.photo){c.source.connect(c.g);c.g.connect(BUS.clip.in)}}catch(e){errOnce('Audio reconnect',e)}}});try{build()}catch(e){}try{rClips()}catch(e){}}if(Array.isArray(d.cp)){const same=d.cp.length===S.clips.length&&d.cp.every((p,i)=>p.n===undefined||p.n===S.clips[i].name)&&(!d.ids||d.ids.every((x,i)=>S.clips[i]._id===x));if(same){d.cp.forEach((p,i)=>{const c=S.clips[i];c.in=p.i;c.out=p.o;c.spd=p.s;c.vol=p.v;c.rev=p.r;c.tone=p.tn;c.afi=p.fi;c.afo=p.fo;c.kfs=p.k;c.fx=p.f;c.tr=p.t;c.anim=p.an;c.flipH=p.fh;c.flipV=p.fv;c.flt=p.fl;c.efk=p.ef;c.spc=p.sc;c._spk=null})}else warn='Clips differ from the saved state (count or names): per-clip settings were NOT restored.'}}catch(e){errOnce('Restore',e);return false}
 const r=rBase(raw);try{build()}catch(e){}if(warn)try{st(warn)}catch(e){}restoreSnapshot.lastWarn=warn;return r};
 restoreSnapshot=function(raw){const bak=snapString();if(rApply(raw))return true;try{rApply(bak)}catch(e){}return false};
 const applyPend=()=>{S._pend=null;const d=null;if(!d||!S.clips.length||d.cp.length!==S.clips.length)return;if(!d.cp.every((p,i)=>p.n===undefined||p.n===S.clips[i].name))return;S._pend=null;d.cp.forEach((p,i)=>{const c=S.clips[i];c.in=p.i;c.out=p.o;c.spd=p.s;c.vol=p.v;c.rev=p.r;c.tone=p.tn;c.afi=p.fi;c.afo=p.fo;c.kfs=p.k;c.fx=p.f;c.tr=p.t;c.anim=p.an;c.flipH=p.fh;c.flipV=p.fv;c.flt=p.fl;c.efk=p.ef;c.spc=p.sc;c._spk=null});try{st('Saved clip settings restored from autosave')}catch(e){}};
@@ -4157,4 +4178,387 @@ header:after,.auto,.logo b,#play{animation:none!important}
 
 :root.thfade{transition:--ac .7s ease,--ac2 .7s ease,--g1 .7s ease,--g2 .7s ease,--g3 .7s ease,--on .7s ease,--bg .7s ease,--bg2 .7s ease,--pan .7s ease,--bd .7s ease,--glow .7s ease,--txt2 .7s ease,--mut .7s ease}
 </style>
+
+<script id="shoxy-audio-upgrade-v1">
+(()=> {
+  const $ = id => document.getElementById(id);
+  // Add a gallery video picker directly to the Extract Sound panel.
+  const exCard = $('exsnd')?.closest('.card');
+  if (exCard && !$('exvidpick')) {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)';
+    wrap.innerHTML = '<div style="font-weight:700;margin-bottom:7px">Extract from a video in your gallery</div><div class="row"><label class="btn hot" style="flex:1">Choose video<input id="exvidpick" type="file" accept="video/*,.mp4,.mov,.m4v,.webm" hidden></label><button class="btn" id="exvidwav" type="button" disabled>Download WAV</button></div><p class="small" id="exvidstat" style="margin:7px 0 0">Choose a video from your device. Its audio will be extracted without adding the video to your project.</p>';
+    exCard.append(wrap);
+  }
+  let gallerySoundBlob = null, gallerySoundName = '';
+  async function decodeVideoSound(file) {
+    const status = $('exvidstat'), btn = $('exvidwav');
+    if (!file) return;
+    if (!file.type.startsWith('video/') && !/\.(mp4|mov|m4v|webm|mkv|avi)$/i.test(file.name)) {
+      status.textContent = 'Please choose a video file.'; return;
+    }
+    status.textContent = 'Reading video and extracting its audio…';
+    btn.disabled = true;
+    try {
+      const data = await file.arrayBuffer();
+      const OC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+      if (!OC) throw new Error('Audio extraction is not supported in this browser.');
+      let decoded;
+      try { decoded = await new OC(2, 2, 44100).decodeAudioData(data.slice(0)); }
+      catch (_) {
+        // Some browsers cannot demux the audio track from an MP4/MOV file with decodeAudioData.
+        // Fall back to capturing the video's own audio track while it plays.
+        const video=document.createElement('video'), videoUrl=URL.createObjectURL(file);
+        video.preload='auto'; video.playsInline=true; video.src=videoUrl;
+        try {
+          await new Promise((resolve,reject)=>{
+            video.onloadedmetadata=resolve; video.onerror=()=>reject(new Error('This video format cannot be opened by the browser.'));
+          });
+          const capture=video.captureStream ? video.captureStream() : (video.mozCaptureStream ? video.mozCaptureStream() : null);
+          const tracks=capture?.getAudioTracks?.() || [];
+          if(!tracks.length) throw new Error('This video has no audio track, or this browser cannot access it.');
+          if(!window.MediaRecorder) throw new Error('This browser cannot extract audio from this video format. Try an MP4 with AAC audio.');
+          const audioStream=new MediaStream(tracks), mime=['audio/webm;codecs=opus','audio/webm','audio/mp4'].find(t=>MediaRecorder.isTypeSupported?.(t));
+          const recorder=new MediaRecorder(audioStream,mime?{mimeType:mime}:undefined), chunks=[];
+          const recorded=new Promise((resolve,reject)=>{
+            recorder.ondataavailable=e=>{if(e.data?.size)chunks.push(e.data)};
+            recorder.onerror=()=>reject(new Error('Could not record the video audio track.'));
+            recorder.onstop=async()=>{try{const blob=new Blob(chunks,{type:recorder.mimeType||'audio/webm'});resolve(await new OC(2,2,44100).decodeAudioData(await blob.arrayBuffer()))}catch(err){reject(new Error('The extracted audio could not be decoded.'))}};
+          });
+          recorder.start(250);
+          await video.play();
+          await new Promise(resolve=>{video.onended=resolve; video.onerror=resolve});
+          if(recorder.state!=='inactive') recorder.stop();
+          decoded=await recorded;
+        } finally { video.pause(); video.removeAttribute('src'); video.load(); URL.revokeObjectURL(videoUrl); }
+      }
+      const wav = wavOf(decoded, 0, decoded.length);
+      gallerySoundBlob = wav;
+      gallerySoundName = file.name.replace(/\.[^.]+$/, '') + ' (sound)';
+      const url = URL.createObjectURL(wav), old = S.song && S.song.blobUrl;
+      songEl.pause(); songEl.removeAttribute('crossorigin');
+      await new Promise((resolve, reject) => {
+        songEl.onloadedmetadata = () => { songEl.onloadedmetadata = null; songReady(gallerySoundName, wav, null); S.song.blobUrl = url; if (old) URL.revokeObjectURL(old); resolve(); };
+        songEl.onerror = () => { songEl.onerror = null; reject(new Error('Could not load the extracted audio.')); };
+        songEl.src = url;
+      });
+      if ($('clipVol')) { S.clipVol = 0; volUI(); vols(); }
+      btn.disabled = false;
+      status.textContent = 'Extracted audio loaded as your song (' + decoded.duration.toFixed(1) + ' s). You can now trim it, add fades and effects, or analyze beats.';
+      try { setTab('music'); $('sndcard')?.scrollIntoView({behavior:'smooth',block:'start'}); sndDecode().then(()=>sndDraw()).catch(()=>{}); } catch (_) {}
+    } catch (err) {
+      status.textContent = err.message || String(err);
+      st(err.message || String(err));
+    }
+  }
+  $('exvidpick')?.addEventListener('change', e => { const f=e.target.files?.[0]; e.target.value=''; decodeVideoSound(f); });
+  $('exvidwav')?.addEventListener('click', () => {
+    if (!gallerySoundBlob) return;
+    const u=URL.createObjectURL(gallerySoundBlob), a=document.createElement('a');
+    a.href=u; a.download=(gallerySoundName || 'video')+'-sound.wav'; document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),4000);
+  });
+
+  // Make the song lane tappable: it opens the complete sound editor/effects controls.
+  const tl = $('tlin');
+  if (tl) tl.addEventListener('click', e => {
+    const lane=e.target.closest('.tb.au');
+    if (!lane) return;
+    e.preventDefault();
+    setTab('music');
+    try { $('sndcard')?.scrollIntoView({behavior:'smooth',block:'start'}); sndDecode().then(()=>sndDraw()).catch(err=>{ if($('sndst')) $('sndst').textContent=err.message; }); } catch (_) {}
+    st('Song selected · edit trim, fades, loudness, speed, bass, treble, reverb, echo and 8D in Audio.');
+  });
+
+  // Keep AI operation steps visible in the manual Timeline workspace as well.
+  const tlCard = $('t-tl')?.querySelector('.card');
+  if (tlCard && !$('aiWorkLog')) {
+    const log=document.createElement('div');
+    log.id='aiWorkLog';
+    log.style.cssText='margin-top:10px;padding:10px 12px;border:1px solid var(--bd);border-radius:14px;background:var(--bg2);display:none;max-height:150px;overflow:auto';
+    log.innerHTML='<div style="font-weight:800;color:var(--ac);margin-bottom:6px">AI edit · live activity</div><div id="aiWorkSteps" class="small">When the AI edits your project, each action will appear here.</div>';
+    tlCard.append(log);
+  }
+  const originalKiStep = window.kiStep;
+  // Function declarations in the main script are global lexical bindings; wrap through a safe hook.
+  try {
+    if (typeof kiStep === 'function' && !kiStep.__timelineMirror) {
+      const wrapped = function(title, detail) {
+        kiStepOriginal(title, detail);
+        const box=$('aiWorkLog'), steps=$('aiWorkSteps');
+        if (!box || !steps) return;
+        box.style.display='block';
+        const row=document.createElement('div');
+        row.style.cssText='padding:6px 0;border-top:1px solid var(--bd);white-space:pre-wrap';
+        const b=document.createElement('b'); b.textContent=String(title || 'Step')+' · ';
+        const span=document.createElement('span'); span.textContent=String(detail || '');
+        row.append(b,span); steps.append(row); box.scrollTop=box.scrollHeight;
+      };
+      const kiStepOriginal = kiStep;
+      // Replace the global binding through a window property where available; fallback is event mirroring below.
+      try { window.kiStep = wrapped; } catch (_) {}
+      wrapped.__timelineMirror=true;
+    }
+  } catch (_) {}
+  // Robust mirror: observe the existing AI trail and copy updates into the manual timeline.
+  const aiLog=$('kilog');
+  if (aiLog && window.MutationObserver) {
+    let mirrorQueued=false;
+    const mirror=()=>{
+      mirrorQueued=false;
+      const source=$('kiTrail'), box=$('aiWorkLog'), steps=$('aiWorkSteps');
+      if (!source || !box || !steps) return;
+      box.style.display='block';
+      const lines=[...source.querySelectorAll('.kistep')].slice(-60).map(x=>x.innerText);
+      const frag=document.createDocumentFragment();
+      lines.forEach(line=>{const row=document.createElement('div');row.style.cssText='padding:5px 0;border-top:1px solid var(--bd);white-space:pre-wrap';row.textContent=line;frag.append(row)});
+      steps.replaceChildren(frag);
+      box.scrollTop=box.scrollHeight;
+    };
+    const observer=new MutationObserver(()=>{
+      if(mirrorQueued)return;
+      mirrorQueued=true;
+      requestAnimationFrame(mirror);
+    });
+    observer.observe(aiLog,{childList:true,subtree:true,characterData:true});
+    addEventListener('pagehide',()=>observer.disconnect(),{once:true});
+  }
+})();
+</script>
+
+<script id="shoxy-v67-reliability">
+(()=>{
+  const wait=ms=>new Promise(r=>setTimeout(r,ms));
+  const setBusy=(on,kind)=>{
+    try{
+      document.documentElement.dataset.shoxyBusy=on?kind:'';
+      document.body.classList.toggle('shoxy-operation-busy',!!on);
+    }catch(e){}
+  };
+  // A single lock owner: the previous v65/v66 wrappers were nested and could
+  // reject their own AI call after the outer wrapper had already set _opLock.
+  try{
+    const runAI=kiSend;
+    const historyPush=pushHistory;
+    // All AI mutations become one undoable transaction. Save the pre-AI
+    // state once, then suppress intermediate snapshots created by actions.
+    pushHistory=function(){
+      if(S._opLock==='ai')return;
+      return historyPush.apply(this,arguments);
+    };
+    kiSend=async function(){
+      if(S._opLock||S.exporting||KI.busy)return;
+      try{historyPush()}catch(e){}
+      S._opLock='ai';setBusy(true,'ai');
+      try{return await runAI.apply(this,arguments)}
+      finally{if(S._opLock==='ai')S._opLock='';setBusy(false,'')}
+    };
+  }catch(e){console.warn('Shoxy v67 AI lock unavailable',e)}
+  try{
+    const runExport=exportVid;
+    exportVid=async function(){
+      if(S._opLock||S.exporting)return;
+      S._opLock='export';setBusy(true,'export');
+      try{
+        if(KI.busy){
+          KI.stop=true;
+          try{KI.ctl&&KI.ctl.abort()}catch(e){}
+          const until=Date.now()+8000;
+          while(KI.busy&&Date.now()<until)await wait(100);
+          if(KI.busy)throw new Error('Die KI konnte nicht rechtzeitig gestoppt werden. Bitte erneut exportieren.');
+        }
+        return await runExport.apply(this,arguments);
+      }finally{if(S._opLock==='export')S._opLock='';setBusy(false,'')}
+    };
+  }catch(e){console.warn('Shoxy v67 export lock unavailable',e)}
+  // Block user-initiated project mutations while AI/export owns the project.
+  // Keep AI Stop and Export Stop available; timeline read/scrub gestures remain usable.
+  const allowed=id=>['kiin','kigo','kistop','exp','shoxyQuick','shoxyPrecise'].includes(id);
+  const blockedTarget=t=>{
+    if(!t||!t.closest)return false;
+    const el=t.closest('button,input,select,textarea,[data-a]');
+    if(!el)return false;
+    if(allowed(el.id))return false;
+    if(el.id==='exp'&&S.exporting)return false;
+    if(el.id==='kistop'&&KI.busy)return false;
+    return true;
+  };
+  const guard=e=>{
+    if(!S._opLock&&!S.exporting)return;
+    if(blockedTarget(e.target)){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if(e.type==='click'&&typeof st==='function')st(S._opLock==='export'?'Export läuft – Bearbeitungen sind kurz gesperrt.':'KI bearbeitet das Projekt – bitte kurz warten oder Stop drücken.');
+    }
+  };
+  ['click','change','input','pointerdown'].forEach(type=>document.addEventListener(type,guard,true));
+  // One compact, explicit mode status.
+  try{
+    const q=document.getElementById('shoxyQuick'),p=document.getElementById('shoxyPrecise'),h=document.getElementById('shoxyModeHint');
+    let mode='quick';try{mode=sessionStorage.getItem('shoxy_ai_mode')||'quick'}catch(e){}
+    window.SHOXY_AI_MODE=mode==='precise'?'precise':'quick';
+    const paint=()=>{
+      const quick=window.SHOXY_AI_MODE==='quick';
+      q?.setAttribute('aria-pressed',String(quick));p?.setAttribute('aria-pressed',String(!quick));
+      q?.classList.toggle('hot',quick);p?.classList.toggle('hot',!quick);
+      if(h)h.textContent=quick?'Quick: one response, up to 5 actions, no planning or review.':'Precise: detailed planning, up to one review round.';
+    };
+    const choose=m=>{if(S._opLock||S.exporting)return;window.SHOXY_AI_MODE=m;try{sessionStorage.setItem('shoxy_ai_mode',m)}catch(e){}paint()};
+    q?.addEventListener('click',()=>choose('quick'));p?.addEventListener('click',()=>choose('precise'));paint();
+  }catch(e){}
+  // Keep the existing thumbnail scheduler conservative: visible cards only,
+  // effects/transitions tabs only, at most five canvases per 250 ms frame.
+})();
+</script>
+
+
+<script id="shoxy-v68-strict">
+(()=>{
+  // === v68 STRICT: Quick mode is hard-enforced, AI is one undo transaction, UI lock is consistent ===
+  const wait=ms=>new Promise(r=>setTimeout(r,ms));
+  const mode=()=>window.SHOXY_AI_MODE==='precise'?'precise':'quick';
+
+  // Stronger single-owner lock + busy flag
+  const setBusy=(on,kind)=>{
+    try{
+      document.documentElement.dataset.shoxyBusy=on?kind:'';
+      document.body.classList.toggle('shoxy-operation-busy',!!on);
+      if(typeof st==='function' && on){
+        // non-spammy: only set once when entering
+      }
+    }catch(e){}
+  };
+
+  // Ensure mode UI exists and is authoritative
+  try{
+    const q=document.getElementById('shoxyQuick');
+    const p=document.getElementById('shoxyPrecise');
+    const h=document.getElementById('shoxyModeHint');
+    let m='quick';
+    try{m=sessionStorage.getItem('shoxy_ai_mode')||'quick'}catch(e){}
+    window.SHOXY_AI_MODE=(m==='precise')?'precise':'quick';
+    const paint=()=>{
+      const quick=mode()==='quick';
+      if(q){q.setAttribute('aria-pressed',String(quick));q.classList.toggle('hot',quick)}
+      if(p){p.setAttribute('aria-pressed',String(!quick));p.classList.toggle('hot',!quick)}
+      if(h)h.textContent=quick
+        ?'Quick: 1 round, max ~5 actions, no planning / no self-review.'
+        :'Precise: planning allowed, max one review round.';
+    };
+    const choose=mm=>{
+      if(S._opLock||S.exporting||(window.KI&&KI.busy))return;
+      window.SHOXY_AI_MODE=mm;
+      try{sessionStorage.setItem('shoxy_ai_mode',mm)}catch(e){}
+      paint();
+    };
+    q&&q.addEventListener('click',()=>choose('quick'));
+    p&&p.addEventListener('click',()=>choose('precise'));
+    paint();
+  }catch(e){}
+
+  // History: while AI owns the project, suppress intermediate snapshots.
+  // One push at the start of kiSend = one Undo step for the whole AI edit.
+  try{
+    if(!pushHistory.__v68){
+      const _push=pushHistory;
+      pushHistory=function(){
+        if(S&&S._opLock==='ai')return;
+        return _push.apply(this,arguments);
+      };
+      pushHistory.__v68=true;
+    }
+  }catch(e){}
+
+  // kiSend wrapper: lock, single history entry, busy UI
+  try{
+    if(!kiSend.__v68){
+      const _send=kiSend;
+      kiSend=async function(){
+        if(S._opLock||S.exporting||(window.KI&&KI.busy))return;
+        try{ // pre-AI snapshot (allowed because lock not set yet)
+          if(typeof pushHistory==='function'){
+            // temporarily bypass suppression
+            const prev=S._opLock; S._opLock='';
+            try{pushHistory()}catch(e){}
+            S._opLock=prev;
+          }
+        }catch(e){}
+        S._opLock='ai';
+        setBusy(true,'ai');
+        try{
+          return await _send.apply(this,arguments);
+        }finally{
+          if(S._opLock==='ai')S._opLock='';
+          setBusy(false,'');
+        }
+      };
+      kiSend.__v68=true;
+    }
+  }catch(e){console.warn('v68 kiSend wrap failed',e)}
+
+  // Export wrapper
+  try{
+    if(!exportVid.__v68){
+      const _exp=exportVid;
+      exportVid=async function(){
+        if(S._opLock||S.exporting)return;
+        S._opLock='export';
+        setBusy(true,'export');
+        try{
+          if(window.KI&&KI.busy){
+            KI.stop=true;
+            try{KI.ctl&&KI.ctl.abort()}catch(e){}
+            const until=Date.now()+8000;
+            while(KI.busy&&Date.now()<until)await wait(100);
+            if(KI.busy)throw new Error('KI konnte nicht rechtzeitig gestoppt werden. Bitte erneut exportieren.');
+          }
+          return await _exp.apply(this,arguments);
+        }finally{
+          if(S._opLock==='export')S._opLock='';
+          setBusy(false,'');
+        }
+      };
+      exportVid.__v68=true;
+    }
+  }catch(e){console.warn('v68 export wrap failed',e)}
+
+  // Block project-mutating UI while locked (keep Stop + mode buttons + scrub usable)
+  try{
+    if(!window.__v68Guard){
+      const allowed=el=>{
+        if(!el)return false;
+        const id=el.id||'';
+        if(['kiin','kigo','kistop','exp','shoxyQuick','shoxyPrecise','play','scrub'].includes(id))return true;
+        if(el.closest&&el.closest('#transport'))return true; // scrub/play
+        return false;
+      };
+      const blocked=t=>{
+        if(!t||!t.closest)return false;
+        const el=t.closest('button,input,select,textarea,[data-a],[data-v48],[data-tl]');
+        if(!el)return false;
+        if(allowed(el))return false;
+        return true;
+      };
+      const guard=e=>{
+        if(!(S&& (S._opLock||S.exporting)))return;
+        if(blocked(e.target)){
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          if(e.type==='click'&&typeof st==='function'){
+            st(S._opLock==='export'?'Export läuft – Bearbeitung kurz gesperrt.':'KI bearbeitet – bitte warten oder Stop.');
+          }
+        }
+      };
+      ['click','change','pointerdown'].forEach(t=>document.addEventListener(t,guard,true));
+      window.__v68Guard=true;
+    }
+  }catch(e){}
+
+  // Hard safety: if somehow review feedback is about to be injected in quick mode,
+  // the loop conditions already check !aiQuick. We additionally expose a helper.
+  window.__shoxyIsQuick=()=>mode()==='quick';
+
+  console.info('[Shoxy v68-strict] Quick mode hard rules + AI transaction lock active. All features kept.');
+})();
+</script>
+
 </body></html>
