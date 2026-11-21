@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ShoxyEditor v68 strict</title>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ShoxyEditor v68.1 ki-fix</title>
 <style>
 :root{color-scheme:dark;--pink:#3b82ff;--vio:#22d3ee;--cy:#62e6ff;--line:#2a2a47;--mut:#9a9cbc;--grad:linear-gradient(100deg,#3b82ff,#22d3ee)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -1382,13 +1382,39 @@ AI_PROVIDERS.gemini={
  async testKey(key){const list=await this.listModels(key);if(!list.length)throw kiErr(200,'Key works, but no Gemini model is available for it.');this.live=list;return 'Key is valid. '+list.length+' models available.'},
  async call(model,body,key,signal){
   const gc={...(body.generationConfig||{})};
-  if(!/gemini-(2\.5|3)/.test(model))delete gc.thinkingConfig;
-  else if(gc.thinkingConfig&&/gemini-2\.5/.test(model)){const lv=gc.thinkingConfig.thinkingLevel;gc.thinkingConfig={thinkingBudget:lv==='high'?8192:lv==='medium'?2048:(/pro/.test(model)?128:0)}}
-  else if(gc.thinkingConfig&&/gemini-3.*pro/.test(model)){const l=gc.thinkingConfig.thinkingLevel;gc.thinkingConfig={thinkingLevel:l==='medium'||l==='high'?'high':'low'}};
+  // Thinking config differs by model family. Never send unsupported levels (e.g. MINIMAL).
+  if(gc.thinkingConfig){
+    const lv=String(gc.thinkingConfig.thinkingLevel||gc.thinkingConfig.thinkingBudget||'low').toLowerCase();
+    const is25=/gemini-2\.5/.test(model);
+    const is3=/gemini-3/.test(model);
+    const isPro=/pro/i.test(model);
+    if(is25){
+      // 2.5 uses thinkingBudget (tokens). 0 disables. Avoid tiny budgets that some flash builds reject.
+      const budget = lv==='high'||lv==='8192'?8192 : lv==='medium'||lv==='2048'?2048 : (isPro?512:0);
+      if(budget>0) gc.thinkingConfig={thinkingBudget:budget};
+      else delete gc.thinkingConfig;
+    }else if(is3){
+      // Gemini 3 accepts thinkingLevel: low | high (not minimal/medium on all variants)
+      gc.thinkingConfig={thinkingLevel:(lv==='high'||lv==='medium')?'high':'low'};
+    }else{
+      delete gc.thinkingConfig;
+    }
+  }
   gc.maxOutputTokens=Math.min(gc.maxOutputTokens||8192,/gemini-(1|2\.0)/.test(model)?8192:65536);
   const req={...body,generationConfig:gc};
-  const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent?key='+encodeURIComponent(key),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(req),signal});
-  let j={};try{j=await r.json()}catch(e){}
+  async function post(reqBody){
+    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent?key='+encodeURIComponent(key),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(reqBody),signal});
+    let j={};try{j=await r.json()}catch(e){}
+    return {r,j};
+  }
+  let {r,j}=await post(req);
+  // Auto-retry once if the model rejects the thinking config (common 400).
+  if(!r.ok && r.status===400 && /thinking/i.test(JSON.stringify(j))){
+    const gc2={...(req.generationConfig||{})};
+    delete gc2.thinkingConfig;
+    const req2={...req,generationConfig:gc2};
+    ({r,j}=await post(req2));
+  }
   if(!r.ok)throw gemError(r.status,j);
   return j;
  }
@@ -2734,14 +2760,14 @@ async function kiSend(){
  const simple=!planFirst&&q.length<=160;let userText=q+localNote+(planFirst?'\n[SYSTEM, nicht vom Nutzer] Das ist ein größerer Auftrag. RUNDE 1 = nur PLANEN, noch nichts ändern: schreib in think die nummerierte Auftragsliste, deine Annahmen, Risiken und die Reihenfolge, trag den Plan in notes ein, gib do:[] aus. Stell nur dann eine Rückfrage, wenn eine falsche Annahme etwas zerstören würde. Danach führst du den Plan aus.':''),imgParts=[];
  const REF=!!(KI.ref&&KI.refTask);let refPass=0;
  try{
-  imgParts=kiImages(simple&&!/(head|kopf|rig|bop|bob|arm|bein|körper|cutout|freistell|charakter|figur|foto|photo)/i.test(q));
+  imgParts=kiImages(false); // always attach current preview frames so the model actually sees the project
   if(KI.ref&&(REF||/(referenz|reference|nachbau|nachmachen|recreate|copy|kopier|wie (in|bei|das|dieses) (video|edit))/i.test(q)))imgParts.push(...refParts());
   let reviews=0,fixes=0,msFix=0,totalActs=0,finalDone=false;const fails={};for(let round=0;round<(aiQuick?1:4);round++){
    if(KI.stop)throw new Error('__stop');kiThink();
    const before=stateSig(),beforeSnap=JSON.parse(JSON.stringify(snap()));
    const hist=KI.h.slice(-24);while(hist.length&&hist[0].role!=='user')hist.shift();
    const contents=[...hist,{role:'user',parts:[{text:userText+'\n\nSTATE:'+JSON.stringify(snap())},...imgParts]}];
-   const t0=Date.now();kiStep('Asking AI','Round '+(round+1)+' of max 6, model '+KI.model);const j=await callAny({systemInstruction:{parts:[{text:SYS()+(aiQuick?`\n\nHARD MODE OVERRIDE — QUICK MODE (highest priority): This request gets exactly ONE model response and ONE execution pass. Do not plan, do not ask for a self-review, do not request measurements, do not use more:true, do not request another round, do not add optional polish. Choose the smallest sufficient set of actions. Maximum 5 actions in do. Do not claim verification unless the editor reports it. The js action is forbidden; use only built-in actions. If the request cannot be completed in one pass, do the safest useful subset and state what remains.`:`\n\nPRECISE MODE LIMIT: You may use at most one self-review/verification round. Never exceed the six-round hard limit. Free JavaScript execution is disabled; use only built-in actions.`)}]},contents,generationConfig:{responseMimeType:'application/json',temperature:.4,topP:.95,maxOutputTokens:planFirst?16384:6144,thinkingConfig:{thinkingLevel:planFirst?'medium':'minimal'}}});
+   const t0=Date.now();kiStep('Asking AI','Round '+(round+1)+' of max 6, model '+KI.model);const j=await callAny({systemInstruction:{parts:[{text:SYS()+(aiQuick?`\n\nHARD MODE OVERRIDE — QUICK MODE (highest priority): This request gets exactly ONE model response and ONE execution pass. Do not plan, do not ask for a self-review, do not request measurements, do not use more:true, do not request another round, do not add optional polish. Choose the smallest sufficient set of actions. Maximum 5 actions in do. Do not claim verification unless the editor reports it. The js action is forbidden; use only built-in actions. If the request cannot be completed in one pass, do the safest useful subset and state what remains.`:`\n\nPRECISE MODE LIMIT: You may use at most one self-review/verification round. Never exceed the six-round hard limit. Free JavaScript execution is disabled; use only built-in actions.`)}]},contents,generationConfig:{responseMimeType:'application/json',temperature:.4,topP:.95,maxOutputTokens:planFirst?16384:6144,thinkingConfig:{thinkingLevel:planFirst?'medium':(aiQuick?'low':'low')}}});
    kiStep('AI answered','in '+((Date.now()-t0)/1000).toFixed(1)+' s');const cand=j.candidates?.[0],rawTxt=(cand?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join('');
    if(!rawTxt){if(round<3){userText='[SYSTEM-RÜCKMELDUNG, nicht vom Nutzer] Leere Antwort ('+(cand?.finishReason||j.promptFeedback?.blockReason||'unbekannt')+'). Antworte erneut NUR mit kurzem JSON.';imgParts=kiImages(true);continue}throw new Error('Leere KI-Antwort ('+(cand?.finishReason||j.promptFeedback?.blockReason||'unbekannt')+')')}
    let o;try{o=parseAI(rawTxt)}catch(pe){
