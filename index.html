@@ -226,7 +226,9 @@ body:before{display:none!important}
 #kiLive{margin:0!important;padding:6px 12px!important;font-size:12px;opacity:.8;flex:0 0 auto;align-self:flex-start}
 #t-ki #kiin{border-radius:22px;padding:11px 14px}#t-ki #kigo{border-radius:50%;width:42px;height:42px;padding:0;flex:0 0 42px!important}
 #t-ki>.row{flex:0 0 auto;margin:0!important;flex-wrap:nowrap}#kistop{border-radius:50%;width:42px;height:42px;padding:0}
-#kitools:empty{display:none}#kiResume{margin:0!important}
+#kitools:empty{display:none}
+#t-ki>#rigcard{max-height:38%}#rigcard.min #riglist{display:none}#t-ki .kl{min-height:110px}#rigtoggle{margin:0 0 4px}
+#rigcard.min #rigtoggle{margin:0}#t-ki{overscroll-behavior:contain}#kiResume{margin:0!important}
 .kitrail{max-width:94%!important;display:flex;flex-direction:column;gap:4px;background:transparent!important;border:0!important;padding:2px 0!important;box-shadow:none!important}
 .kitrailh{font:800 10px 'Orbitron',sans-serif;letter-spacing:1.4px;color:var(--ac,#fff);opacity:.85}
 .kistep{font-size:12.5px;line-height:1.35;color:#d5d5d5;background:#0c0c0c;border:1px solid #2a2a2a;border-radius:12px;padding:6px 10px;white-space:pre-wrap}
@@ -484,15 +486,13 @@ input[type=range]{height:8px!important}
   <div class="row" style="margin-top:6px;gap:6px"><button class="btn" id="kikeytest" type="button">Test key</button><a class="small" id="kikeylink" href="#" target="_blank" rel="noopener noreferrer" style="flex:0 0 auto">Get a free key</a></div>
   <p class="small" id="kikeystat" style="min-height:16px"></p>
   <p class="small" id="f4Status" style="min-height:16px"></p>
-  <div class="row" style="gap:6px;margin:4px 0"><button class="btn" id="geminiPoolBtn" type="button" style="flex:1">Add Gemini knowledge</button><button class="btn" id="poolResetBtn" type="button" style="flex:0 0 auto">Reset added</button></div>
-  <p class="small" id="geminiPoolStatus" style="min-height:16px">Asks Gemini for extra expert knowledge. It is saved in this browser and every AI reads it. Shortcut: F4.</p>
   <label class="l">Model</label>
   <select id="kimodel"></select>
   <p class="small">Your key stays only in this browser. If the free limit is hit, the app waits and retries, then switches to a lighter model by itself.</p>
  </div>
 <div class="kl" id="kilog"></div>
  <div class="row" style="margin-top:6px"><input id="kiin" class="field" placeholder="Just say what you want ..."><button class="btn hot" id="kigo" style="flex:0 0 auto;min-width:48px;font-size:18px">➤</button></div>
- <div class="card" id="rigcard" style="display:none;margin-top:8px"><h3>Photo parts (rig)</h3><div id="riglist"></div></div>
+ <div class="card" id="rigcard" style="display:none;margin-top:8px"><h3 id="rigtoggle" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center">Photo parts (rig)<span id="rigarrow">Show</span></h3><div id="riglist"></div></div>
   <div class="row" id="kitools" style="margin-top:8px"></div>
 </div>
 
@@ -861,8 +861,11 @@ let scrub=false;
 let _dirty=0;['input','change','click','pointerdown','pointerup','keydown','seeked','loadeddata','canplay','load'].forEach(ev=>addEventListener(ev,e=>{const t=e.target;if(t&&t.closest&&t.closest('#tabs'))return;_dirty=performance.now()+900},true));
 let _cache={};function setIf(id,prop,v){if(_cache[id+prop]===v)return;_cache[id+prop]=v;const e=$(id);if(e){if(prop==='v')e.value=v;else if(prop==='l')e.style.left=v;else e.textContent=v}}let _lp=-1;
 function tick(now){try{tick0(now)}catch(e){errOnce('Render',e)}requestAnimationFrame(tick)}
-function tick0(now){beatExtras();const dt=Math.min(.1,(now-S.last)/1000);S.last=now;
+function tick0(now){beatExtras();const dt=Math.min(S.exporting?1:.1,(now-S.last)/1000);S.last=now;
+ /* v43: Export-Wächter. Läuft nur, wenn etwas den Export pausiert hat, und beendet ihn sicher am Ende oder bei Zeitüberschreitung. */
+ if(S.exporting){if(!S.playing&&S.T<S.total-.06){S.playing=true;S.last=now;S.seg=-1}if(S.expT0&&now-S.expT0>Math.max(90000,S.total*15000)){st('Export took too long, saving what was recorded');finishExport()}}
  if(S.playing){S.T+=dt;followAudio();if(S.T>=S.total){if(S.exporting)finishExport();else{S.T=0;S.seg=-1;if(S.song)songEl.currentTime=0}}}
+ if(S.exporting&&S.total&&S.T>=S.total){finishExport();return}
  if(document.hidden&&!S.exporting)return;
  if(S.playing||S.exporting||scrub||now-(S.lr||0)>(now<_dirty?100:450)){S.lr=now;renderFrame(now)}
  if(S.exporting&&exportCanvas&&exportCtx){exportCtx.imageSmoothingEnabled=true;exportCtx.imageSmoothingQuality=$('exphq')?.checked?'high':'medium';exportCtx.clearRect(0,0,exportCanvas.width,exportCanvas.height);exportCtx.drawImage(cv,0,0,exportCanvas.width,exportCanvas.height)}
@@ -871,7 +874,7 @@ function tick0(now){beatExtras();const dt=Math.min(.1,(now-S.last)/1000);S.last=
  setIf('kfcurt','t',S.T.toFixed(2)+'s');
  const d=Math.max(S.total||S.song?.dur||10,1);
  setIf('kfplay','l',Math.min(100,Math.max(0,Math.round(S.T/d*1000)/10))+'%');
- if(S.exporting){const _p=Math.round(S.T/S.total*100);if(_p!==_lp){_lp=_p;st(`Rendering ${_p}% - keep this tab open`)}}else _lp=-1}
+ if(S.exporting){const _p=Math.round(S.T/S.total*100);if(_p!==_lp){_lp=_p;st(`Rendering ${_p}% - keep this tab open`);try{$('exp').textContent='Stop · '+_p+'%'}catch(e){}}}else _lp=-1}
 function play(){if(!S.segs.length)return st('Load clips first');try{initAudio()}catch(e){st('Audio unavailable: '+e.message);return}if(S.T>=S.total-.05)S.T=0;S.playing=true;S.last=performance.now();S.seg=-1;document.documentElement.classList.add('busy');$('play').textContent='❚❚'}
 function pause(){S.playing=false;document.documentElement.classList.remove('busy');S.clips.forEach(c=>c.v.pause());songEl.pause();$('play').textContent='▶'}
 $('play').onclick=()=>S.playing?pause():play();
@@ -882,6 +885,7 @@ function exportRestoreSize(){const p=exportPrev;exportPrev=null;if(p){try{setFor
 async function exportVid(){
  if(!S.segs.length)return st('Load clips first');
  if(!window.MediaRecorder)return st('Export is not supported by this browser. Please use Chrome or Edge.');
+ if(KI.busy){KI.stop=true;try{KI.ctl&&KI.ctl.abort()}catch(e){}st('AI stopped so the export can run cleanly');await new Promise(r=>setTimeout(r,500))}
  const scale=Math.max(720,Math.min(2160,+$('expres').value||1080)),EK=scale/Math.min(W,H),EW=2*Math.round(W*EK/2),EH=2*Math.round(H*EK/2);
  const fps=Math.max(1,Math.min(60,+$('expfps').value||30));
  const bitrate=Math.max(1000000,Math.min(50000000,+$('expq').value||22000000));
@@ -901,12 +905,12 @@ async function exportVid(){
   const candidates=pref==='mp4'?mp4:pref==='webm'?webm:[...mp4,...webm];
   const mime=candidates.find(m=>{try{return MediaRecorder.isTypeSupported(m)}catch(e){return false}});
   if(pref==='mp4'&&!mime)st('MP4 is not supported here - using WebM.');
-  mon.gain.value=0;S.T=0;S.seg=-1;S.exporting=true;
+  mon.gain.value=0;S.T=0;S.seg=-1;S.exporting=true;S.expT0=performance.now();
   rec=new MediaRecorder(stream,{...(mime?{mimeType:mime}:{}),videoBitsPerSecond:bitrate,audioBitsPerSecond:192000});chunks=[];
   rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);
   rec.onstop=()=>{
    const type=rec.mimeType||mime||'video/webm',ext=type.includes('mp4')?'mp4':'webm';
-   if(chunks.length){const u=URL.createObjectURL(new Blob(chunks,{type})),a=document.createElement('a');a.href=u;a.download=`ShoxyEditor-${EW}x${EH}-${S.vibe}.${ext}`;a.click();setTimeout(()=>URL.revokeObjectURL(u),60000);st(`Export fertig ${EW}×${EH} · ${fps} FPS · ${ext.toUpperCase()}`)}else st('Export wurde ohne Videodaten beendet');
+   if(chunks.length){const u=URL.createObjectURL(new Blob(chunks,{type})),a=document.createElement('a');a.href=u;a.download=`ShoxyEditor-${EW}x${EH}-${S.vibe}.${ext}`;a.click();setTimeout(()=>URL.revokeObjectURL(u),60000);st(`Export finished and downloaded: ${EW}×${EH} · ${fps} FPS · ${ext.toUpperCase()}`)}else st('Export ended without video data');
    exportStream?.getVideoTracks().forEach(t=>t.stop());exportStream=null;exportCanvas=null;exportCtx=null;if(mon)mon.gain.value=1;
    chunks=[];rec=null;exportRestoreSize();
   };
@@ -916,7 +920,7 @@ async function exportVid(){
   st(`Exporting: ${EW}×${EH} · ${fps} FPS - keep this tab open`);
  }catch(e){exportRestoreSize();S.exporting=false;pause();if(rec&&rec.state!=='inactive'){try{rec.stop()}catch(x){}}if(mon)mon.gain.value=1;exportStream?.getVideoTracks().forEach(t=>t.stop());exportStream=null;exportCanvas=null;exportCtx=null;$('exp').textContent='Export';st('Export could not start: '+e.message)}
 }
-function finishExport(){if(!S.exporting)return;S.exporting=false;pause();try{if(rec&&rec.state!=='inactive')rec.stop()}catch(e){errOnce('Export',e)}if(mon)mon.gain.value=1;S.T=0;S.seg=-1;$('exp').textContent='Export'}
+function finishExport(){if(!S.exporting)return;S.exporting=false;S.expT0=0;pause();try{if(rec&&rec.state!=='inactive')rec.stop()}catch(e){errOnce('Export',e)}if(mon)mon.gain.value=1;S.T=0;S.seg=-1;$('exp').textContent='Export'}
 $('exp').onclick=()=>S.exporting?finishExport():exportVid();
 /* ---------- Beat Analysis (Engine v2) ---------- */
 /* ===== BEAT ENGINE v2 : Spektralfluss + Tempogram-ACF + Joint-Fit + DP-Tracking + Attack-Feintiming + Downbeats + Drop ===== */
@@ -1111,7 +1115,7 @@ const ACT={tab:setTab,preset:applyPreset,
  tr:v=>{S.trans=v;rTrans()},fill:v=>{S.fill=v;rFill()},
  trtest:()=>{if(S.segs.length<2)return st('You need 2+ clips or Auto-Cut for this');S.T=Math.max(0,S.segs[1].start-.7);S.seg=-1;play()},
  mv:v=>{const[i,d]=v.split(',').map(Number),j=i+d;if(j<0||j>=S.clips.length)return;[S.clips[i],S.clips[j]]=[S.clips[j],S.clips[i]];build();rClips()},
-rm:v=>{if(S.exporting)return st('Erst Export stoppen');const c=S.clips.splice(+v,1)[0];if(!c)return;if(c.v?.pause)c.v.pause();try{c.source?.disconnect();c.g?.disconnect()}catch(e){}if(c.url&&!S.clips.some(o=>o.url===c.url))URL.revokeObjectURL(c.url);build();rClips()},
+rm:v=>{if(S.exporting)return st('Stop the export first');const c=S.clips.splice(+v,1)[0];if(!c)return;if(c.v?.pause)c.v.pause();try{c.source?.disconnect();c.g?.disconnect()}catch(e){}if(c.url&&!S.clips.some(o=>o.url===c.url))URL.revokeObjectURL(c.url);build();rClips()},
  tpl:v=>addText({...TPL[v]}),sel:v=>{S.sel=+v;rText()},
  font:v=>{S.font=v;loadFont(v);const L=S.texts[S.sel];if(L)L.font=v;rFonts()}};
 /* v21: Edit-History + lokales Autosave für Look/Text/Keyframes */
@@ -1301,9 +1305,7 @@ async function kiLoadModels(){
   st.textContent='Checking key ...';
   try{st.textContent=await P.testKey(KI.key);KI_LS('ki_key_'+KI.prov,KI.key);kiFillModels()}catch(e){st.textContent=e.message}
  };
- const gpb=$('geminiPoolBtn');if(gpb)gpb.onclick=kiAddGeminiKnowledge;
- const prb=$('poolResetBtn');if(prb)prb.onclick=()=>{KI_LS(KI_ADD_KEY,'');$('geminiPoolStatus').textContent='Added knowledge cleared. The built-in F4 pool stays.';kiPoolRefresh()};
- addEventListener('keydown',e=>{if(e.key==='F4'){e.preventDefault();try{setTab('ki');$('kicfg').style.display='block';kiPoolRefresh();$('kicfg').scrollIntoView({block:'nearest'})}catch(x){}}});
+  addEventListener('keydown',e=>{if(e.key==='F4'){e.preventDefault();try{setTab('ki');$('kicfg').style.display='block';kiPoolRefresh();$('kicfg').scrollIntoView({block:'nearest'})}catch(x){}}});
  kiSyncCfg();kiLoadModels();
 })();
 const kiAdd=(w,t)=>{const d=document.createElement('div');d.className='mb '+w;const msg=document.createElement('span');msg.textContent=t;const del=document.createElement('button');del.className='mbdel';del.type='button';del.title='Delete message';del.textContent='×';del.onclick=()=>d.remove();d.append(msg,del);$('kilog').append(d);$('kilog').scrollTop=$('kilog').scrollHeight;return d};
@@ -1536,17 +1538,10 @@ const KI_DEPT={
   ]}
 };
 /* ===== F4 SHARED FIXED POOL: fester Teil der Datei, immer verfuegbar, von allen KIs gelesen ===== */
-const KI_F4_TEXT="F4 SHARED FIXED POOL — one mind built from five working styles (Claude, ChatGPT, Gemini, DeepSeek, Grok). It is part of the file and always available. Facts from STATE, tools and images beat this pool; the user's request beats this pool.\n\n## COUNCIL PROTOCOL (all five styles in one pass, silently, no extra rounds)\n- Claude: understand the real goal, ground in STATE, plan small, verify honestly, report briefly. Honest over agreeable.\n- ChatGPT: turn the request into a checklist of requirements and exclusions. Negative limits (only, do not touch, nothing else) are hard borders. Test each requirement against the result at the end.\n- Gemini: use the whole context and every image. Describe only what is visible. Judge composition, legibility, continuity, color consistency.\n- DeepSeek: calculate, do not eyeball. Write the formula with units, check bounds, find the root cause when something fails, change one factor at a time.\n- Grok: first principles. What must happen on the timeline for the goal to be true? Say plainly if an idea is weak and give the stronger alternative. No polite fog.\n- Before answering, run one silent internal debate: proposer drafts the plan, critic attacks it (wrong target? shifted index? time outside clip? too many effects? unrequested change?), verifier checks numbers. Then act once.\n\n## SPEED AND ROUND DISCIPLINE\n- Simple request = one answer with all independent actions together, no questions, no long plan. Do not add a verification round for a trivial change.\n- Big request = short plan in think, then execute independent steps together, then one final check against the original wishes.\n- Never ask what slang means. Resolve it with the most plausible reading and state the assumption in half a sentence.\n- Keep think short and concrete (facts, plan, risks). Keep say to one to three sentences in the user's language and register.\n- Do not repeat an action that already shows in STATE. Plan only the difference between wish and state.\n\n## REQUEST DECODER\n- hook = strongest moment in the first 1 to 2 s. drop = where the beat hits hardest, put the biggest effect there. build = the bars before the drop, calmer, rising energy. outro/loop = last second matches the first.\n- on beat = effect starts at the beat time or 1 to 3 frames earlier (anticipation reads as tight). every beat = every beat; every 2 beats = every second beat.\n- smooth = ease in/out, longer transitions, fewer hard flashes. hard/aggressive = short, high contrast, hard cuts. clean = few effects, strong typography. crazy/insane = more layers but still readable, never all at once.\n- make it cooler / better with no detail = pick one clear style, apply 2 to 4 coordinated elements (cut rhythm, one look, one accent effect, sound shaping) and say what you chose.\n\n## STYLE PLAYBOOKS (use real effect IDs from the editor list; values are starting points to be checked in the preview)\n- Phonk: dark graded look (contrast up, saturation slightly down or red/cyan tinted), cowbell rhythm, zoom punch plus RGB split plus shake on hits (short, 3 to 8 frames), grain and vignette constant but light, glitch or whip transition on bar starts, slowed intro then hard drop.\n- Velocity / speed ramp: normal speed, ramp to 0.2 to 0.4x slow motion into the hit, snap back to 1.2 to 1.6x after it. Keep audio pitch logic in mind: slow motion on the clip audio sounds bad, usually mute clip audio and let the song carry. Ramps must land exactly on the beat.\n- Aura / sigma: dark, high contrast, slow push-in zoom (3 to 8 percent over the phrase), strong vignette, bass-heavy song, one big flash or zoom on the drop, minimal text.\n- Funk / Brazilian: fast beat zoom (5 to 12 percent) every beat or every second beat, glow on highlights, bright saturated color, character bounce or headbop on every beat, short flashes.\n- Shake edit: shake on the hit only, small amplitude, fast decay. Constant shake is cheap and hides the subject.\n- Glitch / digital: RGB split, scanline or pixel offset for 2 to 6 frames, glitch transition at the cut. Do not glitch the whole video continuously.\n- Cinematic / emotional: slower cuts (4 or 8 beats), soft contrast, slight warm or teal grade, long dissolves or fades, letterbox optional, no hard flashes, quiet sound design.\n- AMV / anime: cuts on strong beats and vocal accents, flash frames on punches, speed ramps on action, color pop on peaks, subtitle-style text when lyrics matter.\n- Gaming / sports hype: impact zoom on every kill or goal, slow motion on the key action, shake plus flash on impact, big readable text for score or name, snappy 0.1 to 0.2 s transitions.\n- Memory / vlog / travel: even rhythm, consistent warm grade, simple dissolves, a text title in the first second, light zoom push for life.\n- Lyric / text edit: each word group appears on its vocal beat, one font, high contrast, outline or shadow for legibility, animate in 0.1 to 0.2 s, hold for at least 0.6 s.\n- Character or cutout edit: cut out the character, keep the cutout layer aligned with the clip, put effects on the character layer (glow, RGB, shake, bounce) while the background stays calmer, so the subject pops.\n\n## BEAT AND TIMING MATH\n- beat length = 60 / BPM seconds. bar of 4 beats = 240 / BPM. beat n time = origin + n * 60 / BPM. At 140 BPM a beat is 0.4286 s, a bar is 1.714 s.\n- frame length = 1 / fps. At 30 fps one frame is 0.0333 s. Flash of 3 frames = 0.1 s. Anticipation of 2 frames = 0.067 s.\n- A cut every N beats gives segment length N * 60 / BPM. Clip speed s changes the timeline length of source material: timeline length = source length / s.\n- Check every time against 0..total and against clip borders. After split, delete, reorder or speed change, all later times and indices shift: re-read the timeline before the next dependent action.\n- Keep four speeds apart: clip playback speed, keyframe animation speed, shake or effect speed, music BPM. Changing one must not silently change another.\n- If BPM or beats are missing: run beat detection or ask for a look, otherwise use the song's tempo from the user, never invent beats.\n- Easing: ease-out for punches and zooms (fast start, soft landing), ease-in-out for pans and drifts, linear only for constant motion. A zoom punch is value 1.0 to 1.08 to 1.0 within 6 to 12 frames.\n\n## EFFECT BUDGET AND TASTE\n- 1 to 3 effects at a time. One idea per moment: if text, motion and color already fight, add nothing.\n- Intensity must follow the music: quiet bars low, drop high. Constant maximum reads as noise.\n- Match brightness, contrast and color between clips before adding stylized effects. One consistent look per edit.\n- Use effect length proportional to the hit: flash 2 to 4 frames, RGB split 0.1 to 0.5 s, shake 0.1 to 0.3 s, zoom punch 0.15 to 0.4 s, glitch 2 to 6 frames. Long effects look cheap.\n- Phone performance: many heavy effects on a long 1080p timeline can drop frames in the preview. Prefer fewer, shorter effects and tell the user if something is heavy.\n\n## AUDIO\n- Fade music in and out (0.3 to 1 s). Avoid clipping: keep peaks under 0 dB, target roughly -14 LUFS loudness for short social video.\n- Duck clip audio 6 to 12 dB when the song carries the edit. Cut audio 2 to 3 frames before the visual hit so it feels tight.\n- Cut music on a bar line, not in the middle of a beat. Loop points should land on the same beat position.\n- Do not claim you can download or rip songs. Songs are streamed and used in the edit only.\n\n## VERTICAL 9:16 AND TEXT\n- Keep faces, titles and action inside the central 80 percent. Leave the bottom 20 percent and top 8 percent free (app interface). Keep the original aspect ratio of the media unless the user asks otherwise.\n- Text: one strong font, high contrast, outline or soft shadow, readable for at least 0.6 s, max two lines, 6 to 8 words.\n\n## COLOR\n- Contrast 1.05 to 1.25 and saturation 0.9 to 1.2 are normal ranges. Beyond that, check skin tones and clipping in the preview.\n- Cool/teal shadows plus warm highlights read cinematic. Strong red or cyan tint reads phonk or glitch. Desaturate slightly for aura or sad edits.\n- Vignette 0.2 to 0.5, grain 0.1 to 0.3 for texture. Strong values hide the subject.\n\n## FAILURE CATALOGUE AND RECOVERY\n- Wrong target: effect applied to the whole timeline when only a clip or range was meant. Always set clip index and start/end when the wish is local.\n- Shifted index after split or delete. Time outside clip or outside 0..total. Speed ramp that changes total length and breaks later cuts.\n- Empty or truncated JSON: answer shorter, fewer fields, no prose outside the JSON.\n- Action ran but STATE did not change: the action had no effect. Find the cause (wrong id, wrong parameter, value out of range), do not report success.\n- Same action failed twice: change the approach, do not retry unchanged.\n- Rate limit or network loss: keep going from notes and STATE, do not restart the whole task.\n- Over-editing: user asked for one thing, five things changed. Undo the extras.\n\n## HONEST CAPABILITY RULES\n- Only use real actions, parameters and effect IDs. If a button is missing, build it with custom code, keyframes or overlay if the editor supports it, otherwise say plainly what is not possible and give the closest real alternative.\n- A fact you did not see is not a fact. Say what is verified, what is assumed, what is unknown. Never claim a visual result you could not inspect.\n- Never put API keys, personal data or private project content into notes, pool text or answers.\n\n## WORKING MEMORY\n- Use the notes field for long jobs: goal, plan, done, open, decisions, user preferences. After a break or reload, continue from notes and STATE instead of asking the user to repeat.\n- Treat user corrections as the highest-value information. Update the plan at once and never repeat a rejected approach.";
-const KI_ADD_KEY='shoxy_gemini_pool',KI_ADD_MAX=12000,KI_ADD_STORE_MAX=40000;
-function kiAddedText(){
- const t=KI_LS(KI_ADD_KEY);if(!t)return '';
- const parts=t.split(/(?=\[GEMINI-API-BEITRAG )/).filter(x=>x.trim());let out='',n=0;
- for(let i=parts.length-1;i>=0;i--){if(n+parts[i].length>KI_ADD_MAX)break;out=parts[i]+out;n+=parts[i].length}
- return out;
-}
+const KI_F4_TEXT="F4 SHARED FIXED POOL — one mind built from five working styles (Claude, ChatGPT, Gemini, DeepSeek, Grok). It is part of the file and always available. Facts from STATE, tools and images beat this pool; the user's request beats this pool.\n\n## HARD RULE: NEVER ADD EFFECTS THE USER DID NOT ASK FOR\n- Only change what the user asked. If the project has no effects, do not add any because a recipe in this pool suggests it. Style recipes (phonk, red shard, dark energy, and all others) are applied ONLY when the user names that style or asks to copy a reference. A reference video is a look to understand, not a default.\n- Remove-effects requests: remove means remove. Turn off global effects, clip effects, clip filters and beat events, reset the color look, add nothing. One short answer, no extra polishing.\n- If the user is unhappy that something was added, undo that addition first, then ask in one sentence what they want.\n\n## COUNCIL PROTOCOL (all five styles in one pass, silently, no extra rounds)\n- Claude: understand the real goal, ground in STATE, plan small, verify honestly, report briefly. Honest over agreeable.\n- ChatGPT: turn the request into a checklist of requirements and exclusions. Negative limits (only, do not touch, nothing else) are hard borders. Test each requirement against the result at the end.\n- Gemini: use the whole context and every image. Describe only what is visible. Judge composition, legibility, continuity, color consistency.\n- DeepSeek: calculate, do not eyeball. Write the formula with units, check bounds, find the root cause when something fails, change one factor at a time.\n- Grok: first principles. What must happen on the timeline for the goal to be true? Say plainly if an idea is weak and give the stronger alternative. No polite fog.\n- Before answering, run one silent internal debate: proposer drafts the plan, critic attacks it (wrong target? shifted index? time outside clip? too many effects? unrequested change?), verifier checks numbers. Then act once.\n\n## SPEED AND ROUND DISCIPLINE\n- Simple request = one answer with all independent actions together, no questions, no long plan. Do not add a verification round for a trivial change.\n- Big request = short plan in think, then execute independent steps together, then one final check against the original wishes.\n- Never ask what slang means. Resolve it with the most plausible reading and state the assumption in half a sentence.\n- Keep think short and concrete (facts, plan, risks). Keep say to one to three sentences in the user's language and register.\n- Do not repeat an action that already shows in STATE. Plan only the difference between wish and state.\n\n## REQUEST DECODER\n- hook = strongest moment in the first 1 to 2 s. drop = where the beat hits hardest, put the biggest effect there. build = the bars before the drop, calmer, rising energy. outro/loop = last second matches the first.\n- on beat = effect starts at the beat time or 1 to 3 frames earlier (anticipation reads as tight). every beat = every beat; every 2 beats = every second beat.\n- smooth = ease in/out, longer transitions, fewer hard flashes. hard/aggressive = short, high contrast, hard cuts. clean = few effects, strong typography. crazy/insane = more layers but still readable, never all at once.\n- make it cooler / better with no detail = pick one clear style, apply 2 to 4 coordinated elements (cut rhythm, one look, one accent effect, sound shaping) and say what you chose.\n\n## STYLE PLAYBOOKS (use real effect IDs from the editor list; values are starting points to be checked in the preview)\n- Phonk: dark graded look (contrast up, saturation slightly down or red/cyan tinted), cowbell rhythm, zoom punch plus RGB split plus shake on hits (short, 3 to 8 frames), grain and vignette constant but light, glitch or whip transition on bar starts, slowed intro then hard drop.\n- Velocity / speed ramp: normal speed, ramp to 0.2 to 0.4x slow motion into the hit, snap back to 1.2 to 1.6x after it. Keep audio pitch logic in mind: slow motion on the clip audio sounds bad, usually mute clip audio and let the song carry. Ramps must land exactly on the beat.\n- Aura / sigma: dark, high contrast, slow push-in zoom (3 to 8 percent over the phrase), strong vignette, bass-heavy song, one big flash or zoom on the drop, minimal text.\n- Funk / Brazilian: fast beat zoom (5 to 12 percent) every beat or every second beat, glow on highlights, bright saturated color, character bounce or headbop on every beat, short flashes.\n- Shake edit: shake on the hit only, small amplitude, fast decay. Constant shake is cheap and hides the subject.\n- Glitch / digital: RGB split, scanline or pixel offset for 2 to 6 frames, glitch transition at the cut. Do not glitch the whole video continuously.\n- Cinematic / emotional: slower cuts (4 or 8 beats), soft contrast, slight warm or teal grade, long dissolves or fades, letterbox optional, no hard flashes, quiet sound design.\n- AMV / anime: cuts on strong beats and vocal accents, flash frames on punches, speed ramps on action, color pop on peaks, subtitle-style text when lyrics matter.\n- Gaming / sports hype: impact zoom on every kill or goal, slow motion on the key action, shake plus flash on impact, big readable text for score or name, snappy 0.1 to 0.2 s transitions.\n- Memory / vlog / travel: even rhythm, consistent warm grade, simple dissolves, a text title in the first second, light zoom push for life.\n- Lyric / text edit: each word group appears on its vocal beat, one font, high contrast, outline or shadow for legibility, animate in 0.1 to 0.2 s, hold for at least 0.6 s.\n- Character or cutout edit: cut out the character, keep the cutout layer aligned with the clip, put effects on the character layer (glow, RGB, shake, bounce) while the background stays calmer, so the subject pops.\n\n## BEAT AND TIMING MATH\n- beat length = 60 / BPM seconds. bar of 4 beats = 240 / BPM. beat n time = origin + n * 60 / BPM. At 140 BPM a beat is 0.4286 s, a bar is 1.714 s.\n- frame length = 1 / fps. At 30 fps one frame is 0.0333 s. Flash of 3 frames = 0.1 s. Anticipation of 2 frames = 0.067 s.\n- A cut every N beats gives segment length N * 60 / BPM. Clip speed s changes the timeline length of source material: timeline length = source length / s.\n- Check every time against 0..total and against clip borders. After split, delete, reorder or speed change, all later times and indices shift: re-read the timeline before the next dependent action.\n- Keep four speeds apart: clip playback speed, keyframe animation speed, shake or effect speed, music BPM. Changing one must not silently change another.\n- If BPM or beats are missing: run beat detection or ask for a look, otherwise use the song's tempo from the user, never invent beats.\n- Easing: ease-out for punches and zooms (fast start, soft landing), ease-in-out for pans and drifts, linear only for constant motion. A zoom punch is value 1.0 to 1.08 to 1.0 within 6 to 12 frames.\n\n## EFFECT BUDGET AND TASTE\n- 1 to 3 effects at a time. One idea per moment: if text, motion and color already fight, add nothing.\n- Intensity must follow the music: quiet bars low, drop high. Constant maximum reads as noise.\n- Match brightness, contrast and color between clips before adding stylized effects. One consistent look per edit.\n- Use effect length proportional to the hit: flash 2 to 4 frames, RGB split 0.1 to 0.5 s, shake 0.1 to 0.3 s, zoom punch 0.15 to 0.4 s, glitch 2 to 6 frames. Long effects look cheap.\n- Phone performance: many heavy effects on a long 1080p timeline can drop frames in the preview. Prefer fewer, shorter effects and tell the user if something is heavy.\n\n## AUDIO\n- Fade music in and out (0.3 to 1 s). Avoid clipping: keep peaks under 0 dB, target roughly -14 LUFS loudness for short social video.\n- Duck clip audio 6 to 12 dB when the song carries the edit. Cut audio 2 to 3 frames before the visual hit so it feels tight.\n- Cut music on a bar line, not in the middle of a beat. Loop points should land on the same beat position.\n- Do not claim you can download or rip songs. Songs are streamed and used in the edit only.\n\n## VERTICAL 9:16 AND TEXT\n- Keep faces, titles and action inside the central 80 percent. Leave the bottom 20 percent and top 8 percent free (app interface). Keep the original aspect ratio of the media unless the user asks otherwise.\n- Text: one strong font, high contrast, outline or soft shadow, readable for at least 0.6 s, max two lines, 6 to 8 words.\n\n## COLOR\n- Contrast 1.05 to 1.25 and saturation 0.9 to 1.2 are normal ranges. Beyond that, check skin tones and clipping in the preview.\n- Cool/teal shadows plus warm highlights read cinematic. Strong red or cyan tint reads phonk or glitch. Desaturate slightly for aura or sad edits.\n- Vignette 0.2 to 0.5, grain 0.1 to 0.3 for texture. Strong values hide the subject.\n\n## FAILURE CATALOGUE AND RECOVERY\n- Wrong target: effect applied to the whole timeline when only a clip or range was meant. Always set clip index and start/end when the wish is local.\n- Shifted index after split or delete. Time outside clip or outside 0..total. Speed ramp that changes total length and breaks later cuts.\n- Empty or truncated JSON: answer shorter, fewer fields, no prose outside the JSON.\n- Action ran but STATE did not change: the action had no effect. Find the cause (wrong id, wrong parameter, value out of range), do not report success.\n- Same action failed twice: change the approach, do not retry unchanged.\n- Rate limit or network loss: keep going from notes and STATE, do not restart the whole task.\n- Over-editing: user asked for one thing, five things changed. Undo the extras.\n\n## HONEST CAPABILITY RULES\n- Only use real actions, parameters and effect IDs. If a button is missing, build it with custom code, keyframes or overlay if the editor supports it, otherwise say plainly what is not possible and give the closest real alternative.\n- A fact you did not see is not a fact. Say what is verified, what is assumed, what is unknown. Never claim a visual result you could not inspect.\n- Never put API keys, personal data or private project content into notes, pool text or answers.\n\n## WORKING MEMORY\n- Use the notes field for long jobs: goal, plan, done, open, decisions, user preferences. After a break or reload, continue from notes and STATE instead of asking the user to repeat.\n- Treat user corrections as the highest-value information. Update the plan at once and never repeat a rejected approach.\n## REFERENCE EDITS FROM THE USER (skibidi / titan style TikTok edits; recreate this look with real editor effects)\n- RED SHARD EDIT (reference: red, white and black titan video, landscape): palette is only red, pink, white and black. Build it with duotone (red/black) or strong saturation plus posterize, mirror and glitch slices for the angular shard look, pixelate or mosaic bursts of 2 to 6 frames as blocky glitch bands, invert hit for 1 to 3 frames on the drop (picture flips to white/gray), light streaks (lines) as sunburst rays, rgb split and shake on every hit. Cuts every beat or every second beat from the drop on. Transitions: glitch, pixel, mosaic, whip. Angular wedge slices that each show a shifted or mirrored copy are not a single built-in effect: approximate with glitch slices plus mirror, or build a custom effect with code, and tell the user it is an approximation.\n- DARK ENERGY EDIT (reference: black and gray titan with purple energy core, square): low-key look, saturation 0.3 to 0.6, contrast 1.2 to 1.35, vignette 0.4 to 0.6, grain 0.15 to 0.3, so the picture is nearly monochrome. Accent colors only on energy: glow on the core, purple tint on that spot (duotone or hue), flicker for lightning moments, light streaks or lens flare for beams, short flash or strobe 2 frames on explosions, dust or trail for smoke. Slow push-in zoom 3 to 8 percent per phrase, hard zoom punch on impacts. Change the tint per section (cold, then warm/sepia for the beam) to signal a new phase. Dip to black for 0.2 to 0.5 s between sections and end on black.\n- Apply these recipes only when the user asks for that style. Both references: sections matter. Teaser (calm, dark, slow), build (cuts speed up), drop (invert, flash, biggest effects), release (calm look for 1 to 2 bars), end (black or loop). Effects stay short and land on the beat, the character stays readable.\n- Skibidi universe: characters are cutouts or footage, use cutout and put glow, rgb and shake on the character layer. TV head characters have a bright screen, so glow and bloom there make the look. Use the character knowledge section for who is who.\n";
 function kiPoolRefresh(){
  const el=$('f4Status');if(!el)return;
- el.textContent='F4 shared fixed pool: '+KI_F4_TEXT.length.toLocaleString()+' characters, built in. Departments: '+Object.keys(KI_DEPT).map(k=>KI_DEPT[k].title).join(', ')+'. Added by Gemini API: '+KI_LS(KI_ADD_KEY).length.toLocaleString()+' characters.';
+ el.textContent='F4 shared fixed pool: '+KI_F4_TEXT.length.toLocaleString()+' characters, built in and connected automatically. Every AI reads it together with the knowledge of '+Object.keys(KI_DEPT).map(k=>KI_DEPT[k].title).join(', ')+'.';
 }
 function kiDeptText(lean){
  const P=AI_PROVIDERS[KI.prov],k=(P&&P.dept)||KI.prov,d=KI_DEPT[k],c=KI_DEPT.claude;
@@ -1557,42 +1552,12 @@ function kiDeptText(lean){
    const dept=KI_DEPT[key];
    if(dept&&Array.isArray(dept.info)&&dept.info.length)t+='\n--- '+dept.title.toUpperCase()+' ---\n'+dept.info.join('\n');
   }
-  const added=kiAddedText();
-  if(added)t+='\n--- ADDITIONAL CONTRIBUTIONS CREATED BY THE GEMINI API (saved in this browser) ---\n'+added;
  }
  t+='\n\n=== SHARED WORKING METHOD: CLAUDE ===\n'+c.how;
  if(d&&k!=='claude')t+='\n\n=== YOUR OWN DEPARTMENT: '+d.title.toUpperCase()+' ===\n'+d.how;
  return t+'\n\n';
 }
 try{kiPoolRefresh()}catch(e){}
-async function kiAddGeminiKnowledge(){
- const status=$('geminiPoolStatus'),btn=$('geminiPoolBtn');
- const key=KI.keys.gemini||KI_LS('ki_key_gemini')||(GEMINI_KEY||'');
- if(!key){status.textContent='Select Gemini as AI provider and save your Gemini key first.';return}
- if(KI.busy){status.textContent='The AI is working right now. Try again when it is done.';return}
- const prevProv=KI.prov;
- btn.disabled=true;status.textContent='Gemini is writing an extra knowledge contribution ...';
- const old=KI_LS(KI_ADD_KEY);
- const prompt=[
-  'You are contributing specialist knowledge as Google Gemini to a shared knowledge pool for ShoxyEditor, a browser-based mobile video editor.',
-  'The pool already covers: hook/drop/rhythm, beat math, effect budget, style playbooks (phonk, velocity, aura, funk, shake, glitch, cinematic, AMV, gaming, vlog, lyric, cutout), audio basics, 9:16 safe areas, color, failure recovery. Do NOT repeat those basics.',
-  'Add NEW, concrete material in your areas of strength: reading frames and judging composition, subject tracking logic, continuity and match cuts, pacing for different platforms, text/caption timing, color matching between clips, quality checks before export, common mistakes of AI editors and how to avoid them.',
-  'Give concrete rules with numbers where possible. No generic advice, no claims about hidden model weights, no user data, no keys. This is knowledge, not an edit instruction.',
-  'Write in English as compact bullet points under short headings. Maximum 1500 words. Return only the contribution text.'
- ].join('\n');
- try{
-  KI.prov='gemini';
-  const result=await callAny({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{temperature:.35,maxOutputTokens:8192,thinkingConfig:{thinkingLevel:'low'}}});
-  const contribution=(result.candidates?.[0]?.content?.parts||[]).filter(x=>!x.thought).map(x=>x.text||'').join('\n').trim();
-  if(contribution.length<300)throw new Error('Gemini did not return a long enough contribution.');
-  if(old&&old.includes(contribution.slice(0,300)))throw new Error('This contribution is already in the pool.');
-  let merged=(old?old+'\n\n':'')+'[GEMINI-API-BEITRAG '+new Date().toISOString()+']\n'+contribution;
-  while(merged.length>KI_ADD_STORE_MAX){const i=merged.indexOf('[GEMINI-API-BEITRAG ',10);if(i<0)break;merged=merged.slice(i)}
-  KI_LS(KI_ADD_KEY,merged);
-  status.textContent='Saved. '+contribution.length.toLocaleString()+' characters added to the shared pool for all AIs.';
- }catch(e){status.textContent='Not saved: '+(e.message||String(e));}
- finally{KI.prov=prevProv;btn.disabled=false;kiPoolRefresh()}
-}
 const SYS=()=>BRAIN+kiDeptText()+`You are Shoxy AI, an expert mobile video-editing assistant built into this editor. Be concise, practical, and technically accurate. You answer in the language the user writes in, from the very first message on (see LANGUAGE).
 BÜRO (intern, erwähne es dem Nutzer gegenüber nie): Du hast ein eigenes Büro mit Notizbuch, das auch nach Verbindungsabbruch oder Neuladen erhalten bleibt. Aktueller Inhalt: ${KI.notes||'(noch leer)'}\nSchreibe bei mehrstufigen oder längeren Aufgaben im JSON-Feld "notes" fortlaufend den kompletten neuen Notizstand (Ziel, Plan, erledigte und offene Schritte, Entscheidungen, Vorlieben des Nutzers, max. 1500 Zeichen). Nach einem Abbruch machst du anhand der Notizen und STATE genau dort weiter, ohne von vorn zu beginnen.
 PERSONALITY: Act like an experienced professional editor and creative director: friendly, direct, confident, honest. Never use emojis. Never claim an edit succeeded unless the editor confirms it.
@@ -2165,6 +2130,7 @@ function rigApply(o){
 function rigSig(r){
  return r?{on:r.on,parts:r.parts.map(p=>({name:p.name,box:p.box,poly:p.poly?'poly'+p.poly.length:null,pivot:p.pivot,feather:p.feather,overlap:p.overlap,erase:p.erase,on:p.on,motion:p.motion}))}:null;
 }
+(function(){try{const c=document.getElementById('rigcard');if(!c)return;const set=m=>{c.classList.toggle('min',m);document.getElementById('rigarrow').textContent=m?'Show':'Hide';try{localStorage.setItem('shoxy_rig_min',m?'1':'0')}catch(e){}};set((localStorage.getItem('shoxy_rig_min')||'1')!=='0');document.getElementById('rigtoggle').onclick=()=>set(!c.classList.contains('min'))}catch(e){}})();
 function renderRigList(){
  const root=$('riglist'),card=$('rigcard');if(!root||!card)return;
  const hs=allRigHolders().filter(x=>x.h.rig&&x.h.rig.parts.length);
@@ -2381,6 +2347,38 @@ function parseAI(txt){
  const t=txt.trim().replace(/^```(?:json)?\s*/i,'').replace(/```\s*$/,'').trim();
  try{return JSON.parse(t)}catch(e){const a=t.indexOf('{'),b=t.lastIndexOf('}');if(a>=0&&b>a)return JSON.parse(t.slice(a,b+1));throw new Error('KI-Antwort war kein gültiges JSON')}
 }
+
+/* v42: sofortiger lokaler Befehl "alle Effekte entfernen" (kein KI-Aufruf, sichtbare Schritte) */
+const kiIsClearFx=q=>{
+ if(q.length>90)return false;
+ if(/\b(au[sß]er|except|but|nur|only|bis auf|aber|ein|an|on|hinzu\w*|add|f[uü]g\w*|apply|aktivier\w*|erstell\w*|create|make)\b/i.test(q))return false;
+ const target=/\b(effekt\w*|effects?|fx|filter\w*)\b/i,all=/\b(alle[nrms]?|all|every|jeden|s[aä]mtliche\w*)\b/i,verb=/\b(entfern\w*|l[oö]sch\w*|wegmachen|weg|raus|ab|aus|remove|delete|clear|reset|disable|strip|off|nimm|nehm\w*|schalt\w*|zur[uü]ck\w*)\b/i;
+ return target.test(q)&&verb.test(q)&&(all.test(q)||(/\b(effekte|effects)\b/i.test(q)&&q.trim().split(/\s+/).length<=5));
+};
+async function kiClearAllEffects(q){
+ kiBusy(true);
+ try{
+  kiStep('Understood','Remove ALL effects. This is done locally, no AI call, so it is instant.');
+  const g=[...S.fx];
+  kiStep('Global effects',g.length?'Turning off '+g.length+': '+g.join(', '):'None were on');
+  S.fx=new Set();S.fxp={};S.fxi={};
+  const evN=(S.ev||[]).filter(e=>['flash','zoom','reverse'].includes(e.type)).length;
+  S.ev=(S.ev||[]).filter(e=>!['flash','zoom','reverse'].includes(e.type));
+  kiStep('Beat events',evN?evN+' flash/zoom/reverse events removed':'None set');
+  let cfx=0,cflt=0;
+  S.clips.forEach(c=>{if(c.fx&&c.fx.length){cfx+=c.fx.length;c.fx=[]}if(c.flt){c.flt=undefined;cflt++}});
+  kiStep('Per-clip effects',cfx||cflt?cfx+' clip effects and '+cflt+' clip filters removed':'None set');
+  const look=S.bright!==1||S.contrast!==1||S.sat!==1||S.hue!==0;
+  S.bright=1;S.contrast=1;S.sat=1;S.hue=0;S.vibe='custom';
+  kiStep('Color look',look?'Brightness, contrast, saturation and hue reset to neutral':'Already neutral');
+  try{build()}catch(e){}try{syncUI()}catch(e){}try{rFx()}catch(e){}try{rPresets()}catch(e){}try{rClips()}catch(e){}
+  kiTrailFreeze();
+  const n=g.length+evN+cfx+cflt;
+  const msg=n||look?'All effects are removed ('+g.length+' global, '+evN+' beat events, '+(cfx+cflt)+' on clips'+(look?', color look reset':'')+'). Transitions and text were not touched. Undo brings everything back.':'There were no effects on the project, nothing to remove.';
+  kiAdd('ai',msg);KI.h.push({role:'user',parts:[{text:q}]},{role:'model',parts:[{text:msg}]});
+ }catch(e){kiTrailFreeze();kiAdd('ai','Could not remove the effects: '+e.message)}
+ kiBusy(false);officeSave();
+}
 async function kiSend(){
  const q=$('kiin').value.trim();if(!q)return;$('kiin').value='';kiAdd('me',q);try{pushHistory()}catch(e){}
  // Instant local greeting: no model round-trip for ordinary greetings.
@@ -2388,6 +2386,8 @@ async function kiSend(){
   const reply=/^(good morning)/i.test(q)?'Good morning. What are we editing today?':'Hey! What are we editing today?';
   kiAdd('ai',reply);KI.h.push({role:'user',parts:[{text:q}]},{role:'model',parts:[{text:reply}]});officeSave?.();return;
  }
+ if(S.exporting){kiAdd('ai','An export is running. I will not touch the project until it is finished. Wait for it or press Stop.');return}
+ if(kiIsClearFx(q)){await kiClearAllEffects(q);return}
  // Lightweight knowledge questions use one short Flash response, without project screenshots,
  // long planning, or the multi-round edit verification loop.
  if(/^(what is|what does|explain|define|how do i|how does|what'?s the difference|why does|was ist|was bedeutet|was macht|erkl[aä]re?|wie funktioniert|wie geht|was ist der unterschied)\b/i.test(q) &&
@@ -2439,7 +2439,7 @@ async function kiSend(){
  if(quick&&/\b(head ?bop|head ?bang|kopf ?nicken|kopfnicken)\b/i.test(q)){
   let hs=[];try{hs=rigTargets('photos')}catch(e){}
   if(hs.length){
-   try{await prepVideo({target:'photos'});const msg=rigApply({target:'photos',part:'head',motion:'pro',body:.9,bodySpan:.92,blur:0,plug:0,overlap:.26,feather:.06});S.fx.delete('headbop');rFx();kiAdd('ai','Headbop applied: the head moves, torso and arms follow softly and the legs get the follow-through. No ghost or shadow overlay copies.\n'+msg);localNote='\n[LOKAL BEREITS ANGEWENDET: '+msg+'. Prüfe mit Quellfoto und Kontrollbild, ob die rote Box den ganzen Kopf trifft. Wenn nicht, korrigiere per rig mit exakter box oder poly. Wenn ja, antworte nur kurz mit do:[] und noop:true.]'}catch(e){kiAdd('ai',''+e.message)}
+   try{await prepVideo({target:'photos'});const msg=rigApply({target:'photos',part:'head',motion:'pro',body:.9,bodySpan:.92,blur:0,plug:0,overlap:.26,feather:.06});S.fx.delete('headbop');rFx();kiAdd('ai','Headbop applied: the head moves, torso and arms follow softly and the legs get the follow-through. No ghost or shadow overlay copies.\n'+msg);KI.h.push({role:'user',parts:[{text:q}]},{role:'model',parts:[{text:'Headbop applied locally.'}]});officeSave();kiAdd('ai','If the red box does not cover the whole head, tell me and I will correct it.');return}catch(e){kiAdd('ai',''+e.message)}
   }else{
    S.fx.add('headbop');syncUI();rFx();
    kiAdd('ai','No photo found in the project, so I only turned on the whole-frame headbop (the full clip bounces). For head-only, import a photo as a clip or overlay first.');
@@ -2458,23 +2458,23 @@ async function kiSend(){
    const before=stateSig(),beforeSnap=JSON.parse(JSON.stringify(snap()));
    const hist=KI.h.slice(-24);while(hist.length&&hist[0].role!=='user')hist.shift();
    const contents=[...hist,{role:'user',parts:[{text:userText+'\n\nSTATE:'+JSON.stringify(snap())},...imgParts]}];
-   const j=await callAny({systemInstruction:{parts:[{text:SYS()}]},contents,generationConfig:{responseMimeType:'application/json',temperature:.4,topP:.95,maxOutputTokens:32768,thinkingConfig:{thinkingLevel:planFirst?'medium':'low'}}});
-   const cand=j.candidates?.[0],rawTxt=(cand?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join('');
+   const t0=Date.now();kiStep('Asking AI','Round '+(round+1)+' of max 10, model '+KI.model);const j=await callAny({systemInstruction:{parts:[{text:SYS()}]},contents,generationConfig:{responseMimeType:'application/json',temperature:.4,topP:.95,maxOutputTokens:32768,thinkingConfig:{thinkingLevel:planFirst?'medium':'low'}}});
+   kiStep('AI answered','in '+((Date.now()-t0)/1000).toFixed(1)+' s');const cand=j.candidates?.[0],rawTxt=(cand?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join('');
    if(!rawTxt){if(round<3){userText='[SYSTEM-RÜCKMELDUNG, nicht vom Nutzer] Leere Antwort ('+(cand?.finishReason||j.promptFeedback?.blockReason||'unbekannt')+'). Antworte erneut NUR mit kurzem JSON.';imgParts=kiImages(true);continue}throw new Error('Leere KI-Antwort ('+(cand?.finishReason||j.promptFeedback?.blockReason||'unbekannt')+')')}
    let o;try{o=parseAI(rawTxt)}catch(pe){
     /* v10: abgeschnittenes/kaputtes JSON crasht nicht mehr, die KI bekommt einen zweiten Versuch */
     if(round>=3)throw pe;
     userText='[SYSTEM-RÜCKMELDUNG, nicht vom Nutzer] Deine letzte Antwort war kein gültiges bzw. vollständiges JSON ('+pe.message+'). Antworte erneut NUR mit dem JSON, kürzer, ohne Erklärtext.';imgParts=kiImages(true);continue;
    }
-   if(o.think&&String(o.think).trim()){kiStep('Denkt', String(o.think).trim().slice(0,700))}
+   if(o.think&&String(o.think).trim()){kiStep('Thinking', String(o.think).trim().slice(0,700))}
    if(typeof o.notes==='string'){setNotes(o.notes.slice(0,3000))}officeSave();
    const acts=Array.isArray(o.do)?o.do:[],res=[];
    for(const x of acts){
     if(KI.stop)break;
     const label=String(x.a||'aktion').replace(/_/g,' ');
-    kiStep('Macht', label);
+    kiStep('Doing', label+(x.v===undefined?'':' '+(typeof x.v==='string'?x.v:JSON.stringify(x.v)).slice(0,160)));
     const f=DO[x.a];
-    if(!f){const row={a:x.a,ok:false,m:'unbekannte Aktion'};res.push(row);allRes.push(row);kiStep('Unbekannt', label);continue}
+    if(!f){const row={a:x.a,ok:false,m:'unbekannte Aktion'};res.push(row);allRes.push(row);kiStep('Unknown action', label);continue}
     try{const r=await f(x.v);const row={a:x.a,ok:true,m:r===undefined||r===null?'':String(r).slice(0,500)};res.push(row);allRes.push(row);if(row.m)kiStep(label, row.m.slice(0,180))}
     catch(e){const row={a:x.a,ok:false,m:e.message};res.push(row);allRes.push(row);kiStep('Error', label+': '+e.message)}
    }
@@ -3166,6 +3166,9 @@ $$('expgo').onclick=()=>{setTab('none');exportVid()};
 /* Quick-Edits wandern zu "Looks" */
 TLX.panel();
 })();
+
+/* v43: KI darf Wiedergabe/Export nicht anfassen, solange exportiert wird */
+['play','pause','seek','export'].forEach(k=>{const f=DO[k];if(typeof f==='function')DO[k]=function(...a){if(S.exporting)throw new Error('An export is running. Wait until it is finished.');return f.apply(this,a)}});
 </script>
 
 
