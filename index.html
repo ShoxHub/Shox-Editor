@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ShoxyEditor v69 fix · perf+ai</title>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ShoxyEditor</title>
 <style>
 :root{color-scheme:dark;--pink:#3b82ff;--vio:#22d3ee;--cy:#62e6ff;--line:#2a2a47;--mut:#9a9cbc;--grad:linear-gradient(100deg,#3b82ff,#22d3ee)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -5082,6 +5082,381 @@ header:after,.auto,.logo b,#play{animation:none!important}
   } catch (e) {}
 
   log('Performance + AI patches active');
+})();
+</script>
+
+
+<script id="shoxy-v70-smooth">
+(() => {
+  // Playback was freezing because every frame rewrote playbackRate and, once
+  // the clock drifted a fraction of a second, assigned video.currentTime.
+  // That flushes the decoder (seeking=true) and drawFrame then refuses to
+  // paint — so the preview sticks. Clips also lived off-DOM, which stalls
+  // decoding on phones. This keeps the video element on screen and only seeks
+  // when the user scrubs or the drift is actually large.
+  const now = () => performance.now();
+  const rateMem = new WeakMap();
+  const seekMem = new WeakMap();
+
+  function wantedRate(g, t, hit) {
+    const ramp = typeof has === "function" && has("ramp");
+    const spvN = typeof spv === "function" ? spv(g, t) : 1;
+    const base = (S.speed || 1) * (g.c.spd || 1) * (spvN || 1) * (ramp ? 0.4 + 1.2 * (1 - (hit || 0)) : 1);
+    return Math.min(16, Math.max(0.1, base));
+  }
+
+  function clampSrc(v, tg) {
+    const dur = v && v.duration;
+    if (dur && isFinite(dur) && dur > 0.1) return Math.max(0, Math.min(tg, Math.max(0, dur - 0.05)));
+    return Math.max(0, tg);
+  }
+
+  function targetOf(g, t, v) {
+    let tg;
+    try { tg = tgt(g, t - g.start); } catch (e) { tg = g.src || 0; }
+    tg = clampSrc(v, tg);
+    // The source mapper wraps to the in-point ~50ms before the out-point.
+    // Seeking back there restarts the clip and looks like a freeze. Hold.
+    if (v && isFinite(v.currentTime)) {
+      const local = t - g.start;
+      const nearEnd = g.len - local < 0.09;
+      if (nearEnd && v.currentTime > tg + 0.25) tg = v.currentTime;
+    }
+    return tg;
+  }
+
+  function setRate(v, rate) {
+    const mem = rateMem.get(v) || { rate: -1, at: 0 };
+    const t = now();
+    if (Math.abs(mem.rate - rate) < 0.03 && t - mem.at < 160) return;
+    if (Math.abs((v.playbackRate || 1) - rate) < 0.02) {
+      rateMem.set(v, { rate, at: t });
+      return;
+    }
+    try { v.playbackRate = rate; } catch (e) {}
+    rateMem.set(v, { rate, at: t });
+  }
+
+  function setPitch(v, on) {
+    try { if (v.preservesPitch !== on) v.preservesPitch = on; } catch (e) {}
+  }
+
+  function seekTo(v, tg, minGap) {
+    const mem = seekMem.get(v) || { at: 0, tg: null };
+    const t = now();
+    if (v.seeking) return false;
+    if (Math.abs((v.currentTime || 0) - tg) < 0.045) return false;
+    if (mem.tg != null && Math.abs(mem.tg - tg) < 0.03 && t - mem.at < minGap) return false;
+    if (t - mem.at < minGap) return false;
+    try {
+      v.currentTime = tg;
+      seekMem.set(v, { at: t, tg });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function syncGain(c, t) {
+    if (!c || !c.g) return;
+    let f = 1;
+    const lt = t - (c._s || 0);
+    const L = (c._e || 0) - (c._s || 0);
+    if (c.afi > 0) f = Math.min(f, lt / c.afi);
+    if (c.afo > 0 && L > 0) f = Math.min(f, (L - lt) / c.afo);
+    const gv = (S.clipVol ?? 1) * (c.vol ?? 1) * Math.max(0, Math.min(1, f));
+    if (Math.abs(c.g.gain.value - gv) > 0.012) c.g.gain.value = gv;
+  }
+
+  function syncSong(t) {
+    if (!S.song || typeof songEl === "undefined" || !songEl) return;
+    try {
+      const sp = S.songSpeed || 1;
+      if (S.playing) {
+        if (Math.abs((songEl.playbackRate || 1) - sp) > 0.02) songEl.playbackRate = sp;
+        if (songEl.paused && t * sp < (songEl.duration || 1e9)) songEl.play().catch(() => {});
+        if (!songEl.seeking && Math.abs(songEl.currentTime - t * sp) > Math.max(0.45, 0.35 * sp)) {
+          songEl.currentTime = Math.max(0, t * sp);
+        }
+      } else if (!songEl.paused) songEl.pause();
+    } catch (e) {}
+  }
+
+  try {
+    syncVid = function (g, t, hit) {
+      if (!g || !g.c) return;
+      if (g.c.photo) return;
+      const v = g.c.v;
+      if (!v || v.tagName !== "VIDEO") return;
+      const rv = (typeof has === "function" && (has("reverse") || has("rewind"))) || (typeof revSeg === "function" && revSeg(g));
+      const tg = targetOf(g, t, v);
+      const base = wantedRate(g, t, hit);
+      const wantPitch = g.c.tone !== false;
+      try { syncGain(g.c, t); } catch (e) {}
+
+      if (rv) {
+        try { if (!v.paused) v.pause(); } catch (e) {}
+        seekTo(v, tg, 70);
+        setPitch(v, wantPitch);
+        syncSong(t);
+        return;
+      }
+
+      if (S.playing) {
+        const err = (v.currentTime || 0) - tg;
+        const big = Math.abs(err) > 0.72;
+        if (big) seekTo(v, tg, S.exporting ? 280 : 900);
+        let rate = base;
+        if (!big && v.readyState >= 2 && !S.exporting) {
+          const corr = Math.max(-0.12, Math.min(0.12, -err * 0.45));
+          rate = Math.min(16, Math.max(0.1, base * (1 + corr)));
+        }
+        setRate(v, rate);
+        setPitch(v, wantPitch);
+        if (v.paused && !v.seeking) v.play().catch(() => {});
+      } else {
+        try { if (!v.paused) v.pause(); } catch (e) {}
+        setPitch(v, wantPitch);
+        seekTo(v, tg, 48);
+      }
+      syncSong(t);
+    };
+  } catch (e) { console.warn("[Shoxy v70] syncVid", e); }
+
+  try {
+    activate = function (i) {
+      try { PV.globalAlpha = 1; PV.drawImage(fc, 0, 0); } catch (e) {}
+      S.useTr = S.playing && S.seg >= 0 && i === S.seg + 1;
+      const pool = TR.filter((x) => x[0] !== "cut" && x[0] !== "random");
+      S.curTr = S.trans === "random" ? pool[(Math.random() * pool.length) | 0][0] : S.trans;
+      S.curTd = 0;
+      const et = (S.ev || []).find((e) => e.type === "trans" && Math.abs(e.t - S.segs[i].start) < 0.06);
+      if (et) { S.curTr = et.id; S.curTd = et.dur || 0; }
+      S.seg = i;
+      const g = S.segs[i];
+      if (g && g.first && g.c && g.c.tr && i > 0) { S.curTr = g.c.tr.id; S.curTd = g.c.tr.dur || 0; }
+      const activeV = g && g.c && g.c.v;
+      S.clips.forEach((c) => {
+        if (!c || c.photo || !c.v || c.v.tagName !== "VIDEO") return;
+        try {
+          if (c.v !== activeV) {
+            c.v.pause();
+            c.v.preload = "metadata";
+          } else {
+            c.v.preload = "auto";
+            c.v.playsInline = true;
+            c.v.setAttribute("playsinline", "");
+            c.v.setAttribute("webkit-playsinline", "");
+          }
+        } catch (e) {}
+      });
+      if (g && g.c && !g.c.photo && g.c.v && g.c.v.tagName === "VIDEO") {
+        const v = g.c.v;
+        let tg;
+        try { tg = tgt(g, S.T - g.start); } catch (e) { tg = g.src || 0; }
+        tg = clampSrc(v, tg);
+        // A seek of a few milliseconds still flushes the decoder. Skip it.
+        if (!v.seeking && Math.abs((v.currentTime || 0) - tg) > 0.12) {
+          try { v.currentTime = tg; seekMem.set(v, { at: now(), tg }); } catch (e) {}
+        }
+      }
+    };
+  } catch (e) { console.warn("[Shoxy v70] activate", e); }
+
+  try {
+    followAudio = function () {
+      if (!S.song || typeof songEl === "undefined" || !songEl) return;
+      if (songEl.paused || songEl.seeking || songEl.readyState < 2 || songEl.currentTime < 0.05) return;
+      const sp = S.songSpeed || 1;
+      const lat = (typeof AC !== "undefined" && AC && !S.exporting) ? (AC.outputLatency || 0) : 0;
+      const diff = songEl.currentTime / sp - lat - S.T;
+      // Never yank the timeline to the song. That desynced the picture and
+      // triggered a seek, which is the freeze. Nudge the song instead.
+      if (Math.abs(diff) > 0.4) {
+        try { songEl.currentTime = Math.max(0, (S.T + lat) * sp); } catch (e) {}
+      }
+    };
+  } catch (e) {}
+
+  try {
+    const prevTick = tick0;
+    tick0 = function (ts) {
+      try {
+        if (S.playing && !S.exporting) {
+          const gap = (ts - S.last) / 1000;
+          if (gap > 0.1 && gap < 0.5) S.T += gap - 0.1;
+        }
+      } catch (e) {}
+      return prevTick.apply(this, arguments);
+    };
+  } catch (e) {}
+
+  function effectsOn() {
+    if (S.exporting) return true;
+    if (S.fx && S.fx.size) return true;
+    if (S.ev && S.ev.length) return true;
+    if (S.texts && S.texts.length) return true;
+    if (S.images && S.images.length) return true;
+    if (S.background) return true;
+    if (S.fill && S.fill !== "fill") return true;
+    if (S.kfs && S.kfs.length) return true;
+    if (Math.abs((S.bright ?? 1) - 1) > 0.015) return true;
+    if (Math.abs((S.contrast ?? 1) - 1) > 0.015) return true;
+    if (Math.abs((S.sat ?? 1) - 1) > 0.015) return true;
+    if (Math.abs(S.hue || 0) > 0.5) return true;
+    if (typeof has === "function" && (has("reverse") || has("rewind") || has("ramp"))) return true;
+    if (typeof CUSTOM === "object" && CUSTOM && Object.keys(CUSTOM).some((k) => CUSTOM[k] && !CUSTOM[k].off)) return true;
+    for (const c of S.clips) {
+      if (!c) continue;
+      if (c.rev || (c.spc && c.spc.length)) return true;
+      if (c.kfs && c.kfs.length) return true;
+      if (c.fx && c.fx.length) return true;
+      if (c.anim) return true;
+      if (c.flipH || c.flipV) return true;
+      if (c.flt && ((c.flt.p && c.flt.p !== "none") || c.flt.hue || c.flt.sep || c.flt.blur || c.flt.inv)) return true;
+      const rig = c.v && c.v.rig;
+      if (rig && rig.on !== false && rig.parts && rig.parts.length) return true;
+    }
+    return false;
+  }
+
+  function transitionLive(g) {
+    if (!g || !S.useTr || !S.curTr || S.curTr === "cut") return false;
+    const td = S.curTd || S.tdur || 0;
+    return td > 0 && (S.T - g.start) < td;
+  }
+
+  function mountClips() {
+    const pv = document.getElementById("pv");
+    if (!pv) return null;
+    let pool = document.getElementById("shoxyPool");
+    if (!pool) {
+      pool = document.createElement("div");
+      pool.id = "shoxyPool";
+      pv.appendChild(pool);
+    }
+    S.clips.forEach((c) => {
+      if (!c || c.photo || !c.v || c.v.tagName !== "VIDEO") return;
+      const v = c.v;
+      v.playsInline = true;
+      v.setAttribute("playsinline", "");
+      v.setAttribute("webkit-playsinline", "");
+      v.removeAttribute("controls");
+      if (v.parentElement !== pool) pool.appendChild(v);
+    });
+    return pool;
+  }
+
+  function showActive(v) {
+    const pool = document.getElementById("shoxyPool");
+    if (!pool) return;
+    let any = false;
+    S.clips.forEach((c) => {
+      if (!c || !c.v || c.v.tagName !== "VIDEO") return;
+      const on = c.v === v;
+      c.v.classList.toggle("on", on);
+      if (on) any = true;
+    });
+    pool.classList.toggle("show", any);
+  }
+
+  try {
+    const prevRender = renderFrame;
+    renderFrame = function (ts) {
+      let pool = null;
+      try { pool = mountClips(); } catch (e) {}
+      if (!S.segs.length || S.exporting) {
+        showActive(null);
+        return prevRender.apply(this, arguments);
+      }
+      const t = S.T;
+      const i = typeof segAt === "function" ? segAt(t) : S.seg;
+      const g = S.segs[i];
+      const crossing = i !== S.seg;
+      const native = !crossing && g && !g.c.photo && g.c.v && g.c.v.tagName === "VIDEO" && !effectsOn() && !transitionLive(g);
+      if (native) {
+        const b = typeof beat === "function" ? beat(t) : { hit: 0, n: 0 };
+        S.lastHit = b.hit; S.lastN = b.n;
+        syncVid(g, t, b.hit);
+        showActive(g.c.v);
+        if (ts - (S._liveSnap || 0) > 280 && g.c.v.readyState >= 2 && !g.c.v.seeking) {
+          S._liveSnap = ts;
+          try { drawFrame(g.c.v); } catch (e) {}
+        }
+        return;
+      }
+      showActive(null);
+      return prevRender.apply(this, arguments);
+    };
+  } catch (e) { console.warn("[Shoxy v70] render", e); }
+
+  try {
+    const prevPlay = play;
+    play = function () {
+      const ret = prevPlay.apply(this, arguments);
+      if (!S.playing) return ret;
+      try {
+        mountClips();
+        const mine = new Set(S.clips.map((c) => c && c.v).filter(Boolean));
+        document.querySelectorAll("video").forEach((v) => {
+          if (!mine.has(v)) { try { v.pause(); } catch (e) {} }
+        });
+        const i = S.segs.length ? segAt(S.T) : -1;
+        const g = i >= 0 ? S.segs[i] : null;
+        if (g && g.c && g.c.v && g.c.v.tagName === "VIDEO") {
+          const v = g.c.v;
+          v.playsInline = true;
+          v.preload = "auto";
+          const p = v.play();
+          if (p && p.catch) p.catch(() => {});
+        }
+      } catch (e) {}
+      return ret;
+    };
+  } catch (e) {}
+
+  try {
+    const scrubEl = document.getElementById("scrub");
+    if (scrubEl && !scrubEl.__v70) {
+      scrubEl.oninput = (e) => {
+        scrub = true;
+        const total = S.total || 0;
+        S.T = Math.max(0, Math.min(total, (+e.target.value || 0) / 1000 * total));
+        const i = S.segs && S.segs.length ? segAt(S.T) : -1;
+        if (i !== S.seg) S.seg = -1;
+      };
+      scrubEl.__v70 = true;
+    }
+  } catch (e) {}
+
+  try {
+    const style = document.createElement("style");
+    style.id = "shoxy-v70-css";
+    style.textContent = [
+      "#shoxyPool{position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0}",
+      "#shoxyPool.show{opacity:1}",
+      "#shoxyPool video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000;opacity:0;pointer-events:none}",
+      "#shoxyPool video.on{opacity:1}",
+      "#pv{isolation:isolate}",
+    ].join("");
+    document.head.appendChild(style);
+  } catch (e) {}
+
+  try {
+    ["F", "C", "X"].forEach((k) => {
+      const ctx = k === "F" ? F : k === "C" ? C : X;
+      if (ctx) ctx.imageSmoothingQuality = "low";
+    });
+  } catch (e) {}
+
+  try {
+    setTimeout(() => {
+      const s = document.getElementById("status");
+      if (s && /v69/i.test(s.textContent || "")) s.textContent = "Ready. Load your clips";
+    }, 900);
+  } catch (e) {}
+
+  try { console.info("[Shoxy v70] native preview, seek only on real drift"); } catch (e) {}
 })();
 </script>
 
